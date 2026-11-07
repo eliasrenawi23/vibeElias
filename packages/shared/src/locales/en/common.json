@@ -149,7 +149,11 @@
     "duplicate": "A record with this value already exists",
     "odometerDecreasing": "The reading is lower than an earlier reading",
     "endAfterStart": "End date must be after the start date",
-    "oneOwnerRequired": "Attach the document to exactly one record"
+    "oneOwnerRequired": "Attach the document to exactly one record",
+    "billingPeriodUnsupported": "Only monthly billing is supported",
+    "dateInPast": "The date cannot be in the past",
+    "segmentStartTooEarly": "The change must start after the current segment's start date",
+    "outsideContract": "The date is outside the contract period"
   },
   "errors": {
     "generic": "Something went wrong. Please try again.",
@@ -171,7 +175,21 @@
     "noOpenCycle": "This inventory cycle is already closed",
     "vehicleLeased": "The vehicle is on an active lease; end the lease segment first",
     "dealPending": "A deal for this vehicle is still pending",
-    "expenseRebilled": "This expense was already charged to a driver and cannot be changed"
+    "expenseRebilled": "This expense was already charged to a driver and cannot be changed",
+    "taxiAgeBlocked": "This car is over the taxi age limit (12 years) and cannot carry a taxi licence",
+    "vehicleAlreadyRegistered": "This car is already registered under another taxi licence",
+    "alreadyDriver": "This contact already has a driver profile",
+    "licenseInUse": "This taxi licence is already on another active lease",
+    "vehicleInUse": "This car is already on another active lease",
+    "driverInactive": "The driver is not active",
+    "licenseNotActive": "The taxi licence is not active",
+    "vehicleNotAvailable": "The car is not available (it must be our taxi and in stock)",
+    "leaseNotEditable": "This contract can no longer be changed this way",
+    "depositInsufficient": "The amount is more than the deposit held",
+    "alreadyVoided": "This entry was already voided",
+    "fineNoDriver": "No driver is matched to this fine",
+    "alreadyRebilled": "This fine was already charged to the driver",
+    "vehicleNotTaxi": "This vehicle is not registered as a taxi"
   },
   "language": {
     "label": "Language",
@@ -529,17 +547,13 @@
     },
     "expiringSoon": "Expiring soon",
     "expiringEmpty": "Nothing expires in the next {{days}} days",
-    "sampleData": "Vehicles in stock is live; the other figures are samples until milestone {{n}}."
+    "sampleData": "Profit this month is a sample figure until milestone {{n}}."
   },
   "placeholder": {
     "title": "This section is on its way",
     "milestone": "Coming in milestone {{n}}",
     "vehicles": "Stock, taxis and drivers' cars with expenses, insurance, odometer and documents.",
-    "taxiLicenses": "Taxi licences, the car each one is registered on, annual fees and profit.",
-    "drivers": "Driver profiles, permits, contracts, ledger and balances.",
-    "leases": "Number-only and car + number contracts with deposits and monthly rent.",
     "deals": "Purchases, sales, trade-ins and consignment with VAT on the margin.",
-    "fines": "Traffic fines, reassignment to drivers and deadlines.",
     "contacts": "Buyers, sellers, garages, insurers and leads with follow-ups.",
     "reminders": "Every expiry and deadline in one feed.",
     "reports": "Profit, inventory ageing, receivables, expenses and the trade book.",
@@ -547,11 +561,8 @@
     "settingsReminders": "How many days ahead each reminder appears.",
     "settingsBackup": "Nightly backup status.",
     "vehicleDeals": "Purchase, sale and consignment deals of this vehicle.",
-    "vehicleLeases": "Lease contracts and segments this vehicle was part of.",
-    "vehicleFines": "Traffic fines received for this vehicle.",
     "vehiclePnl": "Profit and loss per inventory cycle.",
-    "driverProfile": "Driver profile with permits, contracts, ledger and documents.",
-    "taxiLicenseDetail": "The licence file: the car it is registered on, annual fee, leases and profit."
+    "taxiLicensePnl": "Rent income, fees and the purchase price of this licence."
   },
   "settings": {
     "nav": {
@@ -664,7 +675,9 @@
       "createNew": "Create a new contact",
       "quickCreateTitle": "New contact",
       "noResults": "No contacts found"
-    }
+    },
+    "noDriverProfile": "This contact is tagged as a driver but has no driver profile yet.",
+    "createDriverProfile": "Create a driver profile"
   },
   "vehicles": {
     "tabs": {
@@ -724,7 +737,7 @@
       "taxiPlateHint": "Plates ending in 25 or 26 are taxi plates.",
       "markAsTaxi": "Mark as taxi",
       "ownerDriverHint": "Choose a contact tagged as driver.",
-      "ownerDriverNoProfile": "The owner must be a driver: this contact has no driver profile yet (driver profiles arrive in milestone {{n}}).",
+      "ownerDriverNoProfile": "The owner must be a driver: this contact has no driver profile yet.",
       "ownerDriverCurrent": "Current owner: {{name}}",
       "statusHelp": "Later status changes are made from the vehicle page.",
       "isTaxiLabel": "This vehicle is a taxi",
@@ -847,6 +860,398 @@
       "deleteTitle": "Delete policy",
       "activeOnly": "Active only",
       "businessHint": "Trade (dealer) and lot policies that cover the business rather than one car."
+    },
+    "noLeases": "This vehicle has not been leased yet",
+    "noFines": "No traffic fines for this vehicle",
+    "picker": {
+      "placeholder": "Search by plate, make or model",
+      "noResults": "No vehicles found"
+    }
+  },
+  "taxiLicenses": {
+    "new": "New licence",
+    "newTitle": "New taxi licence",
+    "detailTitle": "Taxi licence",
+    "listEmpty": "No taxi licences yet",
+    "listEmptyHint": "Add the licences (green numbers) the business owns.",
+    "searchPlaceholder": "Licence number or holder",
+    "notFound": "Taxi licence not found",
+    "loadError": "Could not load the taxi licence",
+    "created": "Taxi licence created",
+    "currentDriver": "Current driver",
+    "currentVehicle": "Car",
+    "unassigned": "Not leased",
+    "feeDue": "Fee due",
+    "noRegisteredVehicle": "No car registered on it",
+    "fields": {
+      "licenseNo": "Licence number",
+      "holderName": "Registered holder",
+      "acquiredAt": "Acquired on",
+      "acquisitionPrice": "Purchase price",
+      "soldAt": "Sold on",
+      "salePrice": "Sale price",
+      "annualFeeDueAt": "Annual fee due",
+      "renewalAt": "Renewal date",
+      "registeredVehicle": "Registered car"
+    },
+    "sections": {
+      "identity": "Licence",
+      "dates": "Fees and renewal",
+      "money": "Purchase and sale"
+    },
+    "form": {
+      "licenseNoHelp": "As printed on the licence: digits, letters and dashes",
+      "annualFeeHelp": "The annual operating fee is paid with the December slip."
+    },
+    "tabs": {
+      "overview": "Overview",
+      "documents": "Documents",
+      "pnl": "P&L"
+    },
+    "alerts": {
+      "annualFeeDue": "Annual fee due soon",
+      "annualFeeOverdue": "Annual fee overdue",
+      "renewalDue": "Renewal due soon",
+      "renewalOverdue": "Renewal overdue",
+      "idle": "Idle"
+    },
+    "assignment": {
+      "current": "Current assignment",
+      "history": "Assignment history",
+      "none": "This licence is not leased right now.",
+      "noHistory": "This licence has not been leased yet",
+      "since": "Since"
+    },
+    "register": {
+      "action": "Register vehicle",
+      "title": "Car registered on the licence",
+      "hint": "The car registered on this licence at the Ministry of Transport (licence assignment form, meter resealed). Taxis 12 years or older cannot be registered.",
+      "vehicle": "Taxi",
+      "current": "Registered now",
+      "clearHelp": "Clear the field to detach the registered car.",
+      "submit": "Register",
+      "detach": "Detach the car",
+      "registered": "Car registered on the licence",
+      "cleared": "Car detached from the licence"
+    }
+  },
+  "drivers": {
+    "new": "New driver",
+    "newTitle": "New driver",
+    "detailTitle": "Driver",
+    "editTitle": "Edit driver",
+    "listEmpty": "No drivers yet",
+    "listEmptyHint": "Add the drivers who lease licences and taxis.",
+    "searchPlaceholder": "Name, phone, ID or licence number",
+    "withBalanceOnly": "With a balance only",
+    "notFound": "Driver not found",
+    "loadError": "Could not load the driver",
+    "created": "Driver created",
+    "openProfile": "Open the driver profile",
+    "openContact": "Open the contact",
+    "noContracts": "No lease contracts yet",
+    "noOwnedVehicles": "No cars of this driver are recorded",
+    "fields": {
+      "name": "Driver",
+      "contact": "Contact",
+      "licenseNo": "Driving licence number",
+      "licenseExpiry": "Driving licence expiry",
+      "taxiPermitNo": "Taxi driver permit number",
+      "taxiPermitExpiry": "Taxi permit expiry",
+      "medicalExpiry": "Medical certificate expiry",
+      "emergencyName": "Emergency contact",
+      "emergencyPhone": "Emergency phone",
+      "startedAt": "Driving with us since",
+      "activeContract": "Active contract"
+    },
+    "sections": {
+      "permits": "Licences and permits",
+      "contact": "Contact details",
+      "ownedVehicles": "The driver's own cars"
+    },
+    "form": {
+      "stepContact": "1. Contact",
+      "stepDriver": "2. Driver details",
+      "contactSource": "Contact",
+      "existingContact": "Existing contact",
+      "newContact": "New contact",
+      "contactHelp": "Pick the person from your contacts; the driver tag is added automatically.",
+      "alreadyDriver": "This contact already has a driver profile."
+    },
+    "tabs": {
+      "profile": "Profile",
+      "contracts": "Contracts",
+      "ledger": "Ledger",
+      "documents": "Documents"
+    },
+    "alerts": {
+      "licenseExpiring": "Driving licence expiring",
+      "licenseExpired": "Driving licence expired",
+      "taxiPermitExpiring": "Taxi permit expiring",
+      "taxiPermitExpired": "Taxi permit expired",
+      "medicalExpiring": "Medical certificate expiring",
+      "medicalExpired": "Medical certificate expired",
+      "overdue": "Overdue rent"
+    },
+    "picker": {
+      "placeholder": "Search drivers",
+      "noResults": "No drivers found"
+    }
+  },
+  "leases": {
+    "new": "New lease",
+    "newTitle": "New lease",
+    "detailTitle": "Lease contract",
+    "contract": "Contract",
+    "contractNo": "Contract {{no}}",
+    "actionsMenu": "Contract actions",
+    "listEmpty": "No lease contracts yet",
+    "listEmptyHint": "Lease a licence on its own, or a taxi together with its licence, to a driver.",
+    "searchPlaceholder": "Contract number, driver, licence or plate",
+    "notFound": "Contract not found",
+    "loadError": "Could not load the contract",
+    "previousContract": "Previous contract",
+    "noSegments": "No periods yet",
+    "noOpenCharges": "Nothing is open on this contract",
+    "deleteTitle": "Delete draft",
+    "deleteConfirm": "Delete this draft contract? This cannot be undone.",
+    "fields": {
+      "contractNo": "Contract",
+      "driver": "Driver",
+      "type": "Lease type",
+      "license": "Licence",
+      "vehicle": "Car",
+      "monthlyRent": "Monthly rent",
+      "period": "Period",
+      "startDate": "Start date",
+      "endDate": "End date",
+      "actualEndDate": "Actual end date",
+      "endReason": "End reason",
+      "paymentDay": "Payment day of the month",
+      "rentIncludesVat": "Rent includes VAT",
+      "earlyExitPenaltyMonths": "Early-exit penalty",
+      "depositAmount": "Deposit",
+      "depositKind": "Deposit type",
+      "responsibilities": "Who pays",
+      "terms": "Contract terms",
+      "billingPeriod": "Billing",
+      "signedAt": "Signed on",
+      "lastPayment": "Last payment",
+      "renewedFrom": "Renewal of",
+      "segmentReason": "Reason"
+    },
+    "form": {
+      "endDateHelp": "The last day of the contract (inclusive).",
+      "lastRent": "Last rent for this licence",
+      "paymentDayHelp": "1 to 28, so the day exists in every month.",
+      "penaltyHelp": "Months of rent charged if the driver leaves early.",
+      "responsibilitiesHelp": "By default the driver pays everything except the car itself.",
+      "termsHelp": "Leave empty to use the standard clauses from the settings.",
+      "depositHelp": "Received when the contract is activated."
+    },
+    "sections": {
+      "terms": "Terms",
+      "segments": "Licence, car and rent over time",
+      "openCharges": "Open charges"
+    },
+    "tabs": {
+      "overview": "Overview",
+      "ledger": "Ledger",
+      "documents": "Documents"
+    },
+    "alerts": {
+      "endingSoon": "Ending soon",
+      "ended": "Ended",
+      "overdue": "Overdue rent",
+      "draft": "Draft"
+    },
+    "checklists": {
+      "empty": "Not filled in yet"
+    },
+    "wizard": {
+      "steps": {
+        "driver": "Driver",
+        "license": "Licence",
+        "vehicle": "Car",
+        "terms": "Terms",
+        "deposit": "Deposit & handover",
+        "review": "Review"
+      },
+      "newDriver": "New driver",
+      "driverHasLease": "This driver already has an active contract ({{no}}).",
+      "chooseLicense": "Available licence",
+      "noLicenses": "No active licence is free right now.",
+      "chooseCar": "Taxi",
+      "chooseOwnCar": "The driver's own car",
+      "noCar": "No car recorded",
+      "noCarHint": "The licence is leased without recording the car.",
+      "noCars": "No car is available",
+      "ownCarHint": "To choose the driver's car, add it under Vehicles with ownership \"Third party\" and the driver as its owner.",
+      "carAndNumberHint": "We lease our taxi together with the licence.",
+      "numberOnlyHint": "The driver puts the licence on their own car.",
+      "registeredOnLicense": "Registered on this licence",
+      "vehicleRequired": "Choose the taxi for a car + licence lease",
+      "noHandover": "No handover checklist: the driver uses their own car.",
+      "createDraft": "Create draft",
+      "created": "Draft contract created",
+      "createdHint": "Activate it when the contract is signed and the deposit is received.",
+      "openContract": "Open the contract"
+    },
+    "activate": {
+      "action": "Activate",
+      "now": "Activate now",
+      "title": "Activate contract",
+      "hint": "The contract becomes active: rent is charged from the start date and the deposit received is recorded.",
+      "submit": "Activate",
+      "depositReceived": "Deposit received",
+      "depositHelp": "Leave empty if no deposit was received. Agreed type: {{kind}}.",
+      "depositDate": "Deposit date",
+      "done": "Contract activated"
+    },
+    "segment": {
+      "action": "Swap car / change rent",
+      "title": "Swap car or change rent",
+      "hint": "The current period closes the day before the date below and a new one starts with the changes.",
+      "from": "From",
+      "ownCarHelp": "Optional: the driver's own car.",
+      "saved": "Change recorded"
+    },
+    "end": {
+      "action": "End contract",
+      "title": "End contract",
+      "submit": "End contract",
+      "earlyHint": "The contract ends before its end date: rent already charged for later days is credited back.",
+      "penalty": "Early-exit penalty",
+      "applyPenalty": "Charge the penalty",
+      "penaltyFormula": "{{months}} × the monthly rent of {{rent}}",
+      "deposit": "Deposit",
+      "depositActions": {
+        "HOLD": "Keep",
+        "RETURN": "Return to the driver",
+        "APPLY": "Apply to the debt"
+      },
+      "done": "Contract ended"
+    },
+    "renew": {
+      "action": "Renew",
+      "title": "Renew contract",
+      "hint": "This contract ends as renewed and a new one starts the next day. The deposit carries over.",
+      "submit": "Renew",
+      "done": "Contract renewed"
+    },
+    "deposit": {
+      "action": "Deposit",
+      "title": "Deposit",
+      "applyHint": "The amount is taken from the deposit and paid against the open debt.",
+      "saved": "Deposit updated"
+    },
+    "edit": {
+      "title": "Edit contract",
+      "activeHint": "An active contract can only change its end date, payment day, terms, responsibilities and notes."
+    }
+  },
+  "ledger": {
+    "title": "Ledger",
+    "empty": "No entries yet",
+    "owesUs": "Owes us",
+    "inCredit": "In credit",
+    "settled": "Settled",
+    "paidUp": "Paid",
+    "dueOn": "Due",
+    "voided": "Voided",
+    "voidReasonShown": "Void reason",
+    "showVoided": "Show voided",
+    "noContract": "No contract",
+    "fields": {
+      "date": "Date",
+      "type": "Type",
+      "description": "Description",
+      "charge": "Charge",
+      "payment": "Payment / credit",
+      "deposit": "Deposit",
+      "runningBalance": "Balance",
+      "remaining": "Open",
+      "balance": "Balance",
+      "depositHeld": "Deposit held",
+      "charged": "Charged",
+      "paid": "Paid",
+      "amount": "Amount",
+      "method": "Payment method",
+      "reference": "Reference",
+      "contract": "Contract",
+      "chargeKind": "Charge type",
+      "dueDate": "Due date",
+      "period": "Month"
+    },
+    "ageing": {
+      "title": "Overdue",
+      "current": "Not yet due",
+      "d1_30": "1–30 days",
+      "d31_60": "31–60 days",
+      "d61_90": "61–90 days",
+      "d90_plus": "Over 90 days"
+    },
+    "payment": {
+      "action": "Record payment",
+      "title": "Record payment",
+      "referenceHelp": "Cheque number, transfer or Bit confirmation",
+      "saved": "Payment recorded"
+    },
+    "charge": {
+      "action": "Add charge",
+      "title": "Add charge",
+      "dueDateHelp": "Defaults to the charge date",
+      "saved": "Charge added"
+    },
+    "credit": {
+      "action": "Add credit",
+      "title": "Add credit",
+      "saved": "Credit added"
+    },
+    "void": {
+      "action": "Void",
+      "title": "Void entry",
+      "hint": "The entry stays in the ledger, struck through, and no longer counts in the balance.",
+      "reason": "Reason",
+      "saved": "Entry voided"
+    }
+  },
+  "fines": {
+    "add": "Add fine",
+    "addTitle": "Add traffic fine",
+    "added": "Fine added",
+    "addedMatched": "Fine added and matched to {{name}}",
+    "listEmpty": "No traffic fines",
+    "listEmptyHint": "Record the fines received for our cars to reassign them to the driver in time.",
+    "matchHint": "The driver who had the car at the time of the offence is matched automatically.",
+    "receivedHelp": "The reassignment deadline is 90 days from this date.",
+    "authorityHelp": "Police, municipality, toll road…",
+    "drawerTitle": "Fine",
+    "noDriver": "No driver matched",
+    "openContract": "Open the contract",
+    "changeStatus": "Status",
+    "overrideDriver": "Driver",
+    "overrideDriverHelp": "Change the matched driver if needed.",
+    "rebill": "Rebill to driver",
+    "rebillConfirm": "We paid this fine: add it as a charge to the driver ledger?",
+    "rebillNeedsDriver": "Match a driver to rebill the fine.",
+    "rebilled": "Fine charged to the driver",
+    "rebilledTag": "Rebilled",
+    "fields": {
+      "vehicle": "Car",
+      "offenceAt": "Offence date and time",
+      "receivedAt": "Received on",
+      "amount": "Amount",
+      "fineNo": "Fine number",
+      "authority": "Issued by",
+      "driver": "Driver",
+      "contract": "Contract",
+      "reassignDeadline": "Reassign by",
+      "rebilled": "Charged to driver"
+    },
+    "alerts": {
+      "reassignDueSoon": "Reassign soon",
+      "reassignOverdue": "Reassignment overdue"
     }
   }
 }

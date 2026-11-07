@@ -1,6 +1,7 @@
 import { defineConfig, devices } from '@playwright/test';
 
-const PORT = 5173;
+/** Dev server port; `PW_PORT=5174 npx playwright test` runs next to a dev server already on 5173. */
+const PORT = Number(process.env.PW_PORT ?? 5173);
 const baseURL = `http://localhost:${PORT}`;
 
 /**
@@ -10,6 +11,8 @@ const baseURL = `http://localhost:${PORT}`;
 // Default export required by Playwright.
 export default defineConfig({
   testDir: './e2e',
+  // Flows cross several pages and dialogs against the dev server.
+  timeout: 60_000,
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 1 : 0,

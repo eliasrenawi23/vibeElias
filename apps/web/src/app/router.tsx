@@ -6,8 +6,11 @@ import { ContactsPage } from '../features/contacts/pages/ContactsPage';
 import { DashboardPage } from '../features/dashboard/pages/DashboardPage';
 import { DealsPage } from '../features/deals/pages/DealsPage';
 import { DriverDetailPage } from '../features/drivers/pages/DriverDetailPage';
+import { DriverNewPage } from '../features/drivers/pages/DriverNewPage';
 import { DriversPage } from '../features/drivers/pages/DriversPage';
 import { FinesPage } from '../features/fines/pages/FinesPage';
+import { LeaseDetailPage } from '../features/leases/pages/LeaseDetailPage';
+import { LeaseNewPage } from '../features/leases/pages/LeaseNewPage';
 import { LeasesPage } from '../features/leases/pages/LeasesPage';
 import { RemindersPage } from '../features/reminders/pages/RemindersPage';
 import { ReportsPage } from '../features/reports/pages/ReportsPage';
@@ -18,6 +21,7 @@ import {
   ReminderSettingsPage,
 } from '../features/settings/pages/SettingsPlaceholderPages';
 import { TaxiLicenseDetailPage } from '../features/taxi-licenses/pages/TaxiLicenseDetailPage';
+import { TaxiLicenseNewPage } from '../features/taxi-licenses/pages/TaxiLicenseNewPage';
 import { TaxiLicensesPage } from '../features/taxi-licenses/pages/TaxiLicensesPage';
 import { VehicleDetailPage } from '../features/vehicles/pages/VehicleDetailPage';
 import { VehicleNewPage } from '../features/vehicles/pages/VehicleNewPage';
@@ -64,13 +68,29 @@ export const routes: RouteObject[] = [
             handle: handle('nav.taxiLicenses'),
           },
           {
+            path: 'taxi-licenses/new',
+            element: <TaxiLicenseNewPage />,
+            handle: handle('taxiLicenses.newTitle'),
+          },
+          {
             path: 'taxi-licenses/:id',
             element: <TaxiLicenseDetailPage />,
-            handle: handle('nav.taxiLicenses'),
+            handle: handle('taxiLicenses.detailTitle'),
           },
           { path: 'drivers', element: <DriversPage />, handle: handle('nav.drivers') },
-          { path: 'drivers/:id', element: <DriverDetailPage />, handle: handle('nav.drivers') },
+          { path: 'drivers/new', element: <DriverNewPage />, handle: handle('drivers.newTitle') },
+          {
+            path: 'drivers/:id',
+            element: <DriverDetailPage />,
+            handle: handle('drivers.detailTitle'),
+          },
           { path: 'leases', element: <LeasesPage />, handle: handle('nav.leases') },
+          { path: 'leases/new', element: <LeaseNewPage />, handle: handle('leases.newTitle') },
+          {
+            path: 'leases/:id',
+            element: <LeaseDetailPage />,
+            handle: handle('leases.detailTitle'),
+          },
           { path: 'deals', element: <DealsPage />, handle: handle('nav.deals') },
           { path: 'fines', element: <FinesPage />, handle: handle('nav.fines') },
           { path: 'contacts', element: <ContactsPage />, handle: handle('nav.contacts') },

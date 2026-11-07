@@ -21,6 +21,21 @@ export const ErrorKey = {
   vehicleLeased: 'errors.vehicleLeased',
   dealPending: 'errors.dealPending',
   expenseRebilled: 'errors.expenseRebilled',
+  // Milestone 3: taxi licences, drivers, leases, ledger, fines.
+  taxiAgeBlocked: 'errors.taxiAgeBlocked',
+  vehicleNotTaxi: 'errors.vehicleNotTaxi',
+  vehicleAlreadyRegistered: 'errors.vehicleAlreadyRegistered',
+  alreadyDriver: 'errors.alreadyDriver',
+  driverInactive: 'errors.driverInactive',
+  licenseNotActive: 'errors.licenseNotActive',
+  vehicleNotAvailable: 'errors.vehicleNotAvailable',
+  licenseInUse: 'errors.licenseInUse',
+  vehicleInUse: 'errors.vehicleInUse',
+  leaseNotEditable: 'errors.leaseNotEditable',
+  depositInsufficient: 'errors.depositInsufficient',
+  alreadyVoided: 'errors.alreadyVoided',
+  fineNoDriver: 'errors.fineNoDriver',
+  alreadyRebilled: 'errors.alreadyRebilled',
   invalidCredentials: 'auth.invalidCredentials',
   sessionExpired: 'auth.sessionExpired',
   tooManyAttempts: 'auth.tooManyAttempts',
@@ -31,6 +46,14 @@ export type ErrorKey = (typeof ErrorKey)[keyof typeof ErrorKey];
 export const FieldErrorKey = {
   duplicate: 'validation.duplicate',
   odometerDecreasing: 'validation.odometerDecreasing',
+  endAfterStart: 'validation.endAfterStart',
+  billingPeriodUnsupported: 'validation.billingPeriodUnsupported',
+  /** The date must be today or later (lease end-date extension). */
+  dateInPast: 'validation.dateInPast',
+  /** A segment change must start after the current segment's start date. */
+  segmentStartTooEarly: 'validation.segmentStartTooEarly',
+  /** The date lies outside the contract period. */
+  outsideContract: 'validation.outsideContract',
 } as const;
 
 /** One field-level problem; `path` is the dotted field path (`reminderLeadDays.insurance`). */

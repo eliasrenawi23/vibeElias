@@ -297,6 +297,60 @@ export const VehicleAlert = z.enum([
 ]);
 export type VehicleAlert = z.infer<typeof VehicleAlert>;
 
+/**
+ * Computed taxi-licence alert codes (`alerts` on `GET /taxi-licenses` items and details).
+ * - annualFeeDue: annual operating-licence fee due within `Settings.reminderLeadDays.taxiLicense`
+ * - annualFeeOverdue: the annual fee due date has passed
+ * - renewalDue / renewalOverdue: same rule for `renewalAt`
+ * - idle: ACTIVE licence without an open lease segment (not earning)
+ */
+export const TaxiLicenseAlert = z.enum([
+  'annualFeeDue',
+  'annualFeeOverdue',
+  'renewalDue',
+  'renewalOverdue',
+  'idle',
+]);
+export type TaxiLicenseAlert = z.infer<typeof TaxiLicenseAlert>;
+
+/**
+ * Computed driver alert codes (`alerts` on `GET /drivers` items and details). Lead days:
+ * `Settings.reminderLeadDays.{driverLicense,taxiPermit,medical}`.
+ * - overdue: at least one open charge is past its due date
+ */
+export const DriverAlert = z.enum([
+  'licenseExpiring',
+  'licenseExpired',
+  'taxiPermitExpiring',
+  'taxiPermitExpired',
+  'medicalExpiring',
+  'medicalExpired',
+  'overdue',
+]);
+export type DriverAlert = z.infer<typeof DriverAlert>;
+
+/**
+ * Computed lease alert codes (`alerts` on `GET /leases` items and details).
+ * - endingSoon: ACTIVE and endDate within `Settings.reminderLeadDays.lease`
+ * - ended: ACTIVE although endDate has passed (end or renew it)
+ * - overdue: an open charge of the contract is past its due date
+ * - draft: not activated yet
+ */
+export const LeaseAlert = z.enum(['endingSoon', 'ended', 'overdue', 'draft']);
+export type LeaseAlert = z.infer<typeof LeaseAlert>;
+
+/**
+ * Computed traffic-fine alert codes (status NEW only).
+ * - reassignDueSoon: reassignment deadline within 14 days
+ * - reassignOverdue: reassignment deadline has passed
+ */
+export const FineAlert = z.enum(['reassignDueSoon', 'reassignOverdue']);
+export type FineAlert = z.infer<typeof FineAlert>;
+
+/** What happens to the held deposit when a lease ends (`POST /leases/:id/end`). */
+export const DepositEndAction = z.enum(['HOLD', 'RETURN', 'APPLY']);
+export type DepositEndAction = z.infer<typeof DepositEndAction>;
+
 /** Sort direction for list queries. */
 export const SortOrder = z.enum(['asc', 'desc']);
 export type SortOrder = z.infer<typeof SortOrder>;

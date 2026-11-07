@@ -125,8 +125,9 @@ export default defineConfig({
   preview: { port: 4173 },
   build: {
     sourcemap: true,
-    // Ant Design alone is ~1 MB minified; it gets its own long-lived chunk.
-    chunkSizeWarningLimit: 1200,
+    // Ant Design alone is ~1.2 MB minified (Steps, Drawer, Timeline... since milestone 3); it gets
+    // its own long-lived chunk.
+    chunkSizeWarningLimit: 1400,
     rolldownOptions: {
       output: {
         // Vendor chunks change rarely, so they stay cached across app deploys.

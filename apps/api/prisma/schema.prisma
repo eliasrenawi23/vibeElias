@@ -546,6 +546,7 @@ model LeaseContract {
   handoverChecklist      Json?
   returnChecklist        Json?
   terms                  String?
+  notes                  String?
   renewedFromId          String?         @unique
   renewedFrom            LeaseContract?  @relation("Renewal", fields: [renewedFromId], references: [id])
   renewedTo              LeaseContract?  @relation("Renewal")
@@ -609,6 +610,8 @@ model LedgerEntry {
   voidedAt             DateTime?
   voidReason           String?
   createdById          String?
+  /// PAYMENT / CREDIT: charge ids to settle first (in order) before FIFO; see LedgerService.
+  allocateTo           String[]            @default([])
   createdAt            DateTime            @default(now())
   allocationsAsCharge  PaymentAllocation[] @relation("Charge")
   allocationsAsPayment PaymentAllocation[] @relation("Payment")

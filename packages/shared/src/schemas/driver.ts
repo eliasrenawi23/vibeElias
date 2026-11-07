@@ -63,5 +63,7 @@ export const DriverQuerySchema = pagination.extend({
   hasActiveLease: queryBool.optional(),
   /** Licence, permit or medical expiring on/before this date. */
   expiringBefore: isoDate.optional(),
+  /** Only drivers who owe money (ledger balance > 0). */
+  withBalanceOnly: queryBool.optional(),
 });
 export type DriverQuery = z.infer<typeof DriverQuerySchema>;

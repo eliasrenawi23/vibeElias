@@ -1,7 +1,8 @@
 /**
  * Dashboard data. `GET /dashboard/kpis` and `GET /reminders/feed` arrive in milestone 5; until
- * then the page shows these zero figures so the layout can be reviewed. "Vehicles in stock" is
- * already live (counted with `GET /vehicles?status=IN_STOCK&pageSize=1`).
+ * then "profit this month" is a zero sample. Live already: vehicles in stock
+ * (`GET /vehicles?status=IN_STOCK&pageSize=1`), active leases (`GET /leases?status=ACTIVE&pageSize=1`)
+ * and driver receivables (sum of the positive balances of `GET /ledger/balances`).
  */
 
 export interface DashboardKpis {

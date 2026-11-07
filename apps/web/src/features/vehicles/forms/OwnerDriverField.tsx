@@ -12,9 +12,6 @@ import type { Contact } from '../../contacts/types';
 import type { NamedRef } from '../types';
 import type { VehicleFormInput, VehicleFormOutput } from './vehicleFormSchema';
 
-/** Milestone that brings driver profiles (`GET /drivers`). */
-const DRIVERS_MILESTONE = 3;
-
 export interface OwnerDriverFieldProps {
   control: Control<VehicleFormInput, unknown, VehicleFormOutput>;
   /** The stored owner (edit mode). */
@@ -26,8 +23,8 @@ export interface OwnerDriverFieldProps {
 
 /**
  * `ownerDriverId` of a THIRD_PARTY vehicle. Drivers are picked as contacts tagged DRIVER; the
- * field takes the contact's driver profile id. A contact without a profile cannot be chosen yet
- * (profiles arrive with the drivers module): the field explains why and the form blocks saving.
+ * field takes the contact's driver profile id. A contact without a profile cannot be chosen: the
+ * field explains why, links to "new driver" for that contact, and the form blocks saving.
  */
 export function OwnerDriverField({
   control,
@@ -71,7 +68,14 @@ export function OwnerDriverField({
   const help =
     noProfile && contactId ? (
       <Typography.Text type="warning" data-testid="owner-driver-no-profile">
-        {t('vehicles.form.ownerDriverNoProfile', { n: DRIVERS_MILESTONE })}
+        {t('vehicles.form.ownerDriverNoProfile')} {/* A new tab keeps this unsaved form. */}
+        <a
+          href={`/drivers/new?contactId=${encodeURIComponent(contactId)}`}
+          target="_blank"
+          rel="noreferrer"
+        >
+          {t('contacts.createDriverProfile')}
+        </a>
       </Typography.Text>
     ) : current && field.value === current.id && !contactId ? (
       t('vehicles.form.ownerDriverCurrent', { name: isolateAuto(current.name) })

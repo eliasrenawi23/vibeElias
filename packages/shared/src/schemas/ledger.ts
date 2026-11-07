@@ -54,6 +54,13 @@ export const LedgerPaymentCreateSchema = z.object({
   /** Cheque number, transfer reference, Bit confirmation... */
   reference: optionalText(100),
   description: optionalText(500),
+  /** Free-text note (stored as the entry description when `description` is not given). */
+  notes: optionalText(500),
+  /**
+   * Charge ids to settle first, in this order (open charges of the same driver); whatever is
+   * left is allocated FIFO. Kept on the entry so every re-allocation honours it.
+   */
+  allocateTo: z.array(idString).max(100).optional(),
 });
 export type LedgerPaymentCreate = z.infer<typeof LedgerPaymentCreateSchema>;
 export type LedgerPaymentCreateInput = z.input<typeof LedgerPaymentCreateSchema>;
@@ -65,7 +72,7 @@ export const LedgerCreditCreateSchema = z.object({
   date: isoDate,
   amount: positiveMoney,
   reference: optionalText(100),
-  description: z.string().trim().min(1).max(500),
+  description: optionalText(500),
 });
 export type LedgerCreditCreate = z.infer<typeof LedgerCreditCreateSchema>;
 export type LedgerCreditCreateInput = z.input<typeof LedgerCreditCreateSchema>;
@@ -88,11 +95,15 @@ export const LedgerQuerySchema = pagination.extend({
 });
 export type LedgerQuery = z.infer<typeof LedgerQuerySchema>;
 
-/** `GET /ledger/balances` */
-export const LedgerBalancesQuerySchema = z.object({
+/** `GET /ledger/balances` (paginated; default order: balance, highest first). */
+export const LedgerBalancesQuerySchema = pagination.extend({
   driverId: idString.optional(),
+  /** Matches the driver's name. */
+  q: z.string().trim().min(1).max(100).optional(),
   /** Only drivers who owe money (balance > 0). */
   debtorsOnly: queryBool.default(false),
+  /** Only drivers with an open charge past its due date. */
+  overdueOnly: queryBool.default(false),
 });
 export type LedgerBalancesQuery = z.infer<typeof LedgerBalancesQuerySchema>;
 
@@ -125,6 +136,22 @@ export const DriverAgeingSchema = z.object({
   total: money,
 });
 export type DriverAgeing = z.infer<typeof DriverAgeingSchema>;
+
+/** `GET /drivers/:id/ledger?from&to&type&includeVoided` (statement, oldest first, no paging). */
+export const DriverLedgerQuerySchema = z.object({
+  from: isoDate.optional(),
+  to: isoDate.optional(),
+  type: queryList(LedgerType).optional(),
+  includeVoided: queryBool.default(false),
+});
+export type DriverLedgerQuery = z.infer<typeof DriverLedgerQuerySchema>;
+
+/**
+ * Ageing bucket keys of the API responses (`ageing` on drivers, `GET /ledger/ageing` rows), in
+ * display order: not yet due, 1-30, 31-60, 61-90 and over 90 days past due.
+ */
+export const LEDGER_AGEING_KEYS = ['current', 'd1_30', 'd31_60', 'd61_90', 'd90_plus'] as const;
+export type LedgerAgeingKey = (typeof LEDGER_AGEING_KEYS)[number];
 
 /** Ageing bucket keys in display order. */
 export const AGEING_BUCKETS = [

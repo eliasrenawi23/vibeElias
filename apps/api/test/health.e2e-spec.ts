@@ -57,6 +57,15 @@ describe('Health (e2e)', () => {
         '/api/cycles/{id}/return',
         '/api/documents/{id}/thumb',
         '/api/insurance',
+        '/api/taxi-licenses/{id}/register-vehicle',
+        '/api/drivers/{id}/ledger',
+        '/api/leases/{id}/activate',
+        '/api/leases/{id}/segments',
+        '/api/leases/billing/preview',
+        '/api/leases/billing/run',
+        '/api/ledger/balances',
+        '/api/ledger/{id}/void',
+        '/api/fines/{id}/rebill',
       ]),
     );
   });

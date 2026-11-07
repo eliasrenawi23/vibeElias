@@ -4,8 +4,9 @@ import { Alert, App, Badge, Button, Card, Flex, Skeleton, Tabs, Tag } from 'antd
 import { useState, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams, useSearchParams } from 'react-router';
-import { AutoDir, Ltr } from '../../../shared/lib/bidi';
+import { AutoDir } from '../../../shared/lib/bidi';
 import { useEnumLabel } from '../../../shared/lib/enums';
+import { LicenseTag } from '../../../shared/ui/LicenseTag';
 import { LoadError } from '../../../shared/ui/LoadError';
 import { PageHeader } from '../../../shared/ui/PageHeader';
 import { PlaceholderPage } from '../../../shared/ui/PlaceholderPage';
@@ -17,8 +18,10 @@ import { fetchVehicle, updateVehicle } from '../api';
 import { AlertBadges } from '../components/AlertBadges';
 import { VehicleActions, type VehicleActionKey } from '../components/VehicleActions';
 import { VehicleExpensesTab } from '../components/VehicleExpensesTab';
+import { VehicleFinesTab } from '../components/VehicleFinesTab';
 import { VehicleInfoTab } from '../components/VehicleInfoTab';
 import { VehicleInsuranceTab } from '../components/VehicleInsuranceTab';
+import { VehicleLeasesTab } from '../components/VehicleLeasesTab';
 import { VehiclesBackLink } from '../components/VehiclesBackLink';
 import { ConsignDialog } from '../dialogs/ConsignDialog';
 import { ExpenseDialog } from '../dialogs/ExpenseDialog';
@@ -47,8 +50,7 @@ function isTab(value: string | null): value is VehicleTab {
   return TAB_KEYS.includes(value as VehicleTab);
 }
 
-/** Milestones that deliver the placeholder tabs (see the plan). */
-const LEASES_MILESTONE = 3;
+/** Milestone that delivers the placeholder tabs (see the plan). */
 const DEALS_MILESTONE = 4;
 
 /** `/vehicles/:id`: header with actions, and the vehicle file in tabs. */
@@ -231,22 +233,12 @@ function VehicleView({ id }: { id: string }) {
             {
               key: 'leases',
               label: t('vehicles.detailTabs.leases'),
-              children: (
-                <PlaceholderPage
-                  descriptionKey="placeholder.vehicleLeases"
-                  milestone={LEASES_MILESTONE}
-                />
-              ),
+              children: <VehicleLeasesTab vehicleId={vehicle.id} />,
             },
             {
               key: 'fines',
               label: t('vehicles.detailTabs.fines'),
-              children: (
-                <PlaceholderPage
-                  descriptionKey="placeholder.vehicleFines"
-                  milestone={LEASES_MILESTONE}
-                />
-              ),
+              children: <VehicleFinesTab vehicleId={vehicle.id} />,
             },
             {
               key: 'pnl',
@@ -331,9 +323,7 @@ function VehicleHeader({ vehicle: v, actions }: VehicleHeaderProps) {
         <Tag>{enumLabel('VehicleOwnership', v.ownership)}</Tag>
         {v.isTaxi && <Tag color="gold">{t('vehicles.taxi')}</Tag>}
         {v.registeredLicense && (
-          <Tag className="rm-license-tag">
-            <Ltr>{v.registeredLicense.licenseNo}</Ltr>
-          </Tag>
+          <LicenseTag licenseNo={v.registeredLicense.licenseNo} id={v.registeredLicense.id} />
         )}
         <AlertBadges alerts={v.alerts} hideEmpty />
       </Flex>

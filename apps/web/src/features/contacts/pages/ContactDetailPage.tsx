@@ -159,6 +159,22 @@ function ContactView({ id }: { id: string }) {
         }
       />
       {contact.archivedAt && <Alert type="warning" showIcon title={t('contacts.archivedNotice')} />}
+      {!contact.driver && contact.tags.includes('DRIVER') && (
+        <Alert
+          type="info"
+          showIcon
+          icon={<IdcardOutlined />}
+          title={t('contacts.noDriverProfile')}
+          action={
+            <Link
+              to={`/drivers/new?contactId=${encodeURIComponent(contact.id)}`}
+              data-testid="contact-create-driver"
+            >
+              {t('contacts.createDriverProfile')}
+            </Link>
+          }
+        />
+      )}
       {contact.driver && (
         <Alert
           type="info"
@@ -166,7 +182,10 @@ function ContactView({ id }: { id: string }) {
           icon={<IdcardOutlined />}
           title={t('contacts.driverProfileHint')}
           action={
-            <Link to={`/drivers/${encodeURIComponent(contact.driver.id)}`}>
+            <Link
+              to={`/drivers/${encodeURIComponent(contact.driver.id)}`}
+              data-testid="contact-driver-link"
+            >
               {t('contacts.driverProfile')}
             </Link>
           }
@@ -219,12 +238,32 @@ function ContactSummary({ contact }: { contact: ContactDetail }) {
             children: company ? t('contacts.company') : t('contacts.person'),
           },
           ...(company
-            ? [{ key: 'company', label: t('contacts.fields.companyName'), children: text(contact.companyName) }]
+            ? [
+                {
+                  key: 'company',
+                  label: t('contacts.fields.companyName'),
+                  children: text(contact.companyName),
+                },
+              ]
             : [
-                { key: 'first', label: t('contacts.fields.firstName'), children: text(contact.firstName) },
-                { key: 'last', label: t('contacts.fields.lastName'), children: text(contact.lastName) },
+                {
+                  key: 'first',
+                  label: t('contacts.fields.firstName'),
+                  children: text(contact.firstName),
+                },
+                {
+                  key: 'last',
+                  label: t('contacts.fields.lastName'),
+                  children: text(contact.lastName),
+                },
                 ...(contact.companyName
-                  ? [{ key: 'company', label: t('contacts.fields.companyName'), children: text(contact.companyName) }]
+                  ? [
+                      {
+                        key: 'company',
+                        label: t('contacts.fields.companyName'),
+                        children: text(contact.companyName),
+                      },
+                    ]
                   : []),
               ]),
           {

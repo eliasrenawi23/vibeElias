@@ -15,10 +15,15 @@ import { RequestedWithGuard } from './common/guards/requested-with.guard';
 import { DecimalToNumberInterceptor } from './common/interceptors/decimal-to-number.interceptor';
 import { Env, validateEnv } from './config/env';
 import { DocumentsModule } from './documents/documents.module';
+import { DriversModule } from './drivers/drivers.module';
+import { FinesModule } from './fines/fines.module';
 import { HealthModule } from './health/health.module';
 import { JobsModule } from './jobs/jobs.module';
+import { LeasesModule } from './leases/leases.module';
+import { LedgerModule } from './ledger/ledger.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { SettingsModule } from './settings/settings.module';
+import { TaxiLicensesModule } from './taxi-licenses/taxi-licenses.module';
 import { UsersModule } from './users/users.module';
 import { VehiclesModule } from './vehicles/vehicles.module';
 
@@ -50,6 +55,11 @@ import { VehiclesModule } from './vehicles/vehicles.module';
     SettingsModule,
     ContactsModule,
     VehiclesModule,
+    TaxiLicensesModule,
+    DriversModule,
+    LedgerModule,
+    LeasesModule,
+    FinesModule,
     DocumentsModule,
     HealthModule,
     JobsModule,

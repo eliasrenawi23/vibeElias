@@ -1,7 +1,8 @@
-/** TanStack Query keys for fines (the list/detail queries arrive in milestone 3). */
+import type { FineListQuery } from './types';
+
+/** TanStack Query keys for traffic fines. */
 export const fineKeys = {
   all: ['fines'] as const,
   lists: () => [...fineKeys.all, 'list'] as const,
-  list: (filters: Record<string, unknown>) => [...fineKeys.lists(), filters] as const,
-  detail: (id: string) => [...fineKeys.all, 'detail', id] as const,
+  list: (filters: FineListQuery) => [...fineKeys.lists(), filters] as const,
 };

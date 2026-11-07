@@ -1,5 +1,15 @@
 import { SearchOutlined } from '@ant-design/icons';
-import { AutoComplete, Button, DatePicker, Flex, Input, InputNumber, Select, Switch, Tag } from 'antd';
+import {
+  AutoComplete,
+  Button,
+  DatePicker,
+  Flex,
+  Input,
+  InputNumber,
+  Select,
+  Switch,
+  Tag,
+} from 'antd';
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSearchParams } from 'react-router';
@@ -39,7 +49,13 @@ export type FilterDef =
       max?: number;
     }
   | { type: 'dateRange'; keys: [string, string]; label: string }
-  | { type: 'autocomplete'; key: string; label: string; options: string[]; width?: number };
+  | { type: 'autocomplete'; key: string; label: string; options: string[]; width?: number }
+  | {
+      /** Any control (e.g. a server-search picker) bound to one URL param. */
+      type: 'custom';
+      key: string;
+      render: (value: string | null, onChange: (value: string | null) => void) => ReactNode;
+    };
 
 export interface FilterBarProps {
   /** URL param of the search box (default `q`); `null` hides the search box. */
@@ -223,6 +239,13 @@ export function FilterBar({
               })
             }
           />
+        );
+      }
+      case 'custom': {
+        return (
+          <span key={f.key} className="rm-filter-custom">
+            {f.render(params.get(f.key), (v) => update({ [f.key]: v }))}
+          </span>
         );
       }
       case 'autocomplete': {

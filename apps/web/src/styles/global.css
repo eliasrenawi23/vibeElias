@@ -523,3 +523,145 @@ body {
   padding: 2px 8px;
   font-size: var(--rm-text-body-size);
 }
+
+/* ---- Drivers, ledger and leases ------------------------------------------------------------- */
+
+.rm-nowrap {
+  white-space: nowrap;
+}
+
+.rm-grow {
+  flex: 1;
+  min-width: 0;
+}
+
+/* Driver balance: positive = owes us (red), zero (grey), negative = credit (green). */
+.rm-balance {
+  font-weight: var(--rm-font-weight-medium);
+}
+
+.rm-balance-owes {
+  color: var(--rm-color-error);
+}
+
+.rm-balance-zero {
+  color: var(--rm-color-text-tertiary);
+}
+
+.rm-balance-credit {
+  color: var(--rm-color-success);
+}
+
+/* Voided ledger rows are kept for the record but struck through. */
+.rm-ledger-voided td,
+.rm-data-card.rm-ledger-voided {
+  color: var(--rm-color-text-tertiary);
+}
+
+.rm-ledger-voided .rm-money,
+.rm-ledger-voided .rm-ledger-description > bdi,
+.rm-ledger-voided .rm-month {
+  text-decoration: line-through;
+}
+
+.rm-ledger-meta,
+.rm-ledger-void-reason {
+  font-size: var(--rm-text-small-size);
+}
+
+.rm-stat-card.ant-card {
+  height: 100%;
+}
+
+.rm-stat-title {
+  display: block;
+  font-size: var(--rm-text-small-size);
+}
+
+.rm-stat-value {
+  margin-top: 2px;
+  font-size: var(--rm-text-h3-size);
+  line-height: var(--rm-text-h3-line-height);
+}
+
+.rm-stat-hint {
+  display: block;
+  font-size: var(--rm-text-small-size);
+}
+
+.rm-license-title .rm-license-tag.ant-tag {
+  padding: 2px 10px;
+  font-size: 0.9em;
+}
+
+.rm-license-no {
+  font-weight: var(--rm-font-weight-semibold);
+  letter-spacing: 0.02em;
+}
+
+.rm-contract-no {
+  font-weight: var(--rm-font-weight-medium);
+}
+
+.rm-inline-create {
+  align-self: flex-start;
+}
+
+/* Rich single-choice rows (licences, cars) in the lease wizard. */
+.rm-selectable-list {
+  display: block;
+  width: 100%;
+}
+
+.rm-selectable-item.ant-radio-wrapper {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  margin: 0;
+  padding: 10px 12px;
+  border: 1px solid var(--rm-color-border);
+  border-radius: var(--rm-radius-md);
+  background: var(--rm-color-bg-container);
+}
+
+.rm-selectable-item.ant-radio-wrapper > span:last-child {
+  flex: 1;
+  min-width: 0;
+}
+
+.rm-selectable-item-selected.ant-radio-wrapper {
+  border-color: var(--rm-color-primary-active);
+  background: var(--rm-color-primary-soft);
+}
+
+.rm-selectable-list-invalid .rm-selectable-item.ant-radio-wrapper {
+  border-color: var(--rm-color-error-border);
+}
+
+.rm-selectable-title {
+  font-weight: var(--rm-font-weight-medium);
+}
+
+.rm-selectable-desc {
+  font-size: var(--rm-text-small-size);
+}
+
+.rm-responsibility-row {
+  max-width: 420px;
+}
+
+.rm-check-on {
+  color: var(--rm-color-success);
+}
+
+.rm-check-off {
+  color: var(--rm-color-text-tertiary);
+}
+
+.rm-drawer-divider.ant-divider {
+  margin: 4px 0;
+}
+
+.rm-filter-custom .ant-select {
+  min-width: 200px;
+}

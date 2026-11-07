@@ -34,6 +34,29 @@ export const SWAGGER_TAGS: readonly { name: string; description: string }[] = [
     description: 'Inventory cycles: list, consignment intake, return to the consignor',
   },
   {
+    name: 'taxi-licenses',
+    description: 'Taxi licences: registered car (12-year rule), open segment, history, alerts',
+  },
+  {
+    name: 'drivers',
+    description: 'Drivers: contact, documents expiry alerts, contracts, balance, ageing, statement',
+  },
+  {
+    name: 'leases',
+    description:
+      'Lease contracts: draft (locks licence / car), activate, segments (swap / rent change), ' +
+      'end, renew, deposits, checklists, monthly rent billing (preview / run, nightly job)',
+  },
+  {
+    name: 'ledger',
+    description:
+      'Driver ledger: charges, payments, credits, void; FIFO allocation; balances and ageing views',
+  },
+  {
+    name: 'fines',
+    description: 'Traffic fines: auto-matched driver, reassignment deadline, rebill to the driver',
+  },
+  {
     name: 'documents',
     description:
       'Uploads (pdf / jpeg / png / webp, sniffed), thumbnails and authenticated file streaming',

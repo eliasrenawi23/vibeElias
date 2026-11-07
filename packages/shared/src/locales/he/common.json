@@ -149,7 +149,11 @@
     "duplicate": "כבר קיימת רשומה עם הערך הזה",
     "odometerDecreasing": "הקריאה נמוכה מקריאה קודמת",
     "endAfterStart": "תאריך הסיום חייב להיות אחרי תאריך ההתחלה",
-    "oneOwnerRequired": "יש לשייך את המסמך לרשומה אחת בדיוק"
+    "oneOwnerRequired": "יש לשייך את המסמך לרשומה אחת בדיוק",
+    "billingPeriodUnsupported": "נתמך רק חיוב חודשי",
+    "dateInPast": "התאריך לא יכול להיות בעבר",
+    "segmentStartTooEarly": "השינוי חייב להתחיל אחרי תאריך ההתחלה של המקטע הנוכחי",
+    "outsideContract": "התאריך מחוץ לתקופת החוזה"
   },
   "errors": {
     "generic": "משהו השתבש. נסו שוב.",
@@ -171,7 +175,21 @@
     "noOpenCycle": "מחזור המלאי הזה כבר נסגר",
     "vehicleLeased": "הרכב מושכר בחוזה פעיל; יש לסיים קודם את תקופת ההשכרה",
     "dealPending": "יש עסקה פתוחה על הרכב",
-    "expenseRebilled": "ההוצאה כבר חויבה לנהג ולא ניתן לשנות אותה"
+    "expenseRebilled": "ההוצאה כבר חויבה לנהג ולא ניתן לשנות אותה",
+    "taxiAgeBlocked": "הרכב עבר את גיל המונית המרבי (12 שנים) ואי אפשר לרשום עליו רישיון מונית",
+    "vehicleAlreadyRegistered": "הרכב כבר רשום על רישיון מונית אחר",
+    "alreadyDriver": "לאיש הקשר הזה כבר יש פרופיל נהג",
+    "licenseInUse": "רישיון המונית כבר נמצא בחוזה השכרה פעיל אחר",
+    "vehicleInUse": "הרכב כבר נמצא בחוזה השכרה פעיל אחר",
+    "driverInactive": "הנהג אינו פעיל",
+    "licenseNotActive": "רישיון המונית אינו פעיל",
+    "vehicleNotAvailable": "הרכב אינו זמין (צריך להיות מונית שלנו שנמצאת במלאי)",
+    "leaseNotEditable": "כבר אי אפשר לשנות את החוזה הזה בדרך זו",
+    "depositInsufficient": "הסכום גבוה מהפיקדון המוחזק",
+    "alreadyVoided": "הרשומה הזו כבר בוטלה",
+    "fineNoDriver": "לא שויך נהג לקנס הזה",
+    "alreadyRebilled": "הקנס הזה כבר חויב לנהג",
+    "vehicleNotTaxi": "הרכב הזה אינו רשום כמונית"
   },
   "language": {
     "label": "שפה",
@@ -529,17 +547,13 @@
     },
     "expiringSoon": "פג תוקף בקרוב",
     "expiringEmpty": "אין פריטים שתוקפם פג ב-{{days}} הימים הקרובים",
-    "sampleData": "מספר הרכבים במלאי מעודכן; שאר הנתונים הם נתוני דוגמה עד שלב {{n}}."
+    "sampleData": "רווח החודש הוא נתון דוגמה עד שלב {{n}}."
   },
   "placeholder": {
     "title": "החלק הזה בדרך",
     "milestone": "יגיע בשלב {{n}}",
     "vehicles": "מלאי, מוניות ורכבי נהגים עם הוצאות, ביטוחים, קילומטראז׳ ומסמכים.",
-    "taxiLicenses": "רישיונות מונית, הרכב שעליו רשום כל רישיון, אגרות שנתיות ורווחיות.",
-    "drivers": "פרופילי נהגים, היתרים, חוזים, כרטסת ויתרות.",
-    "leases": "חוזי השכרת מספר בלבד ורכב + מספר, עם פיקדונות ודמי שכירות חודשיים.",
     "deals": "קניות, מכירות, טרייד-אין ותיווך, עם מע״מ על המרווח.",
-    "fines": "דוחות תנועה, הסבה לנהגים ומועדים.",
     "contacts": "קונים, מוכרים, מוסכים, מבטחים ולידים עם מעקב.",
     "reminders": "כל פקיעות התוקף והמועדים במקום אחד.",
     "reports": "רווחיות, גיול מלאי, חובות, הוצאות וספר סחר.",
@@ -547,11 +561,8 @@
     "settingsReminders": "כמה ימים מראש מופיעה כל תזכורת.",
     "settingsBackup": "סטטוס הגיבוי הלילי.",
     "vehicleDeals": "עסקאות קנייה, מכירה וקונסיגנציה של הרכב.",
-    "vehicleLeases": "חוזי השכרה ותקופות שבהם הרכב היה מושכר.",
-    "vehicleFines": "דוחות תנועה שהתקבלו על הרכב.",
     "vehiclePnl": "רווח והפסד לכל מחזור מלאי.",
-    "driverProfile": "פרופיל נהג עם היתרים, חוזים, כרטסת ומסמכים.",
-    "taxiLicenseDetail": "תיק הרישיון: הרכב שעליו הוא רשום, האגרה השנתית, החוזים והרווח."
+    "taxiLicensePnl": "הכנסות משכירות, אגרות ומחיר הרכישה של הרישיון."
   },
   "settings": {
     "nav": {
@@ -664,7 +675,9 @@
       "createNew": "יצירת איש קשר חדש",
       "quickCreateTitle": "איש קשר חדש",
       "noResults": "לא נמצאו אנשי קשר"
-    }
+    },
+    "noDriverProfile": "איש הקשר מסומן כנהג אך עדיין אין לו פרופיל נהג.",
+    "createDriverProfile": "יצירת פרופיל נהג"
   },
   "vehicles": {
     "tabs": {
@@ -724,7 +737,7 @@
       "taxiPlateHint": "מספרי רישוי שמסתיימים ב-25 או ב-26 הם של מוניות.",
       "markAsTaxi": "סימון כמונית",
       "ownerDriverHint": "בחרו איש קשר עם התגית נהג.",
-      "ownerDriverNoProfile": "הבעלים חייב להיות נהג: לאיש הקשר הזה אין עדיין פרופיל נהג (פרופילי נהגים יגיעו בשלב {{n}}).",
+      "ownerDriverNoProfile": "הבעלים חייב להיות נהג: לאיש הקשר הזה אין עדיין פרופיל נהג.",
       "ownerDriverCurrent": "הבעלים הנוכחי: {{name}}",
       "statusHelp": "שינויי סטטוס בהמשך נעשים מדף הרכב.",
       "isTaxiLabel": "הרכב הוא מונית",
@@ -847,6 +860,398 @@
       "deleteTitle": "מחיקת פוליסה",
       "activeOnly": "פעילות בלבד",
       "businessHint": "ביטוחי סחר ומגרש שמכסים את העסק ולא רכב מסוים."
+    },
+    "noLeases": "הרכב עדיין לא הושכר",
+    "noFines": "אין קנסות לרכב הזה",
+    "picker": {
+      "placeholder": "חיפוש לפי מספר רישוי, יצרן או דגם",
+      "noResults": "לא נמצאו רכבים"
+    }
+  },
+  "taxiLicenses": {
+    "new": "רישיון חדש",
+    "newTitle": "רישיון מונית חדש",
+    "detailTitle": "רישיון מונית",
+    "listEmpty": "עדיין אין רישיונות מונית",
+    "listEmptyHint": "הוסיפו את הרישיונות (המספרים הירוקים) שבבעלות העסק.",
+    "searchPlaceholder": "מספר רישיון או בעל הרישיון",
+    "notFound": "רישיון המונית לא נמצא",
+    "loadError": "לא ניתן לטעון את רישיון המונית",
+    "created": "רישיון המונית נוצר",
+    "currentDriver": "נהג נוכחי",
+    "currentVehicle": "רכב",
+    "unassigned": "לא מושכר",
+    "feeDue": "אגרה לתשלום",
+    "noRegisteredVehicle": "לא רשום עליו רכב",
+    "fields": {
+      "licenseNo": "מספר רישיון",
+      "holderName": "בעל הרישיון הרשום",
+      "acquiredAt": "תאריך רכישה",
+      "acquisitionPrice": "מחיר רכישה",
+      "soldAt": "תאריך מכירה",
+      "salePrice": "מחיר מכירה",
+      "annualFeeDueAt": "מועד אגרה שנתית",
+      "renewalAt": "מועד חידוש",
+      "registeredVehicle": "רכב רשום"
+    },
+    "sections": {
+      "identity": "רישיון",
+      "dates": "אגרות וחידוש",
+      "money": "רכישה ומכירה"
+    },
+    "form": {
+      "licenseNoHelp": "כפי שמופיע ברישיון: ספרות, אותיות ומקפים",
+      "annualFeeHelp": "אגרת רישיון ההפעלה השנתית משולמת בשובר של דצמבר."
+    },
+    "tabs": {
+      "overview": "סקירה",
+      "documents": "מסמכים",
+      "pnl": "רווח והפסד"
+    },
+    "alerts": {
+      "annualFeeDue": "אגרה שנתית בקרוב",
+      "annualFeeOverdue": "אגרה שנתית באיחור",
+      "renewalDue": "חידוש בקרוב",
+      "renewalOverdue": "חידוש באיחור",
+      "idle": "לא מושכר זמן רב"
+    },
+    "assignment": {
+      "current": "שיוך נוכחי",
+      "history": "היסטוריית שיוכים",
+      "none": "הרישיון אינו מושכר כרגע.",
+      "noHistory": "הרישיון עדיין לא הושכר",
+      "since": "מתאריך"
+    },
+    "register": {
+      "action": "רישום רכב",
+      "title": "הרכב הרשום על הרישיון",
+      "hint": "הרכב הרשום על הרישיון במשרד התחבורה (טופס העברת רישיון, חתימה מחדש של המונה). אי אפשר לרשום מונית בת 12 שנים ומעלה.",
+      "vehicle": "מונית",
+      "current": "רשום כעת",
+      "clearHelp": "נקו את השדה כדי לנתק את הרכב הרשום.",
+      "submit": "רישום",
+      "detach": "ניתוק הרכב",
+      "registered": "הרכב נרשם על הרישיון",
+      "cleared": "הרכב נותק מהרישיון"
+    }
+  },
+  "drivers": {
+    "new": "נהג חדש",
+    "newTitle": "נהג חדש",
+    "detailTitle": "נהג",
+    "editTitle": "עריכת נהג",
+    "listEmpty": "עדיין אין נהגים",
+    "listEmptyHint": "הוסיפו את הנהגים ששוכרים רישיונות ומוניות.",
+    "searchPlaceholder": "שם, טלפון, ת״ז או מספר רישיון",
+    "withBalanceOnly": "רק עם יתרה",
+    "notFound": "הנהג לא נמצא",
+    "loadError": "לא ניתן לטעון את הנהג",
+    "created": "הנהג נוצר",
+    "openProfile": "לפרופיל הנהג",
+    "openContact": "לאיש הקשר",
+    "noContracts": "עדיין אין חוזי השכרה",
+    "noOwnedVehicles": "לא רשומים רכבים של הנהג",
+    "fields": {
+      "name": "נהג",
+      "contact": "איש קשר",
+      "licenseNo": "מספר רישיון נהיגה",
+      "licenseExpiry": "תוקף רישיון נהיגה",
+      "taxiPermitNo": "מספר היתר נהג מונית",
+      "taxiPermitExpiry": "תוקף היתר מונית",
+      "medicalExpiry": "תוקף אישור רפואי",
+      "emergencyName": "איש קשר לחירום",
+      "emergencyPhone": "טלפון לחירום",
+      "startedAt": "נוהג אצלנו מתאריך",
+      "activeContract": "חוזה פעיל"
+    },
+    "sections": {
+      "permits": "רישיונות והיתרים",
+      "contact": "פרטי קשר",
+      "ownedVehicles": "הרכבים של הנהג"
+    },
+    "form": {
+      "stepContact": "1. איש קשר",
+      "stepDriver": "2. פרטי הנהג",
+      "contactSource": "איש קשר",
+      "existingContact": "איש קשר קיים",
+      "newContact": "איש קשר חדש",
+      "contactHelp": "בחרו את האדם מאנשי הקשר; התגית ״נהג״ תתווסף אוטומטית.",
+      "alreadyDriver": "לאיש הקשר הזה כבר יש פרופיל נהג."
+    },
+    "tabs": {
+      "profile": "פרופיל",
+      "contracts": "חוזים",
+      "ledger": "כרטסת",
+      "documents": "מסמכים"
+    },
+    "alerts": {
+      "licenseExpiring": "רישיון נהיגה פג בקרוב",
+      "licenseExpired": "רישיון נהיגה פג",
+      "taxiPermitExpiring": "היתר מונית פג בקרוב",
+      "taxiPermitExpired": "היתר מונית פג",
+      "medicalExpiring": "אישור רפואי פג בקרוב",
+      "medicalExpired": "אישור רפואי פג",
+      "overdue": "שכירות באיחור"
+    },
+    "picker": {
+      "placeholder": "חיפוש נהגים",
+      "noResults": "לא נמצאו נהגים"
+    }
+  },
+  "leases": {
+    "new": "השכרה חדשה",
+    "newTitle": "השכרה חדשה",
+    "detailTitle": "חוזה השכרה",
+    "contract": "חוזה",
+    "contractNo": "חוזה {{no}}",
+    "actionsMenu": "פעולות חוזה",
+    "listEmpty": "עדיין אין חוזי השכרה",
+    "listEmptyHint": "השכירו לנהג רישיון לבדו, או מונית יחד עם הרישיון שלה.",
+    "searchPlaceholder": "מספר חוזה, נהג, רישיון או מספר רישוי",
+    "notFound": "החוזה לא נמצא",
+    "loadError": "לא ניתן לטעון את החוזה",
+    "previousContract": "החוזה הקודם",
+    "noSegments": "עדיין אין תקופות",
+    "noOpenCharges": "אין חיובים פתוחים בחוזה הזה",
+    "deleteTitle": "מחיקת טיוטה",
+    "deleteConfirm": "למחוק את טיוטת החוזה? לא ניתן לבטל פעולה זו.",
+    "fields": {
+      "contractNo": "חוזה",
+      "driver": "נהג",
+      "type": "סוג השכרה",
+      "license": "רישיון",
+      "vehicle": "רכב",
+      "monthlyRent": "שכירות חודשית",
+      "period": "תקופה",
+      "startDate": "תאריך התחלה",
+      "endDate": "תאריך סיום",
+      "actualEndDate": "תאריך סיום בפועל",
+      "endReason": "סיבת סיום",
+      "paymentDay": "יום התשלום בחודש",
+      "rentIncludesVat": "השכירות כוללת מע״מ",
+      "earlyExitPenaltyMonths": "פיצוי על יציאה מוקדמת",
+      "depositAmount": "פיקדון",
+      "depositKind": "סוג הפיקדון",
+      "responsibilities": "מי משלם",
+      "terms": "תנאי החוזה",
+      "billingPeriod": "חיוב",
+      "signedAt": "תאריך חתימה",
+      "lastPayment": "תשלום אחרון",
+      "renewedFrom": "חידוש של",
+      "segmentReason": "סיבה"
+    },
+    "form": {
+      "endDateHelp": "היום האחרון של החוזה (כולל).",
+      "lastRent": "השכירות האחרונה של הרישיון",
+      "paymentDayHelp": "1 עד 28, כדי שהיום יהיה קיים בכל חודש.",
+      "penaltyHelp": "חודשי שכירות שיחויבו אם הנהג עוזב מוקדם.",
+      "responsibilitiesHelp": "כברירת מחדל הנהג משלם על הכול חוץ מהרכב עצמו.",
+      "termsHelp": "השאירו ריק כדי להשתמש בסעיפים הקבועים מההגדרות.",
+      "depositHelp": "מתקבל בעת הפעלת החוזה."
+    },
+    "sections": {
+      "terms": "תנאים",
+      "segments": "רישיון, רכב ושכירות לאורך זמן",
+      "openCharges": "חיובים פתוחים"
+    },
+    "tabs": {
+      "overview": "סקירה",
+      "ledger": "כרטסת",
+      "documents": "מסמכים"
+    },
+    "alerts": {
+      "endingSoon": "מסתיים בקרוב",
+      "ended": "הסתיים",
+      "overdue": "שכירות באיחור",
+      "draft": "טיוטה"
+    },
+    "checklists": {
+      "empty": "עדיין לא מולא"
+    },
+    "wizard": {
+      "steps": {
+        "driver": "נהג",
+        "license": "רישיון",
+        "vehicle": "רכב",
+        "terms": "תנאים",
+        "deposit": "פיקדון ומסירה",
+        "review": "סיכום"
+      },
+      "newDriver": "נהג חדש",
+      "driverHasLease": "לנהג הזה כבר יש חוזה פעיל ({{no}}).",
+      "chooseLicense": "רישיון פנוי",
+      "noLicenses": "אין כרגע רישיון פעיל פנוי.",
+      "chooseCar": "מונית",
+      "chooseOwnCar": "הרכב של הנהג",
+      "noCar": "ללא רישום רכב",
+      "noCarHint": "הרישיון מושכר בלי לרשום את הרכב.",
+      "noCars": "אין רכב זמין",
+      "ownCarHint": "כדי לבחור את רכב הנהג, הוסיפו אותו בעמוד הרכבים עם בעלות ״צד שלישי״ והנהג כבעלים.",
+      "carAndNumberHint": "אנחנו משכירים את המונית שלנו יחד עם הרישיון.",
+      "numberOnlyHint": "הנהג מעלה את הרישיון על הרכב שלו.",
+      "registeredOnLicense": "רשום על הרישיון הזה",
+      "vehicleRequired": "בחרו מונית להשכרת רכב + רישיון",
+      "noHandover": "אין רשימת מסירה: הנהג משתמש ברכב שלו.",
+      "createDraft": "יצירת טיוטה",
+      "created": "טיוטת החוזה נוצרה",
+      "createdHint": "הפעילו אותו כשהחוזה נחתם והפיקדון התקבל.",
+      "openContract": "לחוזה"
+    },
+    "activate": {
+      "action": "הפעלה",
+      "now": "הפעלה עכשיו",
+      "title": "הפעלת חוזה",
+      "hint": "החוזה הופך לפעיל: השכירות מחויבת מתאריך ההתחלה והפיקדון שהתקבל נרשם.",
+      "submit": "הפעלה",
+      "depositReceived": "פיקדון שהתקבל",
+      "depositHelp": "השאירו ריק אם לא התקבל פיקדון. הסוג המוסכם: {{kind}}.",
+      "depositDate": "תאריך הפיקדון",
+      "done": "החוזה הופעל"
+    },
+    "segment": {
+      "action": "החלפת רכב / שינוי שכירות",
+      "title": "החלפת רכב או שינוי שכירות",
+      "hint": "התקופה הנוכחית נסגרת יום לפני התאריך שלמטה, ותקופה חדשה מתחילה עם השינויים.",
+      "from": "החל מ",
+      "ownCarHelp": "אופציונלי: הרכב של הנהג.",
+      "saved": "השינוי נרשם"
+    },
+    "end": {
+      "action": "סיום חוזה",
+      "title": "סיום חוזה",
+      "submit": "סיום החוזה",
+      "earlyHint": "החוזה מסתיים לפני מועד סיומו: שכירות שכבר חויבה על ימים מאוחרים יותר תזוכה.",
+      "penalty": "פיצוי על יציאה מוקדמת",
+      "applyPenalty": "לחייב את הפיצוי",
+      "penaltyFormula": "{{months}} × שכירות חודשית של {{rent}}",
+      "deposit": "פיקדון",
+      "depositActions": {
+        "HOLD": "להשאיר",
+        "RETURN": "להחזיר לנהג",
+        "APPLY": "לקזז מהחוב"
+      },
+      "done": "החוזה הסתיים"
+    },
+    "renew": {
+      "action": "חידוש",
+      "title": "חידוש חוזה",
+      "hint": "החוזה הזה מסתיים כ״חודש״ וחוזה חדש מתחיל למחרת. הפיקדון עובר לחוזה החדש.",
+      "submit": "חידוש",
+      "done": "החוזה חודש"
+    },
+    "deposit": {
+      "action": "פיקדון",
+      "title": "פיקדון",
+      "applyHint": "הסכום נלקח מהפיקדון ומשולם על חשבון החוב הפתוח.",
+      "saved": "הפיקדון עודכן"
+    },
+    "edit": {
+      "title": "עריכת חוזה",
+      "activeHint": "בחוזה פעיל אפשר לשנות רק את תאריך הסיום, יום התשלום, התנאים, חלוקת האחריות וההערות."
+    }
+  },
+  "ledger": {
+    "title": "כרטסת",
+    "empty": "עדיין אין רשומות",
+    "owesUs": "חייב לנו",
+    "inCredit": "ביתרת זכות",
+    "settled": "מאוזן",
+    "paidUp": "שולם",
+    "dueOn": "לתשלום עד",
+    "voided": "בוטל",
+    "voidReasonShown": "סיבת הביטול",
+    "showVoided": "הצגת רשומות מבוטלות",
+    "noContract": "ללא חוזה",
+    "fields": {
+      "date": "תאריך",
+      "type": "סוג",
+      "description": "תיאור",
+      "charge": "חיוב",
+      "payment": "תשלום / זיכוי",
+      "deposit": "פיקדון",
+      "runningBalance": "יתרה",
+      "remaining": "פתוח",
+      "balance": "יתרה",
+      "depositHeld": "פיקדון מוחזק",
+      "charged": "חויב",
+      "paid": "שולם",
+      "amount": "סכום",
+      "method": "אמצעי תשלום",
+      "reference": "אסמכתה",
+      "contract": "חוזה",
+      "chargeKind": "סוג החיוב",
+      "dueDate": "מועד תשלום",
+      "period": "חודש"
+    },
+    "ageing": {
+      "title": "באיחור",
+      "current": "טרם הגיע מועדו",
+      "d1_30": "1–30 ימים",
+      "d31_60": "31–60 ימים",
+      "d61_90": "61–90 ימים",
+      "d90_plus": "מעל 90 ימים"
+    },
+    "payment": {
+      "action": "רישום תשלום",
+      "title": "רישום תשלום",
+      "referenceHelp": "מספר צ׳ק, אסמכתת העברה או אישור ביט",
+      "saved": "התשלום נרשם"
+    },
+    "charge": {
+      "action": "הוספת חיוב",
+      "title": "הוספת חיוב",
+      "dueDateHelp": "ברירת המחדל: תאריך החיוב",
+      "saved": "החיוב נוסף"
+    },
+    "credit": {
+      "action": "הוספת זיכוי",
+      "title": "הוספת זיכוי",
+      "saved": "הזיכוי נוסף"
+    },
+    "void": {
+      "action": "ביטול",
+      "title": "ביטול רשומה",
+      "hint": "הרשומה נשארת בכרטסת, מחוקה בקו, ואינה נספרת עוד ביתרה.",
+      "reason": "סיבה",
+      "saved": "הרשומה בוטלה"
+    }
+  },
+  "fines": {
+    "add": "הוספת קנס",
+    "addTitle": "הוספת קנס תנועה",
+    "added": "הקנס נוסף",
+    "addedMatched": "הקנס נוסף ושויך ל{{name}}",
+    "listEmpty": "אין קנסות תנועה",
+    "listEmptyHint": "רשמו את הקנסות שמתקבלים על הרכבים שלנו כדי להסב אותם לנהג בזמן.",
+    "matchHint": "הנהג שהחזיק ברכב בזמן העבירה משויך אוטומטית.",
+    "receivedHelp": "המועד האחרון להסבה הוא 90 ימים מתאריך זה.",
+    "authorityHelp": "משטרה, עירייה, כביש אגרה…",
+    "drawerTitle": "קנס",
+    "noDriver": "לא שויך נהג",
+    "openContract": "לחוזה",
+    "changeStatus": "סטטוס",
+    "overrideDriver": "נהג",
+    "overrideDriverHelp": "שנו את הנהג המשויך במידת הצורך.",
+    "rebill": "חיוב הנהג",
+    "rebillConfirm": "שילמנו את הקנס: להוסיף אותו כחיוב בכרטסת הנהג?",
+    "rebillNeedsDriver": "שייכו נהג כדי לחייב אותו בקנס.",
+    "rebilled": "הקנס חויב לנהג",
+    "rebilledTag": "חויב לנהג",
+    "fields": {
+      "vehicle": "רכב",
+      "offenceAt": "תאריך ושעת העבירה",
+      "receivedAt": "תאריך קבלה",
+      "amount": "סכום",
+      "fineNo": "מספר הדוח",
+      "authority": "גורם מנפיק",
+      "driver": "נהג",
+      "contract": "חוזה",
+      "reassignDeadline": "להסב עד",
+      "rebilled": "חויב לנהג"
+    },
+    "alerts": {
+      "reassignDueSoon": "להסב בקרוב",
+      "reassignOverdue": "מועד ההסבה עבר"
     }
   }
 }

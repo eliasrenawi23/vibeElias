@@ -93,6 +93,20 @@ async function mockApi(page: Page, options: { loggedIn?: boolean } = {}): Promis
       if (!loggedIn) return json(route, 401, unauthorized);
       return json(route, 200, { items: [], total: 4, page: 1, pageSize: 1 });
     }
+    if (path === '/api/leases' && method === 'GET') {
+      // Dashboard KPI "active leases": `?status=ACTIVE&pageSize=1` -> `total`.
+      if (!loggedIn) return json(route, 401, unauthorized);
+      return json(route, 200, { items: [], total: 2, page: 1, pageSize: 1 });
+    }
+    if (path === '/api/ledger/balances' && method === 'GET') {
+      // Dashboard KPI "driver receivables": the sum of the positive balances.
+      if (!loggedIn) return json(route, 401, unauthorized);
+      const row = (driverId: string, balance: number) => ({ driverId, name: driverId, balance });
+      return json(route, 200, {
+        items: [row('drv_1', 1500), row('drv_2', -200), row('drv_3', 300)],
+        total: 3,
+      });
+    }
     if (path === '/api/settings') {
       if (!loggedIn) return json(route, 401, unauthorized);
       if (method === 'PATCH') api.settings = { ...api.settings, ...(body as object) };
@@ -149,8 +163,15 @@ test('login, switch language and theme', async ({ page }) => {
   await expect(page.getByRole('heading', { level: 1 })).toHaveText('לוח בקרה');
   await expect(page).toHaveTitle('לוח בקרה · רינאוי מוטורס');
   await expect(page.locator('.ant-statistic').first()).toBeVisible();
-  // Live KPI from the vehicles list total.
+  // Live KPIs: vehicles and active leases from the list totals, receivables = 1,500 + 300.
   await expect(page.locator('.ant-statistic-content').first()).toHaveText('4');
+  await expect(page.locator('.ant-statistic-content').nth(1)).toHaveText('2');
+  await expect(page.locator('.ant-statistic-content').nth(2)).toContainText('1,800');
+  expect(
+    api.calls.some(
+      (c) => c.method === 'GET' && c.path === '/api/leases' && c.search.includes('status=ACTIVE'),
+    ),
+  ).toBe(true);
   expect(
     api.calls.some(
       (c) =>

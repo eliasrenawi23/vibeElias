@@ -6,6 +6,10 @@ import { useAuth } from '../../../app/providers/AuthProvider';
 import { isolateAuto } from '../../../shared/lib/bidi';
 import { EmptyState } from '../../../shared/ui/EmptyState';
 import { PageHeader } from '../../../shared/ui/PageHeader';
+import { countLeases } from '../../leases/api';
+import { leaseKeys } from '../../leases/queryKeys';
+import { fetchReceivables } from '../../ledger/api';
+import { ledgerKeys } from '../../ledger/queryKeys';
 import { countVehicles } from '../../vehicles/api';
 import { vehicleKeys } from '../../vehicles/queryKeys';
 import { EXPIRING_WINDOW_DAYS, fetchExpiring, fetchKpis, LIVE_DASHBOARD_MILESTONE } from '../api';
@@ -20,6 +24,16 @@ export function DashboardPage() {
   const inStock = useQuery({
     queryKey: vehicleKeys.count('IN_STOCK'),
     queryFn: ({ signal }) => countVehicles('IN_STOCK', signal),
+  });
+  // Live since milestone 3: `GET /leases?status=ACTIVE&pageSize=1` -> `total`, and the sum of
+  // the positive balances of `GET /ledger/balances`.
+  const activeLeases = useQuery({
+    queryKey: leaseKeys.count('ACTIVE'),
+    queryFn: ({ signal }) => countLeases('ACTIVE', signal),
+  });
+  const receivables = useQuery({
+    queryKey: ledgerKeys.receivables(),
+    queryFn: ({ signal }) => fetchReceivables(signal),
   });
   const expiring = useQuery({
     queryKey: dashboardKeys.expiring(EXPIRING_WINDOW_DAYS),
@@ -51,18 +65,18 @@ export function DashboardPage() {
         <Col xs={24} sm={12} xl={6}>
           <KpiCard
             title={t('dashboard.kpis.activeLeases')}
-            value={k?.activeLeases ?? 0}
+            value={activeLeases.data ?? 0}
             icon={<FileProtectOutlined />}
-            loading={kpis.isPending}
+            loading={activeLeases.isPending}
           />
         </Col>
         <Col xs={24} sm={12} xl={6}>
           <KpiCard
             title={t('dashboard.kpis.receivables')}
-            value={k?.receivables ?? 0}
+            value={receivables.data ?? 0}
             icon={<WalletOutlined />}
             money
-            loading={kpis.isPending}
+            loading={receivables.isPending}
           />
         </Col>
         <Col xs={24} sm={12} xl={6}>

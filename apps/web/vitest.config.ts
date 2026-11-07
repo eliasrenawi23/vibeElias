@@ -12,5 +12,8 @@ export default defineConfig({
     setupFiles: ['./src/test/setup.ts'],
     css: false,
     restoreMocks: true,
+    // AntD component tests (dialogs, the lease wizard) need more than the 5 s default on a busy
+    // machine: the first render of a file pays for the AntD import and style generation.
+    testTimeout: 20_000,
   },
 });

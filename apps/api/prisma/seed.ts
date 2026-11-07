@@ -33,17 +33,14 @@ import {
   DEFAULT_BUSINESS_TZ,
   DEFAULT_REMINDER_LEAD_DAYS,
   DEFAULT_RESPONSIBILITIES,
-  dueDateInPeriod,
   fineReassignDeadline,
   HandoverChecklistSchema,
+  ReturnChecklistSchema,
   isValidIsraeliId,
   maxIsoDate,
   minIsoDate,
-  monthsBetween,
-  overlapDaysInPeriod,
   password as passwordPolicy,
   periodOf,
-  periodStart,
   prorate,
   todayInBusinessTz,
   TRANSFER_DUE_WORKING_DAYS,
@@ -52,6 +49,14 @@ import { resolve } from 'node:path';
 import { PDFDocument, rgb, StandardFonts } from 'pdf-lib';
 import sharp from 'sharp';
 import { hashPassword } from '../src/auth/password';
+import {
+  penaltyAmount,
+  planRentCharges,
+  toBillingContract,
+  toBillingSegments,
+  unusedRentCredits,
+} from '../src/leases/billing-plan';
+import { allocateFifo } from '../src/ledger/allocation';
 import { makeThumbnail } from '../src/documents/file-type';
 import { LocalDiskStorage } from '../src/documents/storage/local-disk.storage';
 import { thumbKeyOf } from '../src/documents/storage/storage.service';
@@ -209,43 +214,40 @@ async function migrateLegacySpelling(): Promise<void> {
 }
 
 /* ------------------------------------------------------------------------------------------ */
-/* Ledger FIFO allocation cache (same rule as the ledger service of milestone 3)              */
+/* Ledger FIFO allocation cache (the API's own rule: src/ledger/allocation.ts)                */
 /* ------------------------------------------------------------------------------------------ */
 
-function chargeOrder(a: LedgerEntry, b: LedgerEntry): number {
-  const ad = (a.dueDate ?? a.date).getTime();
-  const bd = (b.dueDate ?? b.date).getTime();
-  return ad - bd || a.date.getTime() - b.date.getTime() || a.id.localeCompare(b.id);
-}
+const isoDay = (d: Date): string => d.toISOString().slice(0, 10);
 
-function creditOrder(a: LedgerEntry, b: LedgerEntry): number {
-  return a.date.getTime() - b.date.getTime() || a.id.localeCompare(b.id);
-}
-
-/** Deletes and rebuilds a driver's PaymentAllocation rows: payments/credits by date vs open charges by due date. */
+/** Deletes and rebuilds a driver's PaymentAllocation rows with the API's `allocateFifo`. */
 async function reallocateDriver(driverId: string): Promise<void> {
   const entries = await prisma.ledgerEntry.findMany({
     where: { driverId, voidedAt: null, type: { in: ['CHARGE', 'PAYMENT', 'CREDIT'] } },
   });
-  const charges = entries.filter((e) => e.type === 'CHARGE').sort(chargeOrder);
-  const credits = entries.filter((e) => e.type !== 'CHARGE').sort(creditOrder);
-  const open = charges.map((c) => ({ id: c.id, left: new Prisma.Decimal(c.amount) }));
-  const rows: Prisma.PaymentAllocationCreateManyInput[] = [];
-  let i = 0;
-  for (const credit of credits) {
-    let left = new Prisma.Decimal(credit.amount);
-    while (left.gt(0) && i < open.length) {
-      const charge = open[i] as { id: string; left: Prisma.Decimal };
-      const amount = Prisma.Decimal.min(left, charge.left);
-      if (amount.gt(0)) rows.push({ paymentId: credit.id, chargeId: charge.id, amount });
-      charge.left = charge.left.minus(amount);
-      left = left.minus(amount);
-      if (charge.left.lte(0)) i++;
-    }
-  }
+  const rows = allocateFifo(
+    entries
+      .filter((e) => e.type === 'CHARGE')
+      .map((e) => ({
+        id: e.id,
+        amount: e.amount,
+        date: isoDay(e.date),
+        dueDate: e.dueDate ? isoDay(e.dueDate) : null,
+      })),
+    entries
+      .filter((e) => e.type !== 'CHARGE')
+      .map((e) => ({ id: e.id, amount: e.amount, date: isoDay(e.date), allocateTo: e.allocateTo })),
+  );
   await prisma.$transaction([
-    prisma.paymentAllocation.deleteMany({ where: { payment: { driverId } } }),
-    prisma.paymentAllocation.createMany({ data: rows }),
+    prisma.paymentAllocation.deleteMany({
+      where: { OR: [{ payment: { driverId } }, { charge: { driverId } }] },
+    }),
+    prisma.paymentAllocation.createMany({
+      data: rows.map((r) => ({
+        paymentId: r.paymentId,
+        chargeId: r.chargeId,
+        amount: ils(r.amount),
+      })),
+    }),
   ]);
 }
 
@@ -672,6 +674,11 @@ async function seedDemo(adminId: string, T: string): Promise<void> {
   // Lease B (number only): started on the 1st eight months ago; car swap on the 12th of last month.
   const leaseBStart = `${addPeriods(thisPeriod, -8)}-01`;
   const swapDate = `${addPeriods(thisPeriod, -1)}-12`;
+  // Lease C (car + number, Rami Haddad): our reserve Octavia + licence 40633 from the 1st five
+  // months ago, terminated early by the driver on the 20th two months ago (credit for the unused
+  // days, one month's rent penalty, deposit applied to the debt). The car was then serviced.
+  const leaseCStart = `${addPeriods(thisPeriod, -5)}-01`;
+  const leaseCEnd = `${addPeriods(thisPeriod, -2)}-20`;
 
   /* ---------------------------------- Drivers ---------------------------------- */
   const drivers: Prisma.DriverUncheckedCreateInput[] = [
@@ -1493,6 +1500,48 @@ async function seedDemo(adminId: string, T: string): Promise<void> {
       terms:
         'מספר בלבד על רכב הנהג; בזמן תיקון רכב הנהג העסק מעמיד רכב מונית חלופי בתוספת דמי שכירות.',
     },
+    {
+      id: 'seed_lease_haddad',
+      driverId: 'seed_drv_haddad',
+      type: 'CAR_AND_NUMBER',
+      status: 'TERMINATED',
+      startDate: day(leaseCStart),
+      endDate: day(addDays(addMonths(leaseCStart, 12), -1)),
+      actualEndDate: day(leaseCEnd),
+      endReason: 'TERMINATED_BY_DRIVER',
+      paymentDay: 5,
+      earlyExitPenaltyMonths: new Prisma.Decimal(1),
+      depositAmount: ils(4_000),
+      depositKind: 'CASH',
+      responsibilities: { ...DEFAULT_RESPONSIBILITIES },
+      handoverChecklist: HandoverChecklistSchema.parse({
+        date: leaseCStart,
+        photosTaken: true,
+        km: 468_300,
+        fuelLevel: 'HALF',
+        spareWheel: true,
+        jack: true,
+        docsInCar: true,
+        damagesNoted: true,
+        damages: 'שקע קטן בדלת האחורית הימנית',
+        meterSealed: true,
+      }),
+      returnChecklist: ReturnChecklistSchema.parse({
+        date: leaseCEnd,
+        photosTaken: true,
+        km: 481_700,
+        fuelLevel: 'QUARTER',
+        spareWheel: true,
+        jack: true,
+        docsInCar: true,
+        damagesNoted: true,
+        damages: 'שקע קטן בדלת האחורית הימנית (קיים מהמסירה); מצמד שחוק',
+        meterSealed: true,
+        keysReturned: true,
+      }),
+      signedAt: at(leaseCStart, '10:00'),
+      terminationNote: 'הנהג עבר לעבוד כשכיר; הפיקדון קוזז מהחוב והיתרה נגבית בתשלומים',
+    },
   ];
   for (const c of contracts) {
     await ensure(
@@ -1531,6 +1580,15 @@ async function seedDemo(adminId: string, T: string): Promise<void> {
       startDate: day(swapDate),
       reason: MIZRAHI_SWAP_REASON,
     },
+    {
+      id: 'seed_seg_haddad_1',
+      contractId: 'seed_lease_haddad',
+      taxiLicenseId: 'seed_tl_40633',
+      vehicleId: 'seed_v_taxi_octavia',
+      monthlyRent: ils(5_800),
+      startDate: day(leaseCStart),
+      endDate: day(leaseCEnd),
+    },
   ];
   for (const s of segments) {
     await ensure(
@@ -1542,52 +1600,62 @@ async function seedDemo(adminId: string, T: string): Promise<void> {
   /* ---------------------------------- Ledger ---------------------------------- */
   const ledger: Prisma.LedgerEntryUncheckedCreateInput[] = [];
 
-  /** RENT charges for every month of the contract up to the current month (proration rule of the plan). */
-  async function rentCharges(contractId: string, idPrefix: string): Promise<LedgerEntry[]> {
+  /**
+   * RENT charges of a contract up to `upto` (default: this month) with the API's billing plan
+   * (`planRentCharges`: proration, due dates, swap months summing to the rent). `asBilledWhileOpen`
+   * plans an ended contract as it was billed while it ran (full months; the end credit comes
+   * separately). A month already billed by the running API (same segment + period) is skipped.
+   */
+  async function rentCharges(
+    contractId: string,
+    idPrefix: string,
+    opts: { upto?: string; asBilledWhileOpen?: boolean } = {},
+  ): Promise<LedgerEntry[]> {
     const contract = await prisma.leaseContract.findUniqueOrThrow({
       where: { id: contractId },
       include: { segments: { orderBy: { startDate: 'asc' } } },
     });
-    const start = contract.startDate.toISOString().slice(0, 10);
-    const entries: Prisma.LedgerEntryUncheckedCreateInput[] = [];
-    contract.segments.forEach((seg: LeaseSegment, segIndex) => {
-      const segStart = seg.startDate.toISOString().slice(0, 10);
-      const segEnd = seg.endDate ? seg.endDate.toISOString().slice(0, 10) : null;
-      for (const period of monthsBetween(maxIsoDate(start, segStart), thisPeriod)) {
-        const days = overlapDaysInPeriod(period, segStart, segEnd);
-        if (days === 0) continue;
-        const date = maxIsoDate(periodStart(period), segStart);
-        entries.push({
-          id: `${idPrefix}_rent_${segIndex}_${period}`,
-          driverId: contract.driverId,
-          contractId,
-          segmentId: seg.id,
-          type: 'CHARGE',
-          chargeKind: 'RENT',
-          rentPeriod: period,
-          date: day(date),
-          dueDate: day(maxIsoDate(dueDateInPeriod(period, contract.paymentDay), date)),
-          amount: ils(prorate(seg.monthlyRent, days, daysInMonth(period))),
-          // NUMBER_ONLY rent is licence income; the segment car is the driver's own.
-          vehicleId: contract.type === 'CAR_AND_NUMBER' ? seg.vehicleId : null,
-          taxiLicenseId: seg.taxiLicenseId,
-          description: `דמי שכירות ${period}`,
-          autoGenerated: true,
-          createdById: adminId,
-        });
-      }
-    });
+    const billing = toBillingContract(contract);
+    const segments = toBillingSegments(contract.segments);
+    if (opts.asBilledWhileOpen) {
+      billing.actualEndDate = null;
+      const last = segments[segments.length - 1];
+      if (last) last.endDate = null;
+    }
     const out: LedgerEntry[] = [];
-    for (const e of entries) {
+    for (const p of planRentCharges(billing, segments, opts.upto ?? thisPeriod)) {
+      const segIndex = contract.segments.findIndex((seg: LeaseSegment) => seg.id === p.segmentId);
+      const id = `${idPrefix}_rent_${segIndex}_${p.rentPeriod}`;
+      const taken = await prisma.ledgerEntry.findFirst({
+        where: { segmentId: p.segmentId, rentPeriod: p.rentPeriod, NOT: { id } },
+      });
+      if (taken) {
+        existing++;
+        out.push(taken);
+        continue;
+      }
+      const e: Prisma.LedgerEntryUncheckedCreateInput = {
+        id,
+        driverId: contract.driverId,
+        contractId,
+        segmentId: p.segmentId,
+        type: 'CHARGE',
+        chargeKind: 'RENT',
+        rentPeriod: p.rentPeriod,
+        date: day(p.date),
+        dueDate: day(p.dueDate),
+        amount: ils(p.amount),
+        // NUMBER_ONLY rent is licence income; the segment car is the driver's own.
+        vehicleId: p.vehicleId,
+        taxiLicenseId: p.taxiLicenseId,
+        description: `דמי שכירות ${p.rentPeriod}`,
+        autoGenerated: true,
+        createdById: adminId,
+      };
       out.push(
         await ensure(
-          () => prisma.ledgerEntry.findUnique({ where: { id: e.id as string } }),
-          () =>
-            prisma.ledgerEntry.upsert({
-              where: { id: e.id as string },
-              update: {},
-              create: e,
-            }),
+          () => prisma.ledgerEntry.findUnique({ where: { id } }),
+          () => prisma.ledgerEntry.upsert({ where: { id }, update: {}, create: e }),
         ),
       );
     }
@@ -1665,6 +1733,127 @@ async function seedDemo(adminId: string, T: string): Promise<void> {
     });
   });
 
+  // Lease C (Rami Haddad, terminated): billed in full while it ran, then the end-of-contract
+  // entries exactly as POST /leases/:id/end creates them.
+  const chargesC = await rentCharges('seed_lease_haddad', 'seed_le_haddad', {
+    upto: periodOf(leaseCEnd),
+    asBilledWhileOpen: true,
+  });
+  const leaseC = await prisma.leaseContract.findUniqueOrThrow({
+    where: { id: 'seed_lease_haddad' },
+    include: { segments: true },
+  });
+  const creditsC = unusedRentCredits(
+    toBillingContract(leaseC),
+    toBillingSegments(leaseC.segments),
+    chargesC.map((c) => ({
+      id: c.id,
+      segmentId: c.segmentId,
+      rentPeriod: c.rentPeriod ?? '',
+      amount: c.amount,
+    })),
+  );
+  const fineChargeDate = `${addPeriods(thisPeriod, -3)}-28`;
+  const C = {
+    driverId: 'seed_drv_haddad',
+    contractId: 'seed_lease_haddad',
+    createdById: adminId,
+  } as const;
+  ledger.push({
+    ...C,
+    id: 'seed_le_haddad_deposit',
+    type: 'DEPOSIT_IN',
+    date: day(leaseCStart),
+    amount: ils(4_000),
+    method: 'CASH',
+    description: 'פיקדון',
+  });
+  // Paid the first three months in full, the fourth only in part.
+  chargesC.forEach((charge, i) => {
+    const due = (charge.dueDate ?? charge.date).toISOString().slice(0, 10);
+    const full = i < chargesC.length - 1;
+    ledger.push({
+      ...C,
+      id: `seed_le_haddad_pay_${i + 1}`,
+      type: 'PAYMENT',
+      date: day(full ? addDays(due, 1) : addDays(due, 2)),
+      amount: full ? charge.amount : ils(3_000),
+      method: i % 2 ? 'CASH' : 'BANK_TRANSFER',
+      description: `תשלום ${charge.rentPeriod}`,
+    });
+  });
+  // Parking fine on the Octavia that we paid and passed on (see the fine + expense below).
+  ledger.push({
+    ...C,
+    id: 'seed_le_haddad_fine',
+    type: 'CHARGE',
+    chargeKind: 'FINE',
+    date: day(fineChargeDate),
+    dueDate: day(fineChargeDate),
+    amount: ils(750),
+    reference: '71-308812',
+    description: 'דוח חניה — עיריית נצרת',
+    vehicleId: 'seed_v_taxi_octavia',
+    taxiLicenseId: 'seed_tl_40633',
+  });
+  for (const credit of creditsC) {
+    ledger.push({
+      ...C,
+      id: `seed_le_haddad_credit_${credit.rentPeriod}`,
+      type: 'CREDIT',
+      date: day(leaseCEnd),
+      amount: ils(credit.amount),
+      description: `${credit.from} – ${credit.to}`,
+      vehicleId: 'seed_v_taxi_octavia',
+      taxiLicenseId: 'seed_tl_40633',
+      autoGenerated: true,
+    });
+  }
+  ledger.push({
+    ...C,
+    id: 'seed_le_haddad_penalty',
+    type: 'CHARGE',
+    chargeKind: 'PENALTY',
+    date: day(leaseCEnd),
+    dueDate: day(leaseCEnd),
+    amount: ils(penaltyAmount(1, 5_800)),
+    description: '1 x 5800.00',
+    vehicleId: 'seed_v_taxi_octavia',
+    taxiLicenseId: 'seed_tl_40633',
+  });
+  // Deposit applied to the debt: DEPOSIT_APPLIED + PAYMENT(OFFSET), linked through `reference`.
+  ledger.push(
+    {
+      ...C,
+      id: 'seed_le_haddad_dep_applied',
+      type: 'DEPOSIT_APPLIED',
+      date: day(leaseCEnd),
+      amount: ils(4_000),
+      reference: 'seed_le_haddad_offset',
+      description: 'קיזוז פיקדון',
+    },
+    {
+      ...C,
+      id: 'seed_le_haddad_offset',
+      type: 'PAYMENT',
+      method: 'OFFSET',
+      date: day(leaseCEnd),
+      amount: ils(4_000),
+      reference: 'seed_le_haddad_dep_applied',
+      description: 'קיזוז פיקדון',
+    },
+    {
+      ...C,
+      id: 'seed_le_haddad_pay_after',
+      type: 'PAYMENT',
+      date: day(`${addPeriods(thisPeriod, -1)}-15`),
+      amount: ils(1_000),
+      method: 'BIT',
+      reference: 'ביט 7713',
+      description: 'תשלום על חשבון החוב',
+    },
+  );
+
   for (const e of ledger) {
     await ensure(
       () => prisma.ledgerEntry.findUnique({ where: { id: e.id as string } }),
@@ -1694,6 +1883,75 @@ async function seedDemo(adminId: string, T: string): Promise<void> {
           status: 'REASSIGN_SUBMITTED',
           reassignDeadline: day(fineReassignDeadline(fineReceived)),
           notes: 'מהירות; נשלחה בקשת הסבה לנהג',
+        },
+      }),
+  );
+  // Red light on the Corolla, not yet reassigned: the 90-day deadline is under 14 days away.
+  const redLightAt = maxIsoDate(leaseAStart, addDays(T, -79));
+  const redLightReceived = addDays(redLightAt, 1);
+  await ensure(
+    () => prisma.trafficFine.findUnique({ where: { id: 'seed_fine_corolla_redlight' } }),
+    () =>
+      prisma.trafficFine.upsert({
+        where: { id: 'seed_fine_corolla_redlight' },
+        update: {},
+        create: {
+          id: 'seed_fine_corolla_redlight',
+          vehicleId: 'seed_v_taxi_corolla',
+          driverId: 'seed_drv_odeh',
+          contractId: 'seed_lease_odeh',
+          fineNo: '52-4490017',
+          authority: 'משטרת ישראל — מצלמת רמזור',
+          offenceAt: at(redLightAt, '06:55'),
+          receivedAt: day(redLightReceived),
+          amount: ils(1_000),
+          status: 'NEW',
+          reassignDeadline: day(fineReassignDeadline(redLightReceived)),
+          notes: 'יש להגיש בקשת הסבה לנהג',
+        },
+      }),
+  );
+  // Parking fine during lease C: we paid it and charged the driver (expense + FINE charge).
+  const parkingReceived = `${addPeriods(thisPeriod, -3)}-25`;
+  await ensure(
+    () => prisma.vehicleExpense.findUnique({ where: { id: 'seed_exp_octavia_parking_fine' } }),
+    () =>
+      prisma.vehicleExpense.upsert({
+        where: { id: 'seed_exp_octavia_parking_fine' },
+        update: {},
+        create: {
+          id: 'seed_exp_octavia_parking_fine',
+          vehicleId: 'seed_v_taxi_octavia',
+          cycleId: 'seed_cyc_octavia',
+          category: 'FINE',
+          date: day(fineChargeDate),
+          amount: ils(750),
+          paidBy: 'US',
+          rebilledEntryId: 'seed_le_haddad_fine',
+          description: 'דוח חניה 71-308812 — חויב לנהג רמי חדאד',
+        },
+      }),
+  );
+  await ensure(
+    () => prisma.trafficFine.findUnique({ where: { id: 'seed_fine_octavia_parking' } }),
+    () =>
+      prisma.trafficFine.upsert({
+        where: { id: 'seed_fine_octavia_parking' },
+        update: {},
+        create: {
+          id: 'seed_fine_octavia_parking',
+          vehicleId: 'seed_v_taxi_octavia',
+          driverId: 'seed_drv_haddad',
+          contractId: 'seed_lease_haddad',
+          fineNo: '71-308812',
+          authority: 'עיריית נצרת — פיקוח חניה',
+          offenceAt: at(`${addPeriods(thisPeriod, -3)}-11`, '14:20'),
+          receivedAt: day(parkingReceived),
+          amount: ils(750),
+          status: 'PAID_BY_US',
+          reassignDeadline: day(fineReassignDeadline(parkingReceived)),
+          chargeEntryId: 'seed_le_haddad_fine',
+          notes: 'שולם על ידינו וחויב לנהג',
         },
       }),
   );
@@ -1740,6 +1998,7 @@ interface BalanceRow {
   driverId: string;
   charged: Prisma.Decimal;
   paid: Prisma.Decimal;
+  credited: Prisma.Decimal;
   balance: Prisma.Decimal;
   deposit_held: Prisma.Decimal;
 }
@@ -1748,6 +2007,8 @@ interface AgeingRow {
   current: Prisma.Decimal;
   d1_30: Prisma.Decimal;
   d31_60: Prisma.Decimal;
+  d61_90: Prisma.Decimal;
+  d90_plus: Prisma.Decimal;
   total: Prisma.Decimal;
 }
 
@@ -1765,14 +2026,15 @@ async function main(): Promise<void> {
   console.log(`Admin: ${admin.email}${demo ? '' : ' (demo data skipped: SEED_DEMO=false)'}`);
   if (demo) {
     const balances = await prisma.$queryRaw<BalanceRow[]>`
-      SELECT "driverId", charged, paid, balance, deposit_held FROM driver_balance_v ORDER BY "driverId"`;
+      SELECT "driverId", charged, paid, credited, balance, deposit_held FROM driver_balance_v ORDER BY "driverId"`;
     const ageing = await prisma.$queryRaw<AgeingRow[]>`
-      SELECT "driverId", "current", d1_30, d31_60, total FROM driver_ageing_v ORDER BY "driverId"`;
+      SELECT "driverId", "current", d1_30, d31_60, d61_90, d90_plus, total FROM driver_ageing_v ORDER BY "driverId"`;
     console.table(
       balances.map((b) => ({
         driver: b.driverId,
         charged: Number(b.charged),
         paid: Number(b.paid),
+        credited: Number(b.credited),
         balance: Number(b.balance),
         deposit: Number(b.deposit_held),
       })),
@@ -1783,6 +2045,8 @@ async function main(): Promise<void> {
         current: Number(a.current),
         d1_30: Number(a.d1_30),
         d31_60: Number(a.d31_60),
+        d61_90: Number(a.d61_90),
+        d90_plus: Number(a.d90_plus),
         total: Number(a.total),
       })),
     );
