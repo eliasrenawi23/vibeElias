@@ -1,0 +1,13 @@
+{
+  "Servers": {
+    "1": {
+      "Name": "Renawi Motors (dev)",
+      "Group": "Servers",
+      "Host": "postgres",
+      "Port": 5432,
+      "MaintenanceDB": "renawi",
+      "Username": "renawi",
+      "SSLMode": "prefer"
+    }
+  }
+}

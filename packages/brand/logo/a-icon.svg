@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Renawi Motors">
+  <title>Renawi Motors</title>
+  <rect width="64" height="64" rx="14" fill="#0F0F10"/>
+  <path fill="#F5C518" d="M17 13H33A13 13 0 0 1 41.95 35.43L49 51H38.5L33.07 39H27V51H17ZM27 22V30H33A4 4 0 0 0 33 22Z"/>
+  <path fill="none" stroke="#0F0F10" stroke-width="1.6" stroke-dasharray="6 3.5" stroke-dashoffset="-1.28" d="M22 51V22.5A5 5 0 0 1 27 17.5H33A8.5 8.5 0 0 1 33 34.5H27"/>
+</svg>

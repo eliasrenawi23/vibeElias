@@ -1,0 +1,48 @@
+{
+  "name": "renawi-motors",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Renawi Motors - used-car dealership and taxi-licence leasing management system",
+  "type": "module",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "predev": "npm run build -w packages/shared",
+    "dev": "dotenv -e .env -- concurrently --names shared,api,web --prefix-colors cyan,magenta,yellow \"npm run dev -w packages/shared\" \"npm run start:dev -w apps/api\" \"npm run dev -w apps/web\"",
+    "build": "npm run build -w packages/shared && npm run build -w apps/api && npm run build -w apps/web",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "test": "npm run test --workspaces --if-present",
+    "test:e2e": "dotenv -e .env -- npm run test:e2e -w apps/api",
+    "db:migrate": "dotenv -e .env -- npm exec -w apps/api -- prisma migrate dev",
+    "db:deploy": "dotenv -e .env -- npm exec -w apps/api -- prisma migrate deploy",
+    "db:seed": "dotenv -e .env -- npm exec -w apps/api -- prisma db seed",
+    "db:reset": "dotenv -e .env -- npm exec -w apps/api -- prisma migrate reset",
+    "db:studio": "dotenv -e .env -- npm exec -w apps/api -- prisma studio",
+    "clean": "rimraf --glob \"apps/*/dist\" \"packages/*/dist\" \"**/*.tsbuildinfo\""
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.4",
+    "concurrently": "^10.0.6",
+    "dotenv-cli": "^11.1.0",
+    "eslint": "^9.39.4",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-react-hooks": "^7.1.1",
+    "globals": "^17.14.0",
+    "prettier": "^3.9.10",
+    "rimraf": "^6.1.4",
+    "typescript": "~5.9.3",
+    "typescript-eslint": "^8.72.1"
+  },
+  "overrides": {
+    "zod": "~3.25.76"
+  }
+}

@@ -1,0 +1,1507 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Renawi Motors Brand</title>
+    <meta
+      name="description"
+      content="Renawi Motors brand preview: logo concepts A and B, colours, type and UI tone in Hebrew, Arabic and English."
+    />
+    <meta name="theme-color" content="#0F0F10" />
+    <link rel="icon" href="logo/favicon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="icons/apple-touch-icon-180.png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Rubik:wght@300..900&display=swap"
+    />
+    <link rel="stylesheet" href="tokens.css" />
+    <style>
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+      }
+      html {
+        -webkit-text-size-adjust: 100%;
+      }
+      body {
+        margin: 0;
+        background: var(--rm-color-bg-layout);
+        color: var(--rm-color-text);
+        font-family: var(--rm-font-sans);
+        font-size: var(--rm-text-body-size);
+        line-height: var(--rm-text-body-line-height);
+      }
+      img {
+        display: block;
+      }
+      h1,
+      h2,
+      h3,
+      h4,
+      p {
+        margin: 0;
+      }
+      h1 {
+        font-size: var(--rm-text-h1-size);
+        line-height: var(--rm-text-h1-line-height);
+        font-weight: var(--rm-text-h1-weight);
+      }
+      h2 {
+        font-size: var(--rm-text-h2-size);
+        line-height: var(--rm-text-h2-line-height);
+        font-weight: var(--rm-text-h2-weight);
+      }
+      h3 {
+        font-size: var(--rm-text-h3-size);
+        line-height: var(--rm-text-h3-line-height);
+        font-weight: var(--rm-text-h3-weight);
+      }
+      h4 {
+        font-size: var(--rm-text-h4-size);
+        line-height: var(--rm-text-h4-line-height);
+        font-weight: var(--rm-text-h4-weight);
+      }
+      .muted {
+        color: var(--rm-color-text-secondary);
+      }
+      .small {
+        font-size: var(--rm-text-small-size);
+        line-height: var(--rm-text-small-line-height);
+      }
+      code,
+      .mono {
+        font-family: var(--rm-font-mono);
+        font-size: 0.92em;
+      }
+
+      /* Top bar: brand chrome */
+      .topbar {
+        position: sticky;
+        top: 0;
+        z-index: 10;
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: space-between;
+        gap: var(--rm-space-3) var(--rm-space-4);
+        padding: var(--rm-space-3) var(--rm-space-4);
+        background: var(--rm-color-chrome-bg);
+        color: var(--rm-color-chrome-text);
+      }
+      .topbar .lockup {
+        height: 32px;
+        width: auto;
+        max-width: 100%;
+      }
+      .controls {
+        display: flex;
+        flex-wrap: wrap;
+        gap: var(--rm-space-2);
+      }
+      .seg {
+        display: inline-flex;
+        border: 1px solid rgba(255, 255, 255, 0.18);
+        border-radius: var(--rm-radius-md);
+        overflow: hidden;
+      }
+      .seg button {
+        min-height: 32px;
+        padding: 0 var(--rm-space-3);
+        border: 0;
+        background: transparent;
+        color: var(--rm-color-chrome-text-secondary);
+        font: inherit;
+        font-size: var(--rm-text-small-size);
+        cursor: pointer;
+      }
+      .seg button + button {
+        border-inline-start: 1px solid rgba(255, 255, 255, 0.18);
+      }
+      .seg button[aria-pressed='true'] {
+        background: var(--rm-color-chrome-selected-bg);
+        color: var(--rm-color-chrome-selected-text);
+        font-weight: var(--rm-font-weight-semibold);
+      }
+      .seg button:focus-visible {
+        outline: 2px solid var(--rm-brand-yellow);
+        outline-offset: -2px;
+      }
+
+      main {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: var(--rm-space-8) var(--rm-space-4) var(--rm-space-16);
+      }
+      section {
+        margin-block-end: var(--rm-space-16);
+      }
+      .section-head {
+        display: grid;
+        gap: var(--rm-space-2);
+        margin-block-end: var(--rm-space-6);
+        max-width: 72ch;
+      }
+      .eyebrow {
+        color: var(--rm-color-primary-text);
+        font-size: var(--rm-text-caption-size);
+        line-height: var(--rm-text-caption-line-height);
+        font-weight: var(--rm-font-weight-semibold);
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+      .grid {
+        display: grid;
+        gap: var(--rm-space-4);
+        grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr));
+      }
+      .grid-sm {
+        display: grid;
+        gap: var(--rm-space-3);
+        grid-template-columns: repeat(auto-fill, minmax(min(100%, 150px), 1fr));
+      }
+      .card {
+        background: var(--rm-color-bg-container);
+        border: 1px solid var(--rm-color-divider);
+        border-radius: var(--rm-radius-lg);
+        padding: var(--rm-space-5);
+        box-shadow: var(--rm-shadow-sm);
+        min-width: 0;
+      }
+      .stack {
+        display: grid;
+        align-content: start;
+        gap: var(--rm-space-3);
+      }
+
+      /* Fixed light/dark backgrounds for logo tiles (independent of the page theme) */
+      .on-light,
+      .on-dark {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: var(--rm-space-3);
+        min-height: 128px;
+        padding: var(--rm-space-5) var(--rm-space-4) var(--rm-space-3);
+        border-radius: var(--rm-radius-md);
+        min-width: 0;
+      }
+      .on-light {
+        background: var(--rm-grey-0);
+        color: var(--rm-grey-600);
+        box-shadow: inset 0 0 0 1px var(--rm-grey-200);
+      }
+      .on-dark {
+        background: var(--rm-grey-950);
+        color: var(--rm-grey-400);
+        box-shadow: inset 0 0 0 1px #26262b;
+      }
+      .on-light figcaption,
+      .on-dark figcaption {
+        font-family: var(--rm-font-mono);
+        font-size: 11px;
+        line-height: 16px;
+        text-align: center;
+        overflow-wrap: anywhere;
+      }
+      figure {
+        margin: 0;
+      }
+      .lockup {
+        width: auto;
+        height: auto;
+        max-width: 100%;
+        max-height: 44px;
+      }
+      .lockup.stacked {
+        max-height: 120px;
+      }
+      .icon-sq {
+        width: 72px;
+        height: 72px;
+      }
+      .icon-wide {
+        width: 112px;
+        height: auto;
+      }
+      .invert {
+        filter: invert(1);
+      }
+      .pair {
+        display: grid;
+        gap: var(--rm-space-2);
+        grid-template-columns: 1fr 1fr;
+      }
+
+      /* Concept cards */
+      .concept h3 {
+        display: flex;
+        align-items: baseline;
+        gap: var(--rm-space-2);
+      }
+      .badge {
+        display: inline-block;
+        padding: 0 var(--rm-space-2);
+        border-radius: var(--rm-radius-pill);
+        background: var(--rm-color-primary);
+        color: var(--rm-color-on-primary);
+        font-size: var(--rm-text-caption-size);
+        line-height: 20px;
+        font-weight: var(--rm-font-weight-semibold);
+      }
+      .concept ul {
+        margin: 0;
+        padding-inline-start: 1.2em;
+      }
+      .concept li + li {
+        margin-block-start: var(--rm-space-1);
+      }
+      .label {
+        font-weight: var(--rm-font-weight-semibold);
+      }
+
+      /* Favicon sizes */
+      .sizes {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: flex-end;
+        gap: var(--rm-space-4);
+      }
+      .safe-zone {
+        position: relative;
+        width: 160px;
+        height: 160px;
+      }
+      .safe-zone img {
+        width: 160px;
+        height: 160px;
+      }
+      .safe-zone::after {
+        content: '';
+        position: absolute;
+        inset: 10%;
+        border: 2px dashed var(--rm-color-error);
+        border-radius: 50%;
+      }
+
+      /* Colour */
+      .swatch {
+        display: grid;
+        border-radius: var(--rm-radius-md);
+        overflow: hidden;
+        border: 1px solid var(--rm-color-divider);
+        background: var(--rm-color-bg-container);
+      }
+      .swatch .chip {
+        display: flex;
+        align-items: flex-end;
+        justify-content: space-between;
+        gap: var(--rm-space-2);
+        min-height: 96px;
+        padding: var(--rm-space-3);
+        font-size: var(--rm-text-h3-size);
+        font-weight: var(--rm-font-weight-semibold);
+      }
+      .swatch .meta {
+        display: grid;
+        gap: 2px;
+        padding: var(--rm-space-3);
+        font-size: var(--rm-text-small-size);
+        line-height: var(--rm-text-small-line-height);
+      }
+      .scale {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(72px, 1fr));
+        border-radius: var(--rm-radius-md);
+        overflow: hidden;
+        border: 1px solid var(--rm-color-divider);
+      }
+      .scale div {
+        min-height: 72px;
+        padding: var(--rm-space-2);
+        font-size: 11px;
+        line-height: 15px;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-end;
+      }
+      .table-wrap {
+        overflow-x: auto;
+        border: 1px solid var(--rm-color-divider);
+        border-radius: var(--rm-radius-lg);
+        background: var(--rm-color-bg-container);
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+      .app table {
+        min-width: 640px;
+      }
+      bdi[dir='ltr'] {
+        white-space: nowrap;
+      }
+      /* English prose stays left-to-right when the page is flipped to RTL */
+      main p,
+      main li,
+      footer {
+        unicode-bidi: plaintext;
+      }
+      th,
+      td {
+        padding: var(--rm-space-3);
+        text-align: start;
+        border-block-end: 1px solid var(--rm-color-divider);
+        vertical-align: middle;
+      }
+      th {
+        background: var(--rm-color-bg-sunken);
+        color: var(--rm-color-text-secondary);
+        font-weight: var(--rm-font-weight-medium);
+        font-size: var(--rm-text-small-size);
+        white-space: nowrap;
+      }
+      tbody tr:last-child td {
+        border-block-end: 0;
+      }
+      tbody tr:hover td {
+        background: var(--rm-color-bg-sunken);
+      }
+      tbody tr.selected td {
+        background: var(--rm-color-primary-soft);
+      }
+      .num {
+        text-align: end;
+        font-variant-numeric: tabular-nums;
+        white-space: nowrap;
+      }
+      .dot {
+        display: inline-block;
+        width: 14px;
+        height: 14px;
+        border-radius: 4px;
+        vertical-align: -2px;
+        box-shadow: inset 0 0 0 1px rgba(127, 127, 127, 0.35);
+      }
+      .result {
+        display: inline-block;
+        min-width: 44px;
+        padding: 0 6px;
+        border-radius: var(--rm-radius-sm);
+        font-size: 11px;
+        line-height: 18px;
+        font-weight: var(--rm-font-weight-semibold);
+        text-align: center;
+      }
+      .result.pass {
+        background: var(--rm-color-success-bg);
+        color: var(--rm-color-success);
+      }
+      .result.fail {
+        background: var(--rm-color-error-bg);
+        color: var(--rm-color-error);
+      }
+      .result.info {
+        background: var(--rm-color-bg-sunken);
+        color: var(--rm-color-text-secondary);
+      }
+
+      /* Type */
+      .specimen {
+        font-size: clamp(40px, 9vw, 88px);
+        line-height: 1.1;
+        font-weight: 600;
+        overflow-wrap: anywhere;
+      }
+      .weights {
+        display: grid;
+        gap: var(--rm-space-1);
+        font-size: var(--rm-text-h3-size);
+        line-height: var(--rm-text-h3-line-height);
+      }
+      .weights span {
+        display: flex;
+        gap: var(--rm-space-4);
+        align-items: baseline;
+      }
+      .weights small {
+        min-width: 3ch;
+        color: var(--rm-color-text-tertiary);
+        font-size: var(--rm-text-small-size);
+        font-variant-numeric: tabular-nums;
+      }
+      .scale-row {
+        display: grid;
+        grid-template-columns: 96px 1fr;
+        gap: var(--rm-space-3);
+        align-items: baseline;
+        padding-block: var(--rm-space-3);
+        border-block-end: 1px solid var(--rm-color-divider);
+      }
+      .scale-row > :last-child {
+        display: grid;
+        gap: var(--rm-space-1);
+        min-width: 0;
+      }
+      .scale-row > :last-child > * {
+        overflow-wrap: anywhere;
+      }
+      .t-display {
+        font-size: var(--rm-text-display-size);
+        line-height: var(--rm-text-display-line-height);
+        font-weight: var(--rm-text-display-weight);
+      }
+      .t-h1 {
+        font-size: var(--rm-text-h1-size);
+        line-height: var(--rm-text-h1-line-height);
+        font-weight: var(--rm-text-h1-weight);
+      }
+      .t-h2 {
+        font-size: var(--rm-text-h2-size);
+        line-height: var(--rm-text-h2-line-height);
+        font-weight: var(--rm-text-h2-weight);
+      }
+      .t-h3 {
+        font-size: var(--rm-text-h3-size);
+        line-height: var(--rm-text-h3-line-height);
+        font-weight: var(--rm-text-h3-weight);
+      }
+      .t-body {
+        font-size: var(--rm-text-body-size);
+        line-height: var(--rm-text-body-line-height);
+      }
+      .t-small {
+        font-size: var(--rm-text-small-size);
+        line-height: var(--rm-text-small-line-height);
+      }
+      .proportional {
+        font-variant-numeric: proportional-nums;
+      }
+
+      /* UI tone */
+      .row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: var(--rm-space-2);
+        align-items: center;
+      }
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: var(--rm-space-2);
+        min-height: var(--rm-control-height);
+        padding: 0 var(--rm-space-4);
+        border-radius: var(--rm-radius-md);
+        border: 1px solid var(--rm-color-border);
+        background: var(--rm-color-bg-container);
+        color: var(--rm-color-text);
+        font: inherit;
+        font-weight: var(--rm-font-weight-medium);
+        cursor: pointer;
+        transition:
+          background var(--rm-duration-fast) var(--rm-easing),
+          border-color var(--rm-duration-fast) var(--rm-easing);
+      }
+      .btn:hover {
+        border-color: var(--rm-color-text);
+      }
+      .btn:focus-visible,
+      .input:focus-visible {
+        outline: none;
+        border-color: var(--rm-color-text);
+        box-shadow: var(--rm-focus-ring);
+      }
+      .btn.primary {
+        background: var(--rm-color-primary);
+        border-color: var(--rm-color-primary);
+        color: var(--rm-color-on-primary);
+      }
+      .btn.primary:hover {
+        background: var(--rm-color-primary-hover);
+        border-color: var(--rm-color-primary-hover);
+      }
+      .btn.danger {
+        background: var(--rm-color-error);
+        border-color: var(--rm-color-error);
+        color: var(--rm-color-on-status);
+      }
+      .btn.link {
+        border-color: transparent;
+        background: transparent;
+        color: var(--rm-color-link);
+      }
+      .btn[disabled] {
+        cursor: not-allowed;
+        color: var(--rm-color-text-disabled);
+        background: var(--rm-color-bg-sunken);
+        border-color: var(--rm-color-divider);
+      }
+      .input {
+        width: 100%;
+        min-height: var(--rm-control-height);
+        padding: 0 var(--rm-space-3);
+        border: 1px solid var(--rm-color-border);
+        border-radius: var(--rm-radius-md);
+        background: var(--rm-color-bg-container);
+        color: var(--rm-color-text);
+        font: inherit;
+      }
+      .input::placeholder {
+        color: var(--rm-color-text-tertiary);
+      }
+      .tag {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 0 var(--rm-space-2);
+        border-radius: var(--rm-radius-sm);
+        border: 1px solid var(--rm-color-border);
+        background: var(--rm-color-bg-sunken);
+        color: var(--rm-color-text);
+        font-size: var(--rm-text-small-size);
+        line-height: 22px;
+        white-space: nowrap;
+      }
+      .tag.success {
+        background: var(--rm-color-success-bg);
+        border-color: var(--rm-color-success-border);
+        color: var(--rm-color-success);
+      }
+      .tag.warning {
+        background: var(--rm-color-warning-bg);
+        border-color: var(--rm-color-warning-border);
+        color: var(--rm-color-warning);
+      }
+      .tag.error {
+        background: var(--rm-color-error-bg);
+        border-color: var(--rm-color-error-border);
+        color: var(--rm-color-error);
+      }
+      .tag.info {
+        background: var(--rm-color-info-bg);
+        border-color: var(--rm-color-info-border);
+        color: var(--rm-color-info);
+      }
+      .tag.license {
+        background: var(--rm-color-license-bg);
+        border-color: var(--rm-color-license-border);
+        color: var(--rm-color-license);
+        font-weight: var(--rm-font-weight-medium);
+      }
+      .tag.license::before {
+        content: '';
+        width: 8px;
+        height: 8px;
+        border-radius: 2px;
+        background: currentColor;
+      }
+
+      /* Mini app chrome */
+      .app {
+        display: grid;
+        grid-template-columns: 200px 1fr;
+        min-height: 300px;
+        border: 1px solid var(--rm-color-divider);
+        border-radius: var(--rm-radius-lg);
+        overflow: hidden;
+        background: var(--rm-color-bg-layout);
+      }
+      .app nav {
+        display: grid;
+        align-content: start;
+        gap: 2px;
+        padding: var(--rm-space-3);
+        background: var(--rm-color-chrome-bg);
+        color: var(--rm-color-chrome-text-secondary);
+      }
+      .app nav .lockup {
+        max-height: 28px;
+        margin: var(--rm-space-1) var(--rm-space-1) var(--rm-space-4);
+      }
+      .app nav a {
+        display: flex;
+        align-items: center;
+        gap: var(--rm-space-2);
+        padding: var(--rm-space-2) var(--rm-space-3);
+        border-radius: var(--rm-radius-md);
+        color: inherit;
+        text-decoration: none;
+      }
+      .app nav a:hover {
+        background: rgba(255, 255, 255, 0.06);
+        color: var(--rm-color-chrome-text);
+      }
+      .app nav a[aria-current='page'] {
+        background: var(--rm-color-chrome-selected-bg);
+        color: var(--rm-color-chrome-selected-text);
+        font-weight: var(--rm-font-weight-semibold);
+      }
+      .app .content {
+        display: grid;
+        align-content: start;
+        gap: var(--rm-space-4);
+        padding: var(--rm-space-5);
+        min-width: 0;
+      }
+      .kpis {
+        display: grid;
+        gap: var(--rm-space-3);
+        grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      }
+      .kpi {
+        display: grid;
+        gap: 2px;
+        padding: var(--rm-space-3) var(--rm-space-4);
+        border-radius: var(--rm-radius-md);
+        background: var(--rm-color-bg-container);
+        border: 1px solid var(--rm-color-divider);
+      }
+      .kpi strong {
+        font-size: var(--rm-text-h3-size);
+        line-height: var(--rm-text-h3-line-height);
+        font-variant-numeric: tabular-nums;
+      }
+      @media (max-width: 640px) {
+        .app {
+          grid-template-columns: 1fr;
+        }
+        .app nav {
+          grid-auto-flow: column;
+          grid-auto-columns: max-content;
+          overflow-x: auto;
+          align-items: center;
+        }
+        .app nav .lockup {
+          margin: 0 var(--rm-space-2) 0 0;
+        }
+        .scale-row {
+          grid-template-columns: 1fr;
+        }
+      }
+      footer {
+        border-block-start: 1px solid var(--rm-color-divider);
+        padding: var(--rm-space-6) var(--rm-space-4);
+        max-width: 1200px;
+        margin: 0 auto;
+      }
+    </style>
+  </head>
+  <body>
+    <header class="topbar">
+      <img id="header-logo" class="lockup" src="logo/a-on-dark-en.svg" alt="Renawi Motors" />
+      <div class="controls">
+        <div class="seg" role="group" aria-label="Logo concept">
+          <button type="button" data-concept="a" aria-pressed="true">Concept A</button>
+          <button type="button" data-concept="b" aria-pressed="false">Concept B</button>
+        </div>
+        <div class="seg" role="group" aria-label="Theme">
+          <button type="button" data-theme-set="light" aria-pressed="false">Light</button>
+          <button type="button" data-theme-set="dark" aria-pressed="false">Dark</button>
+          <button type="button" data-theme-set="system" aria-pressed="true">System</button>
+        </div>
+        <div class="seg" role="group" aria-label="Direction">
+          <button type="button" data-dir="ltr" aria-pressed="true">LTR</button>
+          <button type="button" data-dir="rtl" aria-pressed="false">RTL</button>
+        </div>
+      </div>
+    </header>
+
+    <main>
+      <section id="pick">
+        <div class="section-head">
+          <span class="eyebrow">Decision needed</span>
+          <h1>Pick a logo concept</h1>
+          <p class="muted">
+            Two directions, both in taxi yellow and black, both with a Latin, Hebrew and Arabic
+            lockup. Use the Concept switch at the top to try each one in the header and the app
+            mock-up further down. Everything else on this page (colours, type, UI tone) is the same
+            for either choice.
+          </p>
+        </div>
+        <div class="grid">
+          <article class="card concept stack">
+            <h3>A. Road R <span class="badge">Recommended</span></h3>
+            <div class="pair">
+              <figure class="on-light">
+                <img class="icon-sq" src="logo/a-icon.svg" alt="Concept A icon" />
+              </figure>
+              <figure class="on-dark">
+                <img class="icon-sq" src="logo/a-icon-inverse.svg" alt="Concept A icon, inverse" />
+              </figure>
+            </div>
+            <figure class="on-light">
+              <img class="lockup" src="logo/a-horizontal-en.svg" alt="Renawi Motors" />
+            </figure>
+            <p>
+              A rounded black tile with a yellow R. A dashed centre line runs up the stem and round
+              the bowl, so the R is drawn as a road; the leg is the way out.
+            </p>
+            <ul>
+              <li>
+                Reads at every size: the tile is the app icon as-is; favicon keeps the R, drops the
+                road line.
+              </li>
+              <li>Fits both businesses: says "motors", not only "taxi".</li>
+              <li>
+                Black on yellow inverse for dark screens; one-colour version for stamps and forms.
+              </li>
+              <li>
+                <span class="label">Watch out:</span> the road line needs about 48&nbsp;px or more;
+                below that use <code>favicon.svg</code>.
+              </li>
+            </ul>
+          </article>
+          <article class="card concept stack">
+            <h3>B. Roof sign</h3>
+            <div class="pair">
+              <figure class="on-light">
+                <img class="icon-wide" src="logo/b-icon.svg" alt="Concept B icon" />
+              </figure>
+              <figure class="on-dark">
+                <img
+                  class="icon-wide"
+                  src="logo/b-icon-inverse.svg"
+                  alt="Concept B icon, inverse"
+                />
+              </figure>
+            </div>
+            <figure class="on-light">
+              <img class="lockup" src="logo/b-horizontal-en.svg" alt="Renawi Motors" />
+            </figure>
+            <p>
+              The yellow roof sign every Israeli taxi carries, on its roof line, with the R where
+              the sign's lettering would be. On dark backgrounds the R is cut out and the roof turns
+              white, like the taxi body.
+            </p>
+            <ul>
+              <li>
+                Instantly says "taxi"; a distinctive silhouette on vehicles, signage and the office
+                door.
+              </li>
+              <li>Same R letterform as A, so the two can live together.</li>
+              <li>
+                <span class="label">Watch out:</span> the R is small inside the sign, so app icons
+                need the black tile (<code>build:icons --concept b</code>) and the favicon is weak.
+              </li>
+              <li>
+                <span class="label">Watch out:</span> yellow on white is low contrast (1.6:1); the
+                black R and roof carry it. Leans to the taxi side more than the car dealership.
+              </li>
+            </ul>
+          </article>
+        </div>
+        <p class="muted" style="margin-block-start: var(--rm-space-4); max-width: 72ch">
+          Suggestion: choose A as the logo for the whole business and keep B's roof sign as an
+          illustration for the taxi side (licence pages, driver contracts, vehicle stickers).
+        </p>
+      </section>
+
+      <section id="logos">
+        <div class="section-head">
+          <span class="eyebrow">Logo files</span>
+          <h2>All variants</h2>
+          <p class="muted">
+            Files in <code>packages/brand/logo/</code>. The icon sits on the leading side: left of
+            English, right of Hebrew and Arabic. Wordmarks are vector outlines of Rubik at weight
+            650, so they render the same everywhere.
+          </p>
+        </div>
+        <div class="stack" id="variant-grids"></div>
+      </section>
+
+      <section id="icons">
+        <div class="section-head">
+          <span class="eyebrow">App icons</span>
+          <h2>Favicon and PWA icons</h2>
+          <p class="muted">
+            <code>logo/favicon.svg</code> is the concept A tile with a slightly larger R and no road
+            line, built to hold up at 16&nbsp;px. The PNGs in <code>icons/</code> come from
+            <code>npm run build:icons</code>.
+          </p>
+        </div>
+        <div class="grid">
+          <div class="card stack">
+            <h4>favicon.svg</h4>
+            <div class="pair">
+              <div class="on-light">
+                <div class="sizes">
+                  <img src="logo/favicon.svg" width="16" height="16" alt="16 px" />
+                  <img src="logo/favicon.svg" width="24" height="24" alt="24 px" />
+                  <img src="logo/favicon.svg" width="32" height="32" alt="32 px" />
+                  <img src="logo/favicon.svg" width="48" height="48" alt="48 px" />
+                </div>
+                <figcaption>16 / 24 / 32 / 48</figcaption>
+              </div>
+              <div class="on-dark">
+                <div class="sizes">
+                  <img src="logo/favicon.svg" width="16" height="16" alt="16 px" />
+                  <img src="logo/favicon.svg" width="24" height="24" alt="24 px" />
+                  <img src="logo/favicon.svg" width="32" height="32" alt="32 px" />
+                  <img src="logo/favicon.svg" width="48" height="48" alt="48 px" />
+                </div>
+                <figcaption>16 / 24 / 32 / 48</figcaption>
+              </div>
+            </div>
+          </div>
+          <div class="card stack">
+            <h4>PNG icons</h4>
+            <div class="grid-sm">
+              <figure class="on-light">
+                <img src="icons/icon-192.png" width="96" height="96" alt="icon-192.png" />
+                <figcaption>icon-192.png</figcaption>
+              </figure>
+              <figure class="on-light">
+                <img src="icons/icon-512.png" width="96" height="96" alt="icon-512.png" />
+                <figcaption>icon-512.png</figcaption>
+              </figure>
+              <figure class="on-light">
+                <img
+                  src="icons/apple-touch-icon-180.png"
+                  width="96"
+                  height="96"
+                  style="border-radius: 22%"
+                  alt="apple-touch-icon-180.png"
+                />
+                <figcaption>apple-touch-icon-180.png (iOS rounds it)</figcaption>
+              </figure>
+              <figure class="on-light">
+                <div class="safe-zone">
+                  <img src="icons/maskable-512.png" alt="maskable-512.png" />
+                </div>
+                <figcaption>maskable-512.png, dashed = 80% safe zone</figcaption>
+              </figure>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="colour">
+        <div class="section-head">
+          <span class="eyebrow">Colour</span>
+          <h2>Palette and contrast</h2>
+          <p class="muted">
+            White, taxi yellow and black: the colours of an Israeli taxi (white body, yellow roof
+            sign, yellow plate with black digits). Green is kept for taxi licences, after the green
+            plates that gave the "green number" its name. Ratios are WCAG 2.2, computed live from
+            <code>tokens.css</code>; switch the theme to see the dark values.
+          </p>
+        </div>
+        <div class="grid" id="brand-swatches"></div>
+        <h3 style="margin-block: var(--rm-space-8) var(--rm-space-3)">Yellow and neutral scales</h3>
+        <div class="stack">
+          <div class="scale" id="scale-yellow"></div>
+          <div class="scale" id="scale-grey"></div>
+        </div>
+        <h3 style="margin-block: var(--rm-space-8) var(--rm-space-3)">
+          Text and background pairs (<span id="theme-name">light</span> theme)
+        </h3>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Pair</th>
+                <th>Sample</th>
+                <th>Tokens</th>
+                <th class="num">Ratio</th>
+                <th>Result</th>
+              </tr>
+            </thead>
+            <tbody id="pairs"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section id="type">
+        <div class="section-head">
+          <span class="eyebrow">Typography</span>
+          <h2>Rubik in three scripts</h2>
+          <p class="muted">
+            Rubik (SIL OFL, variable 300 to 900) has native Latin, Hebrew and Arabic in one design.
+            Fallbacks: Noto Sans Hebrew, Noto Sans Arabic, Noto Sans, system UI.
+          </p>
+        </div>
+        <div class="grid">
+          <div class="card stack">
+            <div class="specimen">Aa <span lang="he">אב</span> <span lang="ar">اب</span> 12</div>
+            <div class="weights">
+              <span style="font-weight: 300"
+                ><small>300</small> Motors <span lang="he">מוטורס</span>
+                <span lang="ar">موتورز</span></span
+              >
+              <span style="font-weight: 400"
+                ><small>400</small> Motors <span lang="he">מוטורס</span>
+                <span lang="ar">موتورز</span></span
+              >
+              <span style="font-weight: 500"
+                ><small>500</small> Motors <span lang="he">מוטורס</span>
+                <span lang="ar">موتورز</span></span
+              >
+              <span style="font-weight: 600"
+                ><small>600</small> Motors <span lang="he">מוטורס</span>
+                <span lang="ar">موتورز</span></span
+              >
+              <span style="font-weight: 700"
+                ><small>700</small> Motors <span lang="he">מוטורס</span>
+                <span lang="ar">موتورز</span></span
+              >
+              <span style="font-weight: 900"
+                ><small>900</small> Motors <span lang="he">מוטורס</span>
+                <span lang="ar">موتورز</span></span
+              >
+            </div>
+          </div>
+          <div class="card stack">
+            <h4>Body text</h4>
+            <p lang="he" dir="rtl">
+              רנאוי מוטורס משכירה מספרים ירוקים ומוניות לנהגים ומוכרת רכבים משומשים. החוזה, התשלומים
+              והיתרה של כל נהג נמצאים במקום אחד.
+            </p>
+            <p lang="ar" dir="rtl">
+              رناوي موتورز تؤجّر أرقام التاكسي الخضراء وسيارات الأجرة للسائقين وتبيع السيارات
+              المستعملة. العقد والدفعات ورصيد كل سائق في مكان واحد.
+            </p>
+            <p lang="en" dir="ltr">
+              Renawi Motors leases green-number taxi licences and taxis to drivers and sells used
+              cars. Each driver's contract, payments and balance live in one place.
+            </p>
+          </div>
+        </div>
+        <div class="card" style="margin-block-start: var(--rm-space-4)">
+          <h4 style="margin-block-end: var(--rm-space-2)">Type scale</h4>
+          <div class="scale-row">
+            <span class="muted small mono">display 40/48</span>
+            <div>
+              <span class="t-display">Renawi Motors</span>
+            </div>
+          </div>
+          <div class="scale-row">
+            <span class="muted small mono">h1 32/40</span>
+            <div>
+              <span class="t-h1" lang="he" dir="rtl">לוח בקרה</span>
+              <span class="t-h1" lang="ar" dir="rtl">لوحة التحكم</span>
+              <span class="t-h1">Dashboard</span>
+            </div>
+          </div>
+          <div class="scale-row">
+            <span class="muted small mono">h2 24/32</span>
+            <div>
+              <span class="t-h2" lang="he" dir="rtl">חוזי השכרה פעילים</span>
+              <span class="t-h2" lang="ar" dir="rtl">عقود الإيجار الفعّالة</span>
+              <span class="t-h2">Active leases</span>
+            </div>
+          </div>
+          <div class="scale-row">
+            <span class="muted small mono">h3 20/28</span>
+            <div>
+              <span class="t-h3" lang="he" dir="rtl">יתרת נהג</span>
+              <span class="t-h3" lang="ar" dir="rtl">رصيد السائق</span>
+              <span class="t-h3">Driver balance</span>
+            </div>
+          </div>
+          <div class="scale-row">
+            <span class="muted small mono">body 14/22</span>
+            <div class="t-body">
+              <span lang="he" dir="rtl">תוקף ביטוח החובה מסתיים בעוד 12 ימים.</span>
+              <span lang="ar" dir="rtl">ينتهي التأمين الإلزامي خلال 12 يومًا.</span>
+              <span>Compulsory insurance expires in 12 days.</span>
+            </div>
+          </div>
+          <div class="scale-row">
+            <span class="muted small mono">small 12/18</span>
+            <div class="t-small muted">
+              <span lang="he" dir="rtl">עודכן לאחרונה 07/11/2026</span>
+              <span lang="ar" dir="rtl">آخر تحديث 07/11/2026</span>
+              <span>Last updated 07/11/2026</span>
+            </div>
+          </div>
+          <div class="scale-row">
+            <span class="muted small mono">numerals</span>
+            <div class="t-body">
+              <span class="rm-tabular">tabular: ₪1,111.10 / ₪8,888.80 / ₪12,345.67</span>
+              <span class="proportional muted"
+                >proportional: ₪1,111.10 / ₪8,888.80 / ₪12,345.67</span
+              >
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="ui">
+        <div class="section-head">
+          <span class="eyebrow">Interface</span>
+          <h2>Tone of the UI</h2>
+          <p class="muted">
+            Flat surfaces, hairline borders, one yellow action per view, black text on yellow.
+            Plates, amounts and phone numbers are isolated left-to-right inside Hebrew and Arabic
+            text. Flip the direction at the top: the layout mirrors, the numbers do not.
+          </p>
+        </div>
+        <div class="app" id="app">
+          <nav aria-label="Demo navigation">
+            <img class="lockup app-logo" src="logo/a-on-dark-en.svg" alt="Renawi Motors" />
+            <a href="#ui">Dashboard</a>
+            <a href="#ui" aria-current="page">Drivers</a>
+            <a href="#ui">Taxi licences</a>
+            <a href="#ui">Vehicles</a>
+            <a href="#ui">Deals</a>
+          </nav>
+          <div class="content">
+            <div class="kpis">
+              <div class="kpi">
+                <span class="muted small">Receivables</span>
+                <strong><bdi dir="ltr">₪18,420.00</bdi></strong>
+              </div>
+              <div class="kpi">
+                <span class="muted small">Active leases</span>
+                <strong>14</strong>
+              </div>
+              <div class="kpi">
+                <span class="muted small">Expiring in 30 days</span>
+                <strong>3</strong>
+              </div>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Driver</th>
+                    <th>Note</th>
+                    <th>Plate</th>
+                    <th>Licence</th>
+                    <th>Status</th>
+                    <th class="num">Balance</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr class="selected">
+                    <td><bdi lang="he">משה לוי</bdi></td>
+                    <td><bdi lang="ar">دفع جزئي، الباقي يوم الخميس</bdi></td>
+                    <td><bdi dir="ltr" class="rm-tabular">12-345-67</bdi></td>
+                    <td>
+                      <span class="tag license"><bdi dir="ltr">4721</bdi></span>
+                    </td>
+                    <td><span class="tag warning">Partial</span></td>
+                    <td class="num"><bdi dir="ltr">₪1,234.50</bdi></td>
+                  </tr>
+                  <tr>
+                    <td><bdi lang="ar">محمد ناصر</bdi></td>
+                    <td><bdi lang="he">שילם במזומן, קבלה נשלחה</bdi></td>
+                    <td><bdi dir="ltr" class="rm-tabular">123-45-678</bdi></td>
+                    <td>
+                      <span class="tag license"><bdi dir="ltr">3390</bdi></span>
+                    </td>
+                    <td><span class="tag success">Paid</span></td>
+                    <td class="num"><bdi dir="ltr">₪0.00</bdi></td>
+                  </tr>
+                  <tr>
+                    <td><bdi>Daniel Haddad</bdi></td>
+                    <td><bdi>Deposit held, cheque 0042</bdi></td>
+                    <td><bdi dir="ltr" class="rm-tabular">45-678-26</bdi></td>
+                    <td>
+                      <span class="tag license"><bdi dir="ltr">5108</bdi></span>
+                    </td>
+                    <td><span class="tag error">Overdue</span></td>
+                    <td class="num"><bdi dir="ltr">−₪350.00</bdi></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+        <div class="grid" style="margin-block-start: var(--rm-space-4)">
+          <div class="card stack">
+            <h4>Buttons</h4>
+            <div class="row">
+              <button type="button" class="btn primary">Record payment</button>
+              <button type="button" class="btn">Cancel</button>
+              <button type="button" class="btn danger">Void entry</button>
+              <button type="button" class="btn link">View ledger</button>
+              <button type="button" class="btn" disabled>Disabled</button>
+            </div>
+            <p class="muted small">
+              One primary (yellow) button per view. Text on yellow is always black.
+            </p>
+          </div>
+          <div class="card stack">
+            <h4>Tags</h4>
+            <div class="row">
+              <span class="tag license">Licence <bdi dir="ltr">4721</bdi></span>
+              <span class="tag success">Active</span>
+              <span class="tag warning">Expires soon</span>
+              <span class="tag error">Overdue</span>
+              <span class="tag info">Draft</span>
+              <span class="tag">Consigned</span>
+            </div>
+            <p class="muted small">
+              Green is only for taxi licences; status uses the semantic set.
+            </p>
+          </div>
+          <div class="card stack">
+            <h4>Input and focus</h4>
+            <label class="stack" style="gap: var(--rm-space-1)">
+              <span class="small muted">Plate number</span>
+              <input class="input rm-tabular" dir="ltr" placeholder="12-345-67" />
+            </label>
+            <p class="muted small">
+              Focus: solid ink border plus a yellow glow (yellow alone fails 3:1).
+            </p>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="muted small">
+      Renawi Motors brand, version 0.1. Style guide:
+      <a href="../../docs/brand/style-guide.md">docs/brand/style-guide.md</a>. Tokens:
+      <code>packages/brand/tokens.css</code>, <code>packages/brand/tokens.ts</code>.
+    </footer>
+
+    <script>
+      (function () {
+        var root = document.documentElement;
+        var store = {
+          get: function (k) {
+            try {
+              return window.localStorage.getItem('rm-preview-' + k);
+            } catch (e) {
+              return null;
+            }
+          },
+          set: function (k, v) {
+            try {
+              window.localStorage.setItem('rm-preview-' + k, v);
+            } catch (e) {
+              /* storage unavailable: settings just won't persist */
+            }
+          },
+        };
+        var state = { concept: 'a', theme: 'system', dir: 'ltr' };
+
+        // ---- Logo variant grids -------------------------------------------------------------
+        var concepts = {
+          a: { name: 'Concept A, Road R', iconClass: 'icon-sq' },
+          b: { name: 'Concept B, Roof sign', iconClass: 'icon-wide' },
+        };
+        var langs = ['en', 'he', 'ar'];
+        function tile(bg, src, cls, caption, extra) {
+          return (
+            '<figure class="' +
+            bg +
+            '"><img class="' +
+            cls +
+            (extra ? ' ' + extra : '') +
+            '" src="' +
+            src +
+            '" alt="' +
+            caption +
+            '" /><figcaption>' +
+            caption +
+            '</figcaption></figure>'
+          );
+        }
+        var grids = document.getElementById('variant-grids');
+        Object.keys(concepts).forEach(function (id) {
+          var c = concepts[id];
+          var html = '<div class="card stack"><h3>' + c.name + '</h3>';
+          html +=
+            '<h4 class="muted small">Icon: colour, inverse, one colour</h4><div class="grid-sm">';
+          html += tile('on-light', 'logo/' + id + '-icon.svg', c.iconClass, id + '-icon.svg');
+          html += tile(
+            'on-dark',
+            'logo/' + id + '-icon-inverse.svg',
+            c.iconClass,
+            id + '-icon-inverse.svg',
+          );
+          html += tile(
+            'on-light',
+            'logo/' + id + '-icon-mono.svg',
+            c.iconClass,
+            id + '-icon-mono.svg',
+          );
+          html += tile(
+            'on-dark',
+            'logo/' + id + '-icon-mono.svg',
+            c.iconClass,
+            id + '-icon-mono.svg (white)',
+            'invert',
+          );
+          html += '</div><h4 class="muted small">Horizontal on light</h4><div class="grid">';
+          langs.forEach(function (l) {
+            html += tile(
+              'on-light',
+              'logo/' + id + '-horizontal-' + l + '.svg',
+              'lockup',
+              id + '-horizontal-' + l + '.svg',
+            );
+          });
+          html += '</div><h4 class="muted small">Horizontal on dark</h4><div class="grid">';
+          langs.forEach(function (l) {
+            html += tile(
+              'on-dark',
+              'logo/' + id + '-on-dark-' + l + '.svg',
+              'lockup',
+              id + '-on-dark-' + l + '.svg',
+            );
+          });
+          html += '</div><h4 class="muted small">Stacked</h4><div class="grid">';
+          langs.forEach(function (l) {
+            html += tile(
+              'on-light',
+              'logo/' + id + '-stacked-' + l + '.svg',
+              'lockup stacked',
+              id + '-stacked-' + l + '.svg',
+            );
+          });
+          html += '</div></div>';
+          grids.insertAdjacentHTML('beforeend', html);
+        });
+
+        // ---- Colour ----------------------------------------------------------------------------
+        function cssVar(name) {
+          return getComputedStyle(root).getPropertyValue(name).trim();
+        }
+        function parse(v) {
+          var m = v.match(/^#([0-9a-f]{6})$/i);
+          if (m) {
+            return [0, 2, 4]
+              .map(function (i) {
+                return parseInt(m[1].slice(i, i + 2), 16);
+              })
+              .concat(1);
+          }
+          m = v.match(/^rgba?\(([^)]+)\)$/);
+          if (m) {
+            var p = m[1].split(',').map(function (x) {
+              return parseFloat(x);
+            });
+            return [p[0], p[1], p[2], p.length > 3 ? p[3] : 1];
+          }
+          return [0, 0, 0, 1];
+        }
+        function over(fg, bg) {
+          return [0, 1, 2].map(function (i) {
+            return fg[i] * fg[3] + bg[i] * (1 - fg[3]);
+          });
+        }
+        function lum(rgb) {
+          var c = rgb.map(function (v) {
+            v /= 255;
+            return v <= 0.04045 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4);
+          });
+          return 0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2];
+        }
+        function ratio(fg, bg, base) {
+          var b = over(
+            parse(bg),
+            parse(base || '#FFFFFF')
+              .slice(0, 3)
+              .concat(1),
+          );
+          var f = over(parse(fg), b.concat(1));
+          var l1 = lum(f);
+          var l2 = lum(b);
+          return (Math.max(l1, l2) + 0.05) / (Math.min(l1, l2) + 0.05);
+        }
+        function verdict(r, min) {
+          if (!min) return '<span class="result info">info</span>';
+          if (r < min) return '<span class="result fail">Fail</span>';
+          return '<span class="result pass">' + (r >= 7 ? 'AAA' : 'AA') + '</span>';
+        }
+
+        var brandSwatches = [
+          [
+            'Taxi yellow',
+            '--rm-brand-yellow',
+            'Primary fills, logo, selected item. Black text only.',
+          ],
+          ['Yellow on dark', '--rm-brand-yellow-on-dark', 'Primary colour in the dark theme.'],
+          ['Ink', '--rm-brand-ink', 'Text, logo tile, navigation chrome.'],
+          ['Graphite', '--rm-brand-graphite', 'Secondary chrome, tooltips, dark panels.'],
+          ['White', '--rm-brand-white', 'Surfaces. The taxi body.'],
+          ['Licence green', '--rm-brand-license-green', 'Taxi licences ("green number") only.'],
+        ];
+        function renderSwatches() {
+          var ink = cssVar('--rm-brand-ink');
+          var html = brandSwatches
+            .map(function (s) {
+              var v = cssVar(s[1]);
+              var withInk = ratio(ink, v);
+              var withWhite = ratio('#FFFFFF', v);
+              var text = withInk >= withWhite ? ink : '#FFFFFF';
+              return (
+                '<div class="swatch"><div class="chip" style="background:' +
+                v +
+                ';color:' +
+                text +
+                '"><span>' +
+                s[0] +
+                '</span><span>Aa</span></div><div class="meta"><span class="mono">' +
+                v +
+                ' &nbsp; ' +
+                s[1] +
+                '</span><span>Black text ' +
+                withInk.toFixed(2) +
+                ':1 &middot; white text ' +
+                withWhite.toFixed(2) +
+                ':1</span><span class="muted">' +
+                s[2] +
+                '</span></div></div>'
+              );
+            })
+            .join('');
+          document.getElementById('brand-swatches').innerHTML = html;
+        }
+        function renderScale(id, prefix, steps) {
+          var ink = cssVar('--rm-brand-ink');
+          document.getElementById(id).innerHTML = steps
+            .map(function (step) {
+              var v = cssVar('--rm-' + prefix + '-' + step);
+              var text = ratio(ink, v) >= ratio('#FFFFFF', v) ? ink : '#FFFFFF';
+              return (
+                '<div style="background:' +
+                v +
+                ';color:' +
+                text +
+                '"><strong>' +
+                step +
+                '</strong><span class="mono">' +
+                v +
+                '</span><span>' +
+                ratio(v, '#FFFFFF').toFixed(2) +
+                ' on white</span></div>'
+              );
+            })
+            .join('');
+        }
+
+        var pairs = [
+          ['Body text on card', 'text', 'bg-container', 4.5],
+          ['Secondary text on card', 'text-secondary', 'bg-container', 4.5],
+          ['Placeholder on card', 'text-tertiary', 'bg-container', 4.5],
+          ['Text on primary button', 'on-primary', 'primary', 4.5],
+          ['Text on selected row', 'text', 'primary-soft', 4.5],
+          ['Primary-coloured text', 'primary-text', 'bg-container', 4.5],
+          ['Link', 'link', 'bg-container', 4.5],
+          ['Success tag', 'success', 'success-bg', 4.5],
+          ['Warning tag', 'warning', 'warning-bg', 4.5],
+          ['Error tag', 'error', 'error-bg', 4.5],
+          ['Info tag', 'info', 'info-bg', 4.5],
+          ['Licence tag', 'license', 'license-bg', 4.5],
+          ['Danger button', 'on-status', 'error', 4.5],
+          ['Navigation text', 'chrome-text', 'chrome-bg', 4.5],
+          ['Selected navigation item', 'chrome-selected-text', 'chrome-selected-bg', 4.5],
+          ['Yellow fill on card (decorative)', 'primary', 'bg-container', 0],
+        ];
+        function renderPairs() {
+          var base = cssVar('--rm-color-bg-container');
+          document.getElementById('pairs').innerHTML = pairs
+            .map(function (p) {
+              var fg = cssVar('--rm-color-' + p[1]);
+              var bg = cssVar('--rm-color-' + p[2]);
+              var r = ratio(fg, bg, base);
+              return (
+                '<tr><td>' +
+                p[0] +
+                '</td><td><span class="tag" style="background:' +
+                bg +
+                ';color:' +
+                fg +
+                ';border-color:transparent">Aa אב اب</span></td><td class="mono small">' +
+                p[1] +
+                ' / ' +
+                p[2] +
+                '</td><td class="num">' +
+                r.toFixed(2) +
+                ':1</td><td>' +
+                verdict(r, p[3]) +
+                '</td></tr>'
+              );
+            })
+            .join('');
+        }
+        function effectiveTheme() {
+          if (root.dataset.theme) return root.dataset.theme;
+          return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        }
+        function renderColour() {
+          renderSwatches();
+          renderScale('scale-yellow', 'yellow', [50, 100, 200, 300, 400, 500, 600, 700, 800, 900]);
+          renderScale(
+            'scale-grey',
+            'grey',
+            [0, 50, 100, 200, 300, 400, 500, 600, 700, 800, 900, 950],
+          );
+          renderPairs();
+          document.getElementById('theme-name').textContent = effectiveTheme();
+        }
+
+        // ---- Controls --------------------------------------------------------------------------
+        function press(selector, attr, value) {
+          document.querySelectorAll(selector).forEach(function (b) {
+            b.setAttribute('aria-pressed', String(b.getAttribute(attr) === value));
+          });
+        }
+        function updateLogos() {
+          var lang = state.dir === 'rtl' ? 'he' : 'en';
+          var src = 'logo/' + state.concept + '-on-dark-' + lang + '.svg';
+          document.getElementById('header-logo').src = src;
+          document.querySelector('.app-logo').src = src;
+        }
+        function setConcept(c) {
+          state.concept = c;
+          store.set('concept', c);
+          press('[data-concept]', 'data-concept', c);
+          updateLogos();
+        }
+        function setTheme(t) {
+          state.theme = t;
+          store.set('theme', t);
+          if (t === 'system') delete root.dataset.theme;
+          else root.dataset.theme = t;
+          press('[data-theme-set]', 'data-theme-set', t);
+          renderColour();
+        }
+        function setDir(d) {
+          state.dir = d;
+          store.set('dir', d);
+          root.dir = d;
+          press('[data-dir]', 'data-dir', d);
+          updateLogos();
+        }
+        document.querySelectorAll('[data-concept]').forEach(function (b) {
+          b.addEventListener('click', function () {
+            setConcept(b.getAttribute('data-concept'));
+          });
+        });
+        document.querySelectorAll('[data-theme-set]').forEach(function (b) {
+          b.addEventListener('click', function () {
+            setTheme(b.getAttribute('data-theme-set'));
+          });
+        });
+        document.querySelectorAll('[data-dir]').forEach(function (b) {
+          b.addEventListener('click', function () {
+            setDir(b.getAttribute('data-dir'));
+          });
+        });
+        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function () {
+          if (state.theme === 'system') renderColour();
+        });
+
+        // Initial state: ?concept=b&theme=dark&dir=rtl in the URL wins over the saved choice.
+        var params = new URLSearchParams(window.location.search);
+        function initial(key) {
+          return params.get(key) || store.get(key);
+        }
+        setConcept(initial('concept') === 'b' ? 'b' : 'a');
+        setDir(initial('dir') === 'rtl' ? 'rtl' : 'ltr');
+        var savedTheme = initial('theme');
+        setTheme(savedTheme === 'light' || savedTheme === 'dark' ? savedTheme : 'system');
+      })();
+    </script>
+  </body>
+</html>

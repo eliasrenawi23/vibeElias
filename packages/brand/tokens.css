@@ -1,0 +1,279 @@
+/*
+ * Renawi Motors design tokens.
+ * Generated from tokens.ts by scripts/build-tokens.mjs. Do not edit by hand.
+ *
+ * Light theme on :root. Dark theme when <html data-theme="dark">, or when the system prefers
+ * dark and the page has not forced <html data-theme="light">.
+ */
+
+:root {
+  color-scheme: light;
+
+  /* Brand */
+  --rm-brand-yellow: #f5c518;
+  --rm-brand-yellow-on-dark: #e8bd30;
+  --rm-brand-ink: #0f0f10;
+  --rm-brand-graphite: #2a2a2e;
+  --rm-brand-white: #ffffff;
+  --rm-brand-license-green: #0b6e4f;
+
+  /* Palette (same in both themes) */
+  --rm-yellow-50: #fffbeb;
+  --rm-yellow-100: #fef3c8;
+  --rm-yellow-200: #fce697;
+  --rm-yellow-300: #f8d862;
+  --rm-yellow-400: #f7ce3b;
+  --rm-yellow-500: #f5c518;
+  --rm-yellow-600: #dfae0c;
+  --rm-yellow-700: #ad8200;
+  --rm-yellow-800: #8a6500;
+  --rm-yellow-900: #5c4200;
+  --rm-grey-0: #ffffff;
+  --rm-grey-50: #f7f7f8;
+  --rm-grey-100: #f0f0f2;
+  --rm-grey-200: #e4e4e7;
+  --rm-grey-300: #d4d4d8;
+  --rm-grey-400: #a1a1aa;
+  --rm-grey-500: #71717a;
+  --rm-grey-600: #52525b;
+  --rm-grey-700: #3f3f46;
+  --rm-grey-800: #2a2a2e;
+  --rm-grey-900: #1b1b1f;
+  --rm-grey-950: #0f0f10;
+
+  /* Typography */
+  --rm-font-sans:
+    'Rubik Variable', 'Rubik', 'Noto Sans Hebrew', 'Noto Sans Arabic', 'Noto Sans', system-ui,
+    -apple-system, 'Segoe UI', Roboto, Arial, sans-serif;
+  --rm-font-mono:
+    ui-monospace, 'SFMono-Regular', 'Cascadia Mono', 'Segoe UI Mono', Consolas, 'Liberation Mono',
+    monospace;
+  --rm-font-numeric: tabular-nums;
+  --rm-font-weight-regular: 400;
+  --rm-font-weight-medium: 500;
+  --rm-font-weight-semibold: 600;
+  --rm-font-weight-bold: 700;
+  --rm-text-display-size: 40px;
+  --rm-text-display-line-height: 48px;
+  --rm-text-display-weight: 700;
+  --rm-text-h1-size: 32px;
+  --rm-text-h1-line-height: 40px;
+  --rm-text-h1-weight: 700;
+  --rm-text-h2-size: 24px;
+  --rm-text-h2-line-height: 32px;
+  --rm-text-h2-weight: 600;
+  --rm-text-h3-size: 20px;
+  --rm-text-h3-line-height: 28px;
+  --rm-text-h3-weight: 600;
+  --rm-text-h4-size: 16px;
+  --rm-text-h4-line-height: 24px;
+  --rm-text-h4-weight: 600;
+  --rm-text-body-lg-size: 16px;
+  --rm-text-body-lg-line-height: 26px;
+  --rm-text-body-lg-weight: 400;
+  --rm-text-body-size: 14px;
+  --rm-text-body-line-height: 22px;
+  --rm-text-body-weight: 400;
+  --rm-text-small-size: 12px;
+  --rm-text-small-line-height: 18px;
+  --rm-text-small-weight: 400;
+  --rm-text-caption-size: 11px;
+  --rm-text-caption-line-height: 16px;
+  --rm-text-caption-weight: 500;
+
+  /* Space (4px grid) */
+  --rm-space-0: 0;
+  --rm-space-1: 4px;
+  --rm-space-2: 8px;
+  --rm-space-3: 12px;
+  --rm-space-4: 16px;
+  --rm-space-5: 20px;
+  --rm-space-6: 24px;
+  --rm-space-8: 32px;
+  --rm-space-10: 40px;
+  --rm-space-12: 48px;
+  --rm-space-16: 64px;
+
+  /* Radius */
+  --rm-radius-xs: 4px;
+  --rm-radius-sm: 6px;
+  --rm-radius-md: 8px;
+  --rm-radius-lg: 12px;
+  --rm-radius-xl: 16px;
+  --rm-radius-pill: 999px;
+
+  /* Controls */
+  --rm-control-height-sm: 28px;
+  --rm-control-height: 36px;
+  --rm-control-height-lg: 44px;
+
+  /* Motion */
+  --rm-duration-fast: 120ms;
+  --rm-duration-base: 200ms;
+  --rm-duration-slow: 320ms;
+  --rm-easing: cubic-bezier(0.2, 0, 0, 1);
+
+  /* Theme: light */
+  --rm-color-bg-layout: #f7f7f8;
+  --rm-color-bg-container: #ffffff;
+  --rm-color-bg-elevated: #ffffff;
+  --rm-color-bg-sunken: #f0f0f2;
+  --rm-color-text: #0f0f10;
+  --rm-color-text-secondary: #52525b;
+  --rm-color-text-tertiary: #71717a;
+  --rm-color-text-disabled: #a1a1aa;
+  --rm-color-border: #d4d4d8;
+  --rm-color-border-strong: #a1a1aa;
+  --rm-color-divider: #e4e4e7;
+  --rm-color-primary: #f5c518;
+  --rm-color-primary-hover: #f7ce3b;
+  --rm-color-primary-active: #dfae0c;
+  --rm-color-primary-soft: #fef3c8;
+  --rm-color-primary-text: #8a6500;
+  --rm-color-on-primary: #0f0f10;
+  --rm-color-focus-ring: rgba(245, 197, 24, 0.45);
+  --rm-color-link: #1d5fd1;
+  --rm-color-link-hover: #174ca8;
+  --rm-color-success: #2e7d32;
+  --rm-color-success-bg: #edf7ee;
+  --rm-color-success-border: #a7d3aa;
+  --rm-color-warning: #b54708;
+  --rm-color-warning-bg: #fef0e6;
+  --rm-color-warning-border: #f7c29e;
+  --rm-color-error: #c8281c;
+  --rm-color-error-bg: #fdecea;
+  --rm-color-error-border: #f5b5af;
+  --rm-color-info: #1d5fd1;
+  --rm-color-info-bg: #eaf1fd;
+  --rm-color-info-border: #a9c5f5;
+  --rm-color-license: #0b6e4f;
+  --rm-color-license-bg: #e6f4ee;
+  --rm-color-license-border: #9ed2bc;
+  --rm-color-chrome-bg: #0f0f10;
+  --rm-color-chrome-text: #ededef;
+  --rm-color-chrome-text-secondary: #a6a6ae;
+  --rm-color-chrome-selected-bg: #f5c518;
+  --rm-color-chrome-selected-text: #0f0f10;
+  --rm-color-on-status: #ffffff;
+  --rm-color-overlay: rgba(15, 15, 16, 0.45);
+  --rm-shadow-sm: 0 1px 2px rgba(15, 15, 16, 0.06);
+  --rm-shadow-md: 0 4px 12px rgba(15, 15, 16, 0.08), 0 1px 2px rgba(15, 15, 16, 0.04);
+  --rm-shadow-lg: 0 12px 32px rgba(15, 15, 16, 0.14), 0 2px 6px rgba(15, 15, 16, 0.06);
+  --rm-focus-ring: 0 0 0 3px rgba(245, 197, 24, 0.45);
+}
+
+:root[data-theme='dark'] {
+  color-scheme: dark;
+  --rm-color-bg-layout: #0f0f10;
+  --rm-color-bg-container: #17171a;
+  --rm-color-bg-elevated: #1f1f23;
+  --rm-color-bg-sunken: #0a0a0b;
+  --rm-color-text: #ededef;
+  --rm-color-text-secondary: #a6a6ae;
+  --rm-color-text-tertiary: #8e8e96;
+  --rm-color-text-disabled: #5e5e66;
+  --rm-color-border: #2e2e33;
+  --rm-color-border-strong: #3f3f46;
+  --rm-color-divider: #26262b;
+  --rm-color-primary: #e8bd30;
+  --rm-color-primary-hover: #f0cb55;
+  --rm-color-primary-active: #c99f1f;
+  --rm-color-primary-soft: rgba(232, 189, 48, 0.14);
+  --rm-color-primary-text: #e8bd30;
+  --rm-color-on-primary: #0f0f10;
+  --rm-color-focus-ring: rgba(232, 189, 48, 0.32);
+  --rm-color-link: #6ea8fe;
+  --rm-color-link-hover: #9cc3ff;
+  --rm-color-success: #52c48c;
+  --rm-color-success-bg: rgba(82, 196, 140, 0.14);
+  --rm-color-success-border: #2d6b4d;
+  --rm-color-warning: #f2994a;
+  --rm-color-warning-bg: rgba(242, 153, 74, 0.14);
+  --rm-color-warning-border: #7a4b22;
+  --rm-color-error: #f47067;
+  --rm-color-error-bg: rgba(244, 112, 103, 0.14);
+  --rm-color-error-border: #7d3530;
+  --rm-color-info: #6ea8fe;
+  --rm-color-info-bg: rgba(110, 168, 254, 0.14);
+  --rm-color-info-border: #2f4f80;
+  --rm-color-license: #3ccb94;
+  --rm-color-license-bg: rgba(60, 203, 148, 0.14);
+  --rm-color-license-border: #1f6b50;
+  --rm-color-chrome-bg: #0a0a0b;
+  --rm-color-chrome-text: #ededef;
+  --rm-color-chrome-text-secondary: #a6a6ae;
+  --rm-color-chrome-selected-bg: #e8bd30;
+  --rm-color-chrome-selected-text: #0f0f10;
+  --rm-color-on-status: #0f0f10;
+  --rm-color-overlay: rgba(0, 0, 0, 0.6);
+  --rm-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.5);
+  --rm-shadow-md: 0 4px 12px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.04);
+  --rm-shadow-lg: 0 12px 32px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255, 255, 255, 0.06);
+  --rm-focus-ring: 0 0 0 3px rgba(232, 189, 48, 0.32);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    color-scheme: dark;
+    --rm-color-bg-layout: #0f0f10;
+    --rm-color-bg-container: #17171a;
+    --rm-color-bg-elevated: #1f1f23;
+    --rm-color-bg-sunken: #0a0a0b;
+    --rm-color-text: #ededef;
+    --rm-color-text-secondary: #a6a6ae;
+    --rm-color-text-tertiary: #8e8e96;
+    --rm-color-text-disabled: #5e5e66;
+    --rm-color-border: #2e2e33;
+    --rm-color-border-strong: #3f3f46;
+    --rm-color-divider: #26262b;
+    --rm-color-primary: #e8bd30;
+    --rm-color-primary-hover: #f0cb55;
+    --rm-color-primary-active: #c99f1f;
+    --rm-color-primary-soft: rgba(232, 189, 48, 0.14);
+    --rm-color-primary-text: #e8bd30;
+    --rm-color-on-primary: #0f0f10;
+    --rm-color-focus-ring: rgba(232, 189, 48, 0.32);
+    --rm-color-link: #6ea8fe;
+    --rm-color-link-hover: #9cc3ff;
+    --rm-color-success: #52c48c;
+    --rm-color-success-bg: rgba(82, 196, 140, 0.14);
+    --rm-color-success-border: #2d6b4d;
+    --rm-color-warning: #f2994a;
+    --rm-color-warning-bg: rgba(242, 153, 74, 0.14);
+    --rm-color-warning-border: #7a4b22;
+    --rm-color-error: #f47067;
+    --rm-color-error-bg: rgba(244, 112, 103, 0.14);
+    --rm-color-error-border: #7d3530;
+    --rm-color-info: #6ea8fe;
+    --rm-color-info-bg: rgba(110, 168, 254, 0.14);
+    --rm-color-info-border: #2f4f80;
+    --rm-color-license: #3ccb94;
+    --rm-color-license-bg: rgba(60, 203, 148, 0.14);
+    --rm-color-license-border: #1f6b50;
+    --rm-color-chrome-bg: #0a0a0b;
+    --rm-color-chrome-text: #ededef;
+    --rm-color-chrome-text-secondary: #a6a6ae;
+    --rm-color-chrome-selected-bg: #e8bd30;
+    --rm-color-chrome-selected-text: #0f0f10;
+    --rm-color-on-status: #0f0f10;
+    --rm-color-overlay: rgba(0, 0, 0, 0.6);
+    --rm-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.5);
+    --rm-shadow-md: 0 4px 12px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.04);
+    --rm-shadow-lg: 0 12px 32px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255, 255, 255, 0.06);
+    --rm-focus-ring: 0 0 0 3px rgba(232, 189, 48, 0.32);
+  }
+}
+
+/* Utilities */
+
+/* Amounts, plates, dates and counters: tabular figures so columns line up. */
+.rm-tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Plates, VINs, phones, amounts inside RTL text: left-to-right and isolated. */
+.rm-ltr {
+  direction: ltr;
+  unicode-bidi: isolate;
+  white-space: nowrap;
+}

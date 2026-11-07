@@ -1,0 +1,43 @@
+{
+  "name": "@renawi/brand",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Renawi Motors brand assets: logos, app icons, design tokens (CSS + TypeScript) and the brand preview page",
+  "license": "UNLICENSED",
+  "type": "module",
+  "sideEffects": [
+    "*.css"
+  ],
+  "exports": {
+    "./tokens.css": "./tokens.css",
+    "./tokens": {
+      "types": "./tokens.ts",
+      "import": "./tokens.js",
+      "default": "./tokens.js"
+    },
+    "./logo/*": "./logo/*",
+    "./icons/*": "./icons/*",
+    "./fonts/*": "./fonts/*",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "tokens.css",
+    "tokens.ts",
+    "tokens.js",
+    "logo",
+    "icons",
+    "fonts"
+  ],
+  "scripts": {
+    "build": "npm run build:logos && npm run build:icons && npm run build:tokens",
+    "build:logos": "node scripts/build-logos.mjs",
+    "build:icons": "node scripts/build-icons.mjs",
+    "build:tokens": "node --disable-warning=ExperimentalWarning scripts/build-tokens.mjs",
+    "verify": "node scripts/verify.mjs"
+  },
+  "devDependencies": {
+    "harfbuzzjs": "1.6.4",
+    "opentype.js": "2.0.0",
+    "sharp": "0.35.5"
+  }
+}

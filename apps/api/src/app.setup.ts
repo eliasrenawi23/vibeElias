@@ -1,0 +1,71 @@
+import { ConfigService } from '@nestjs/config';
+import type { NestExpressApplication } from '@nestjs/platform-express';
+import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { installValidationErrorMap } from '@renawi/shared';
+import cookieParser from 'cookie-parser';
+import { cleanupOpenApiDoc } from 'nestjs-zod';
+import { ACCESS_COOKIE } from './auth/auth.constants';
+import type { Env } from './config/env';
+
+export const GLOBAL_PREFIX = 'api';
+export const SWAGGER_PATH = 'api/docs';
+
+/**
+ * HTTP-level setup shared by `main.ts` and the e2e tests: `/api` prefix, cookies, CORS with
+ * credentials, proxy trust, and zod messages as i18n keys.
+ */
+export function configureApp(app: NestExpressApplication): void {
+  // Generic zod messages become translatable keys (validation.required, ...).
+  installValidationErrorMap();
+
+  const config = app.get<ConfigService<Env, true>>(ConfigService);
+  app.setGlobalPrefix(GLOBAL_PREFIX);
+  app.use(cookieParser());
+  app.disable('x-powered-by');
+
+  const trustProxy = config.get('TRUST_PROXY', { infer: true });
+  if (trustProxy)
+    app.set('trust proxy', /^\d+$/.test(trustProxy) ? Number(trustProxy) : trustProxy);
+
+  const origins = config
+    .get('CORS_ORIGIN', { infer: true })
+    .split(',')
+    .map((o) => o.trim())
+    .filter(Boolean);
+  app.enableCors({
+    origin: origins,
+    credentials: true,
+    methods: ['GET', 'HEAD', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Accept', 'Accept-Language', 'X-Requested-With'],
+    maxAge: 600,
+  });
+}
+
+/** Swagger UI at `/api/docs` (JSON at `/api/docs-json`), authenticated by the access cookie. */
+export function setupSwagger(app: NestExpressApplication): void {
+  const document = SwaggerModule.createDocument(
+    app,
+    new DocumentBuilder()
+      .setTitle('Renawi Motors API')
+      .setDescription(
+        'Dealership + taxi-licence leasing API. Log in with POST /api/auth/login (sets httpOnly ' +
+          'cookies); every mutating request needs the header X-Requested-With: XMLHttpRequest ' +
+          '(added automatically by this page). Errors: { statusCode, message: <i18n key>, errors? }.',
+      )
+      .setVersion('0.1.0')
+      .addCookieAuth(ACCESS_COOKIE)
+      .build(),
+  );
+  SwaggerModule.setup(SWAGGER_PATH, app, cleanupOpenApiDoc(document), {
+    customSiteTitle: 'Renawi Motors API',
+    swaggerOptions: {
+      persistAuthorization: true,
+      withCredentials: true,
+      // Serialised into the page with Function#toString, so it must stay self-contained.
+      requestInterceptor: function (req: { headers: Record<string, string> }) {
+        req.headers['X-Requested-With'] = 'XMLHttpRequest';
+        return req;
+      },
+    },
+  });
+}

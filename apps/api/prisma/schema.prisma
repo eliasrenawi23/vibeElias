@@ -1,0 +1,736 @@
+// Renawi Motors - Prisma schema (contract: approved plan, "Domain model (Prisma)").
+// Calendar dates use @db.Date and travel as YYYY-MM-DD strings; money is Decimal(12,2).
+// Migration `partial_indexes_and_views` adds raw-SQL partial unique indexes on LeaseSegment and
+// the driver_balance_v / driver_ageing_v views (not expressible in this file).
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  ADMIN
+  SALES
+  ACCOUNTANT
+}
+
+enum ContactTag {
+  BUYER
+  SELLER
+  DRIVER
+  LEAD
+  SUPPLIER
+  GARAGE
+  INSURER
+  CONSIGNOR
+}
+
+enum DriverStatus {
+  ACTIVE
+  INACTIVE
+  BLACKLISTED
+}
+
+enum VehicleStatus {
+  IN_STOCK
+  RESERVED
+  LEASED
+  SOLD
+  RETURNED
+  SCRAPPED
+  EXTERNAL
+}
+
+enum VehicleOwnership {
+  OWNED
+  CONSIGNED
+  THIRD_PARTY
+}
+
+enum Fuel {
+  PETROL
+  DIESEL
+  HYBRID
+  PLUGIN_HYBRID
+  ELECTRIC
+  LPG
+}
+
+enum Gearbox {
+  AUTO
+  MANUAL
+}
+
+enum CycleKind {
+  OWNED
+  CONSIGNED
+}
+
+enum CycleEndReason {
+  SOLD
+  RETURNED_TO_CONSIGNOR
+  SCRAPPED
+  CANCELLED
+}
+
+enum CommissionMode {
+  FIXED
+  PERCENT
+  SURPLUS
+}
+
+enum ExpenseCategory {
+  REPAIR
+  TEST
+  INSURANCE
+  FUEL
+  TOWING
+  PARTS
+  CLEANING
+  FINE
+  LICENSE_FEE
+  METER
+  OTHER
+}
+
+enum InsuranceType {
+  COMPULSORY
+  THIRD_PARTY
+  COMPREHENSIVE
+  TRADE
+  LOT
+}
+
+enum InsuranceScope {
+  VEHICLE
+  BUSINESS
+}
+
+enum PaidBy {
+  US
+  DRIVER
+  CONSIGNOR
+}
+
+enum TaxiLicenseStatus {
+  ACTIVE
+  SUSPENDED
+  TRANSFER_PENDING
+  SOLD
+}
+
+enum LeaseType {
+  NUMBER_ONLY
+  CAR_AND_NUMBER
+}
+
+// WEEKLY schema-ready, not implemented in v1
+enum BillingPeriod {
+  MONTHLY
+  WEEKLY
+}
+
+enum LeaseStatus {
+  DRAFT
+  ACTIVE
+  ENDED
+  TERMINATED
+}
+
+enum LeaseEndReason {
+  EXPIRED
+  RENEWED
+  TERMINATED_BY_US
+  TERMINATED_BY_DRIVER
+  OTHER
+}
+
+enum DepositKind {
+  CASH
+  CHECK
+  PROMISSORY_NOTE
+}
+
+enum LedgerType {
+  CHARGE
+  PAYMENT
+  CREDIT
+  DEPOSIT_IN
+  DEPOSIT_OUT
+  DEPOSIT_APPLIED
+}
+
+enum ChargeKind {
+  RENT
+  FINE
+  DAMAGE
+  INSURANCE
+  TEST
+  REPAIR
+  PENALTY
+  OTHER
+}
+
+enum PaymentMethod {
+  CASH
+  BANK_TRANSFER
+  CHECK
+  BIT
+  CREDIT_CARD
+  TRADE_IN
+  OFFSET
+}
+
+enum DealType {
+  PURCHASE
+  SALE
+  CONSIGNMENT_SALE
+}
+
+enum DealStatus {
+  DRAFT
+  PENDING
+  COMPLETED
+  CANCELLED
+}
+
+enum VatMode {
+  NONE
+  FULL
+  MARGIN
+}
+
+enum TransferStatus {
+  NOT_STARTED
+  IN_PROGRESS
+  DONE
+}
+
+enum Direction {
+  IN
+  OUT
+}
+
+enum FineStatus {
+  NEW
+  REASSIGN_SUBMITTED
+  REASSIGNED
+  PAID_BY_US
+  CANCELLED
+}
+
+enum DocKind {
+  CAR_LICENSE
+  INSURANCE
+  ID
+  DRIVER_LICENSE
+  TAXI_PERMIT
+  MEDICAL
+  TAXI_LICENSE
+  LICENSE_ASSIGNMENT_FORM
+  CONTRACT
+  AGREEMENT
+  DISCLOSURE_FORM
+  HANDOVER
+  PHOTO
+  RECEIPT
+  FORM
+  OTHER
+}
+
+enum AuditAction {
+  CREATE
+  UPDATE
+  DELETE
+}
+
+model User {
+  id           String     @id @default(cuid())
+  email        String     @unique
+  passwordHash String
+  name         String
+  role         Role       @default(ADMIN)
+  locale       String     @default("he")
+  theme        String     @default("system")
+  tokenVersion Int        @default(0)
+  isActive     Boolean    @default(true)
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+  auditLogs    AuditLog[]
+}
+
+model Contact {
+  id              String           @id @default(cuid())
+  tags            ContactTag[]
+  firstName       String?
+  lastName        String?
+  companyName     String?
+  idNumber        String? // ת"ז / ח"פ
+  phones          String[]
+  email           String?
+  address         String?
+  city            String?
+  preferredLang   String           @default("he")
+  source          String?
+  notes           String?
+  followUpAt      DateTime?        @db.Date
+  archivedAt      DateTime?
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+  driver          Driver?
+  deals           Deal[]
+  consignedCycles InventoryCycle[] @relation("Consignor")
+  expenses        VehicleExpense[]
+  dealPayments    DealPayment[]
+  documents       Document[]
+
+  @@index([lastName, firstName])
+  @@index([idNumber])
+  @@index([followUpAt])
+}
+
+model Driver {
+  id               String          @id @default(cuid())
+  contactId        String          @unique
+  contact          Contact         @relation(fields: [contactId], references: [id])
+  licenseNo        String?
+  licenseExpiry    DateTime?       @db.Date // D1
+  taxiPermitNo     String?
+  taxiPermitExpiry DateTime?       @db.Date
+  medicalExpiry    DateTime?       @db.Date
+  emergencyName    String?
+  emergencyPhone   String?
+  startedAt        DateTime?       @db.Date
+  status           DriverStatus    @default(ACTIVE)
+  notes            String?
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+  contracts        LeaseContract[]
+  ledger           LedgerEntry[]
+  ownedVehicles    Vehicle[] // THIRD_PARTY cars in NUMBER_ONLY leases
+  fines            TrafficFine[]
+  documents        Document[]
+}
+
+model Vehicle {
+  id                 String            @id @default(cuid())
+  plateNo            String            @unique
+  vin                String?           @unique
+  make               String
+  model              String
+  trim               String?
+  year               Int // manufacture year (taxi 12-year rule)
+  color              String?
+  fuel               Fuel?
+  gearbox            Gearbox?
+  engineCc           Int?
+  hand               Int? // יד
+  isTaxi             Boolean           @default(false)
+  status             VehicleStatus     @default(IN_STOCK)
+  ownership          VehicleOwnership  @default(OWNED)
+  ownerDriverId      String?
+  ownerDriver        Driver?           @relation(fields: [ownerDriverId], references: [id])
+  currentKm          Int?
+  registrationExpiry DateTime?         @db.Date // תוקף רישיון רכב / טסט
+  dealerRegisteredAt DateTime?         @db.Date // "רכב בבעלות סוחר" start (12-month cap)
+  meterSerial        String?
+  meterSealedAt      DateTime?         @db.Date
+  location           String?
+  listingPrice       Decimal?          @db.Decimal(12, 2)
+  notes              String?
+  createdAt          DateTime          @default(now())
+  updatedAt          DateTime          @updatedAt
+  cycles             InventoryCycle[]
+  deals              Deal[]
+  expenses           VehicleExpense[]
+  insurance          InsurancePolicy[]
+  odometer           OdometerLog[]
+  segments           LeaseSegment[]
+  ledger             LedgerEntry[]
+  fines              TrafficFine[]
+  documents          Document[]
+  registeredLicense  TaxiLicense?      @relation("RegisteredVehicle")
+
+  @@index([status, ownership])
+  @@index([make, model])
+}
+
+/// One stock period of a vehicle (purchase -> sale, or consignment intake -> sale/return).
+model InventoryCycle {
+  id                String           @id @default(cuid())
+  vehicleId         String
+  vehicle           Vehicle          @relation(fields: [vehicleId], references: [id])
+  kind              CycleKind
+  startedAt         DateTime         @db.Date
+  endedAt           DateTime?        @db.Date
+  endReason         CycleEndReason?
+  purchaseDealId    String?          @unique
+  purchaseDeal      Deal?            @relation("PurchaseOf", fields: [purchaseDealId], references: [id])
+  saleDealId        String?          @unique
+  saleDeal          Deal?            @relation("SaleOf", fields: [saleDealId], references: [id])
+  consignorId       String?
+  consignor         Contact?         @relation("Consignor", fields: [consignorId], references: [id])
+  askingPrice       Decimal?         @db.Decimal(12, 2)
+  minNetToConsignor Decimal?         @db.Decimal(12, 2)
+  commissionMode    CommissionMode?
+  commissionValue   Decimal?         @db.Decimal(12, 2)
+  agreementEndsAt   DateTime?        @db.Date
+  createdAt         DateTime         @default(now())
+  updatedAt         DateTime         @updatedAt
+  deals             Deal[]
+  expenses          VehicleExpense[]
+
+  @@index([vehicleId, endedAt])
+}
+
+model Deal {
+  id                  String          @id @default(cuid())
+  dealNo              Int             @unique @default(autoincrement())
+  type                DealType
+  status              DealStatus      @default(DRAFT)
+  vehicleId           String
+  vehicle             Vehicle         @relation(fields: [vehicleId], references: [id])
+  cycleId             String?
+  cycle               InventoryCycle? @relation(fields: [cycleId], references: [id])
+  counterpartyId      String
+  counterparty        Contact         @relation(fields: [counterpartyId], references: [id])
+  date                DateTime        @db.Date
+  price               Decimal         @db.Decimal(12, 2)
+  listPrice           Decimal?        @db.Decimal(12, 2) // Levi Yitzhak reference
+  vatMode             VatMode         @default(MARGIN)
+  vatRate             Decimal         @db.Decimal(5, 2) // snapshot (18.00)
+  sellerIsVatBusiness Boolean         @default(false) // PURCHASE: forces FULL VAT on resale
+  isTradeIn           Boolean         @default(false)
+  tradeInDealId       String?         @unique // SALE -> its trade-in PURCHASE deal
+  tradeInDeal         Deal?           @relation("TradeIn", fields: [tradeInDealId], references: [id])
+  tradeInFor          Deal?           @relation("TradeIn")
+  commissionAmount    Decimal?        @db.Decimal(12, 2) // CONSIGNMENT_SALE
+  payoutAmount        Decimal?        @db.Decimal(12, 2)
+  warrantyText        String?
+  disclosureSignedAt  DateTime? // required before SALE completes
+  transferStatus      TransferStatus  @default(NOT_STARTED)
+  transferChecklist   Json?
+  transferDueAt       DateTime?       @db.Date // sale date + 6 working days
+  transferredAt       DateTime?       @db.Date
+  notes               String?
+  completedAt         DateTime?
+  cancelledAt         DateTime?
+  createdById         String?
+  createdAt           DateTime        @default(now())
+  updatedAt           DateTime        @updatedAt
+  payments            DealPayment[]
+  documents           Document[]
+  purchaseOfCycle     InventoryCycle? @relation("PurchaseOf")
+  saleOfCycle         InventoryCycle? @relation("SaleOf")
+
+  @@index([type, status, date])
+  @@index([vehicleId])
+}
+
+model DealPayment {
+  id        String        @id @default(cuid())
+  dealId    String
+  deal      Deal          @relation(fields: [dealId], references: [id], onDelete: Cascade)
+  direction Direction
+  contactId String?
+  contact   Contact?      @relation(fields: [contactId], references: [id])
+  date      DateTime      @db.Date
+  amount    Decimal       @db.Decimal(12, 2)
+  method    PaymentMethod
+  reference String?
+  notes     String?
+  createdAt DateTime      @default(now())
+
+  @@index([dealId])
+}
+
+model VehicleExpense {
+  id              String          @id @default(cuid())
+  vehicleId       String
+  vehicle         Vehicle         @relation(fields: [vehicleId], references: [id])
+  cycleId         String?
+  cycle           InventoryCycle? @relation(fields: [cycleId], references: [id])
+  category        ExpenseCategory
+  date            DateTime        @db.Date
+  amount          Decimal         @db.Decimal(12, 2)
+  vatIncluded     Boolean         @default(true)
+  vatReclaimable  Boolean         @default(false)
+  paidBy          PaidBy          @default(US)
+  vendorId        String?
+  vendor          Contact?        @relation(fields: [vendorId], references: [id])
+  rebilledEntryId String?         @unique // CHARGE created when passed on to driver
+  rebilledEntry   LedgerEntry?    @relation(fields: [rebilledEntryId], references: [id])
+  description     String?
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+  documents       Document[]
+
+  @@index([vehicleId, date])
+  @@index([cycleId])
+}
+
+model InsurancePolicy {
+  id               String         @id @default(cuid())
+  scope            InsuranceScope @default(VEHICLE)
+  vehicleId        String? // null for BUSINESS (trade / lot policies)
+  vehicle          Vehicle?       @relation(fields: [vehicleId], references: [id])
+  type             InsuranceType
+  insurer          String
+  policyNo         String?
+  startDate        DateTime       @db.Date
+  endDate          DateTime       @db.Date
+  premium          Decimal?       @db.Decimal(12, 2)
+  paidBy           PaidBy         @default(US)
+  hasTaxiExtension Boolean        @default(false)
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+
+  @@index([vehicleId, endDate])
+  @@index([endDate])
+}
+
+model OdometerLog {
+  id        String   @id @default(cuid())
+  vehicleId String
+  vehicle   Vehicle  @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
+  km        Int
+  date      DateTime @db.Date
+  source    String?
+
+  @@index([vehicleId, date])
+}
+
+model TaxiLicense {
+  id                  String            @id @default(cuid())
+  licenseNo           String            @unique // מספר ירוק
+  holderName          String?
+  status              TaxiLicenseStatus @default(ACTIVE)
+  acquiredAt          DateTime?         @db.Date
+  acquisitionPrice    Decimal?          @db.Decimal(12, 2)
+  soldAt              DateTime?         @db.Date
+  salePrice           Decimal?          @db.Decimal(12, 2)
+  annualFeeDueAt      DateTime?         @db.Date // December slip
+  renewalAt           DateTime?         @db.Date
+  registeredVehicleId String?           @unique // car registered under this number at MoT
+  registeredVehicle   Vehicle?          @relation("RegisteredVehicle", fields: [registeredVehicleId], references: [id])
+  notes               String?
+  createdAt           DateTime          @default(now())
+  updatedAt           DateTime          @updatedAt
+  segments            LeaseSegment[]
+  ledger              LedgerEntry[]
+  documents           Document[]
+}
+
+model LeaseContract {
+  id                     String          @id @default(cuid())
+  contractNo             Int             @unique @default(autoincrement())
+  driverId               String
+  driver                 Driver          @relation(fields: [driverId], references: [id])
+  type                   LeaseType
+  status                 LeaseStatus     @default(DRAFT)
+  billingPeriod          BillingPeriod   @default(MONTHLY)
+  startDate              DateTime        @db.Date
+  endDate                DateTime        @db.Date
+  actualEndDate          DateTime?       @db.Date
+  endReason              LeaseEndReason?
+  paymentDay             Int             @default(1) // 1..28
+  rentIncludesVat        Boolean         @default(true)
+  earlyExitPenaltyMonths Decimal         @default(1) @db.Decimal(4, 2)
+  depositAmount          Decimal         @default(0) @db.Decimal(12, 2)
+  depositKind            DepositKind     @default(CASH)
+  responsibilities       Json // {insurance,test,repairs,fines}: "US"|"DRIVER" (default all DRIVER)
+  handoverChecklist      Json?
+  returnChecklist        Json?
+  terms                  String?
+  renewedFromId          String?         @unique
+  renewedFrom            LeaseContract?  @relation("Renewal", fields: [renewedFromId], references: [id])
+  renewedTo              LeaseContract?  @relation("Renewal")
+  signedAt               DateTime?
+  terminationNote        String?
+  createdAt              DateTime        @default(now())
+  updatedAt              DateTime        @updatedAt
+  segments               LeaseSegment[]
+  ledger                 LedgerEntry[]
+  fines                  TrafficFine[]
+  documents              Document[]
+
+  @@index([driverId, status])
+  @@index([status, endDate])
+}
+
+/// Which licence/car at which rent for which dates. Car swap or rent change = close + open segment.
+/// Migration adds partial unique indexes: one open segment per taxiLicenseId and per vehicleId (WHERE "endDate" IS NULL).
+model LeaseSegment {
+  id            String        @id @default(cuid())
+  contractId    String
+  contract      LeaseContract @relation(fields: [contractId], references: [id], onDelete: Cascade)
+  taxiLicenseId String
+  taxiLicense   TaxiLicense   @relation(fields: [taxiLicenseId], references: [id])
+  vehicleId     String? // null for NUMBER_ONLY
+  vehicle       Vehicle?      @relation(fields: [vehicleId], references: [id])
+  monthlyRent   Decimal       @db.Decimal(12, 2)
+  startDate     DateTime      @db.Date
+  endDate       DateTime?     @db.Date
+  reason        String?
+  createdAt     DateTime      @default(now())
+  rentCharges   LedgerEntry[]
+
+  @@index([contractId, startDate])
+  @@index([taxiLicenseId, endDate])
+  @@index([vehicleId, endDate])
+}
+
+model LedgerEntry {
+  id                   String              @id @default(cuid())
+  driverId             String
+  driver               Driver              @relation(fields: [driverId], references: [id])
+  contractId           String?
+  contract             LeaseContract?      @relation(fields: [contractId], references: [id])
+  segmentId            String?
+  segment              LeaseSegment?       @relation(fields: [segmentId], references: [id])
+  type                 LedgerType
+  chargeKind           ChargeKind?
+  rentPeriod           String? // "2026-11" for RENT charges
+  date                 DateTime            @db.Date
+  dueDate              DateTime?           @db.Date
+  amount               Decimal             @db.Decimal(12, 2) // positive; type gives sign
+  method               PaymentMethod?
+  reference            String?
+  description          String?
+  vehicleId            String? // income attribution
+  vehicle              Vehicle?            @relation(fields: [vehicleId], references: [id])
+  taxiLicenseId        String?
+  taxiLicense          TaxiLicense?        @relation(fields: [taxiLicenseId], references: [id])
+  autoGenerated        Boolean             @default(false)
+  voidedAt             DateTime?
+  voidReason           String?
+  createdById          String?
+  createdAt            DateTime            @default(now())
+  allocationsAsCharge  PaymentAllocation[] @relation("Charge")
+  allocationsAsPayment PaymentAllocation[] @relation("Payment")
+  rebilledExpense      VehicleExpense?
+  fine                 TrafficFine?
+  documents            Document[]
+
+  @@unique([segmentId, rentPeriod])
+  @@index([driverId, date])
+  @@index([type, dueDate])
+}
+
+model PaymentAllocation {
+  id        String      @id @default(cuid())
+  paymentId String
+  payment   LedgerEntry @relation("Payment", fields: [paymentId], references: [id], onDelete: Cascade)
+  chargeId  String
+  charge    LedgerEntry @relation("Charge", fields: [chargeId], references: [id], onDelete: Cascade)
+  amount    Decimal     @db.Decimal(12, 2)
+
+  @@unique([paymentId, chargeId])
+}
+
+model TrafficFine {
+  id               String         @id @default(cuid())
+  vehicleId        String
+  vehicle          Vehicle        @relation(fields: [vehicleId], references: [id])
+  driverId         String? // auto-matched from the open segment at offenceAt
+  driver           Driver?        @relation(fields: [driverId], references: [id])
+  contractId       String?
+  contract         LeaseContract? @relation(fields: [contractId], references: [id])
+  fineNo           String?
+  authority        String?
+  offenceAt        DateTime
+  receivedAt       DateTime       @db.Date
+  amount           Decimal        @db.Decimal(12, 2)
+  status           FineStatus     @default(NEW)
+  reassignDeadline DateTime?      @db.Date // receivedAt + 90 days
+  chargeEntryId    String?        @unique // CHARGE if we paid and rebill the driver
+  chargeEntry      LedgerEntry?   @relation(fields: [chargeEntryId], references: [id])
+  notes            String?
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+
+  @@index([status, reassignDeadline])
+}
+
+model Document {
+  id            String          @id @default(cuid())
+  kind          DocKind
+  fileKey       String
+  fileName      String
+  mime          String
+  size          Int
+  hasThumb      Boolean         @default(false)
+  title         String?
+  lang          String?
+  expiresAt     DateTime?       @db.Date
+  vehicleId     String?
+  vehicle       Vehicle?        @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
+  driverId      String?
+  driver        Driver?         @relation(fields: [driverId], references: [id], onDelete: Cascade)
+  contactId     String?
+  contact       Contact?        @relation(fields: [contactId], references: [id], onDelete: Cascade)
+  dealId        String?
+  deal          Deal?           @relation(fields: [dealId], references: [id], onDelete: Cascade)
+  contractId    String?
+  contract      LeaseContract?  @relation(fields: [contractId], references: [id], onDelete: Cascade)
+  taxiLicenseId String?
+  taxiLicense   TaxiLicense?    @relation(fields: [taxiLicenseId], references: [id], onDelete: Cascade)
+  expenseId     String?
+  expense       VehicleExpense? @relation(fields: [expenseId], references: [id], onDelete: Cascade)
+  ledgerEntryId String?
+  ledgerEntry   LedgerEntry?    @relation(fields: [ledgerEntryId], references: [id], onDelete: Cascade)
+  uploadedById  String?
+  createdAt     DateTime        @default(now())
+
+  @@index([vehicleId])
+  @@index([driverId])
+  @@index([dealId])
+  @@index([contractId])
+  @@index([expiresAt])
+}
+
+model Reminder {
+  id         String    @id @default(cuid())
+  title      String
+  dueAt      DateTime  @db.Date
+  entityType String?
+  entityId   String?
+  notes      String?
+  doneAt     DateTime?
+  createdAt  DateTime  @default(now())
+
+  @@index([doneAt, dueAt])
+}
+
+model Settings {
+  id                Int      @id @default(1)
+  businessName      Json // {he, ar, en}
+  legalId           String? // ח"פ / עוסק מורשה
+  dealerLicenseNo   String?
+  address           String?
+  phone             String?
+  email             String?
+  logoDocumentId    String?
+  vatRate           Decimal  @default(18.00) @db.Decimal(5, 2)
+  reminderLeadDays  Json // {registration:30, insurance:30, driverLicense:60, taxiPermit:60, medical:60, taxiLicense:60, lease:30, document:30, dealerRegistration:30, transfer:2}
+  defaultLeaseTerms Json // responsibilities default all DRIVER + clauses per language
+  updatedAt         DateTime @updatedAt
+}
+
+model AuditLog {
+  id       String      @id @default(cuid())
+  userId   String?
+  user     User?       @relation(fields: [userId], references: [id])
+  entity   String
+  entityId String
+  action   AuditAction
+  diff     Json?
+  at       DateTime    @default(now())
+
+  @@index([entity, entityId])
+  @@index([at])
+}

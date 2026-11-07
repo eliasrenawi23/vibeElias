@@ -1,0 +1,28 @@
+# Ignore rules for `docker build -f apps/api/Dockerfile .` (context = repo root).
+# BuildKit uses <Dockerfile name>.dockerignore next to the Dockerfile instead of a root
+# .dockerignore, so these rules apply to the API image only.
+
+.git
+**/node_modules
+**/dist
+**/coverage
+**/.vite
+**/*.tsbuildinfo
+**/*.log
+**/.env
+**/.env.*
+!**/.env.example
+data
+docs
+deploy
+.vscode
+
+# Other workspaces: only their manifests are needed (npm ci validates the lockfile).
+apps/web/*
+!apps/web/package.json
+packages/brand/*
+!packages/brand/package.json
+
+# API files not needed in the image.
+apps/api/test
+apps/api/data

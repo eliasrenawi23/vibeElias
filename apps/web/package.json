@@ -1,0 +1,53 @@
+{
+  "name": "@renawi/web",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Renawi Motors web app / PWA (React 19 + Vite + Ant Design v6; he/ar/en with RTL; light/dark)",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit -p tsconfig.json && tsc --noEmit -p tsconfig.node.json",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:ui": "playwright test"
+  },
+  "dependencies": {
+    "@ant-design/icons": "^6.3.4",
+    "@fontsource-variable/rubik": "^5.3.0",
+    "@fontsource/noto-sans-arabic": "^5.3.0",
+    "@fontsource/noto-sans-hebrew": "^5.3.0",
+    "@hookform/resolvers": "^7.0.3",
+    "@renawi/brand": "*",
+    "@renawi/shared": "*",
+    "@tanstack/react-query": "^5.107.1",
+    "antd": "^6.7.0",
+    "dayjs": "^1.11.23",
+    "i18next": "^26.7.2",
+    "i18next-browser-languagedetector": "^8.3.0",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
+    "react-hook-form": "^7.91.0",
+    "react-i18next": "^17.1.13",
+    "react-router": "^7.18.5",
+    "zod": "~3.25.76"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.65.0",
+    "@testing-library/dom": "^10.4.2",
+    "@testing-library/jest-dom": "^7.0.1",
+    "@testing-library/react": "^16.3.3",
+    "@types/node": "^24.19.2",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "@vitejs/plugin-react": "^6.2.1",
+    "jsdom": "^31.0.0",
+    "typescript": "~5.9.3",
+    "vite": "^8.3.6",
+    "vite-plugin-pwa": "^2.0.0",
+    "vitest": "^4.1.12",
+    "workbox-window": "^7.4.1"
+  }
+}

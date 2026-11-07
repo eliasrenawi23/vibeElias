@@ -1,0 +1,23 @@
+/** Common car makes in Israel, offered as suggestions (any other make can be typed). */
+export const COMMON_MAKES: readonly string[] = [
+  'Toyota',
+  'Hyundai',
+  'Kia',
+  'Skoda',
+  'Mazda',
+  'Mercedes-Benz',
+  'BYD',
+  'Tesla',
+  'Chery',
+  'MG',
+  'Suzuki',
+  'Nissan',
+  'Honda',
+  'Volkswagen',
+  'Peugeot',
+  'Seat',
+  'Mitsubishi',
+  'Renault',
+  'Citroën',
+  'Subaru',
+];

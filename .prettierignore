@@ -1,0 +1,13 @@
+node_modules/
+dist/
+build/
+dev-dist/
+coverage/
+playwright-report/
+test-results/
+/data/
+uploads/
+package-lock.json
+*.min.js
+*.min.css
+apps/api/prisma/migrations/

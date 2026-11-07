@@ -1,0 +1,48 @@
+{
+  "name": "@renawi/shared",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Renawi Motors shared code: zod schemas, enums, money/date/bidi/plate helpers and he/ar/en locales",
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "require": {
+        "types": "./dist/index.d.cts",
+        "default": "./dist/index.cjs"
+      }
+    },
+    "./locales/*": "./src/locales/*",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist",
+    "src/locales"
+  ],
+  "sideEffects": false,
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "clean": "rimraf dist"
+  },
+  "dependencies": {
+    "dayjs": "^1.11.23",
+    "decimal.js": "^10.6.0",
+    "zod": "~3.25.76"
+  },
+  "devDependencies": {
+    "@types/node": "^24.19.2",
+    "tsup": "^8.5.1",
+    "typescript": "~5.9.3",
+    "vitest": "^4.1.12"
+  }
+}

@@ -1,0 +1,39 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+build/
+dev-dist/
+*.tsbuildinfo
+.vite/
+
+# Environment (keep the example)
+.env
+.env.local
+.env.*.local
+!.env.example
+
+# Tests & coverage
+coverage/
+playwright-report/
+test-results/
+blob-report/
+
+# Runtime data
+uploads/
+/data/
+apps/api/data/
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editors
+.idea/
+.vscode/*
+!.vscode/extensions.json
