@@ -10,6 +10,8 @@ import { RolesGuard } from './auth/guards/roles.guard';
 import { AuditInterceptor } from './common/audit/audit.interceptor';
 import { CommonModule } from './common/common.module';
 import { ContactsModule } from './contacts/contacts.module';
+import { DashboardModule } from './dashboard/dashboard.module';
+import { DealsModule } from './deals/deals.module';
 import { HttpExceptionFilter } from './common/filters/http-exception.filter';
 import { RequestedWithGuard } from './common/guards/requested-with.guard';
 import { DecimalToNumberInterceptor } from './common/interceptors/decimal-to-number.interceptor';
@@ -60,6 +62,8 @@ import { VehiclesModule } from './vehicles/vehicles.module';
     LedgerModule,
     LeasesModule,
     FinesModule,
+    DealsModule,
+    DashboardModule,
     DocumentsModule,
     HealthModule,
     JobsModule,

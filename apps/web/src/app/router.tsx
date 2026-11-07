@@ -4,6 +4,8 @@ import { LoginPage } from '../features/auth/pages/LoginPage';
 import { ContactDetailPage } from '../features/contacts/pages/ContactDetailPage';
 import { ContactsPage } from '../features/contacts/pages/ContactsPage';
 import { DashboardPage } from '../features/dashboard/pages/DashboardPage';
+import { DealDetailPage } from '../features/deals/pages/DealDetailPage';
+import { DealNewPage } from '../features/deals/pages/DealNewPage';
 import { DealsPage } from '../features/deals/pages/DealsPage';
 import { DriverDetailPage } from '../features/drivers/pages/DriverDetailPage';
 import { DriverNewPage } from '../features/drivers/pages/DriverNewPage';
@@ -92,6 +94,12 @@ export const routes: RouteObject[] = [
             handle: handle('leases.detailTitle'),
           },
           { path: 'deals', element: <DealsPage />, handle: handle('nav.deals') },
+          { path: 'deals/new', element: <DealNewPage />, handle: handle('deals.newTitle') },
+          {
+            path: 'deals/:id',
+            element: <DealDetailPage />,
+            handle: handle('deals.detailTitle'),
+          },
           { path: 'fines', element: <FinesPage />, handle: handle('nav.fines') },
           { path: 'contacts', element: <ContactsPage />, handle: handle('nav.contacts') },
           {

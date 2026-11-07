@@ -1,4 +1,4 @@
-import { DeleteOutlined, EditOutlined, PlusOutlined } from '@ant-design/icons';
+import { DeleteOutlined, EditOutlined, PlusOutlined, UserSwitchOutlined } from '@ant-design/icons';
 import { ExpenseCategory, PaidBy } from '@renawi/shared';
 import { keepPreviousData, useMutation, useQuery } from '@tanstack/react-query';
 import { App, Button, Card, Flex, Statistic, Tag, Tooltip, Typography } from 'antd';
@@ -18,6 +18,7 @@ import { Money } from '../../../shared/ui/Money';
 import { ContactLink } from '../../contacts/components/ContactLink';
 import { deleteExpense, fetchExpenses } from '../api';
 import { ExpenseDialog } from '../dialogs/ExpenseDialog';
+import { RebillExpenseDialog } from '../dialogs/RebillExpenseDialog';
 import { vehicleKeys } from '../queryKeys';
 import type { ExpenseListQuery, VehicleExpense } from '../types';
 
@@ -38,6 +39,8 @@ const CATEGORY_COLORS: Readonly<Record<ExpenseCategory, string>> = {
 
 export interface VehicleExpensesTabProps {
   vehicleId: string;
+  /** Taxis: expenses we paid can be rebilled to the driver who had the car. */
+  isTaxi?: boolean;
   /** Opens the "add expense" dialog (shared with the page header action). */
   onAdd: () => void;
   /** Called after an expense was edited or deleted. */
@@ -45,7 +48,12 @@ export interface VehicleExpensesTabProps {
 }
 
 /** Expenses of a vehicle with date / category filters (in the URL) and per-category totals. */
-export function VehicleExpensesTab({ vehicleId, onAdd, onChanged }: VehicleExpensesTabProps) {
+export function VehicleExpensesTab({
+  vehicleId,
+  isTaxi = false,
+  onAdd,
+  onChanged,
+}: VehicleExpensesTabProps) {
   const { t } = useTranslation();
   const { message } = App.useApp();
   const errorMessage = useErrorMessage();
@@ -55,6 +63,7 @@ export function VehicleExpensesTab({ vehicleId, onAdd, onChanged }: VehicleExpen
   const [params] = useSearchParams();
   const [editing, setEditing] = useState<VehicleExpense | null>(null);
   const [deleting, setDeleting] = useState<VehicleExpense | null>(null);
+  const [rebilling, setRebilling] = useState<VehicleExpense | null>(null);
 
   const filters = useMemo<ExpenseListQuery>(
     () => ({
@@ -153,7 +162,26 @@ export function VehicleExpensesTab({ vehicleId, onAdd, onChanged }: VehicleExpen
       title: t('common.actions'),
       align: 'end',
       render: (e) => (
-        <Flex gap={4} justify="flex-end">
+        <Flex gap={4} justify="flex-end" align="center">
+          {e.rebilledEntryId ? (
+            <Tag color="success" data-testid="expense-rebilled">
+              {t('vehicles.expenses.rebilledTag')}
+            </Tag>
+          ) : (
+            isTaxi &&
+            e.paidBy === 'US' && (
+              <Tooltip title={t('vehicles.expenses.rebill')}>
+                <Button
+                  type="text"
+                  size="small"
+                  icon={<UserSwitchOutlined />}
+                  aria-label={t('vehicles.expenses.rebill')}
+                  onClick={() => setRebilling(e)}
+                  data-testid="expense-rebill"
+                />
+              </Tooltip>
+            )
+          )}
           <Tooltip title={t('actions.edit')}>
             <Button
               type="text"
@@ -272,6 +300,17 @@ export function VehicleExpensesTab({ vehicleId, onAdd, onChanged }: VehicleExpen
             setEditing(null);
             onChanged();
             void message.success(t('common.saved'));
+          }}
+        />
+      )}
+      {rebilling && (
+        <RebillExpenseDialog
+          expense={rebilling}
+          onClose={() => setRebilling(null)}
+          onSaved={() => {
+            setRebilling(null);
+            onChanged();
+            void message.success(t('vehicles.expenses.rebilled'));
           }}
         />
       )}

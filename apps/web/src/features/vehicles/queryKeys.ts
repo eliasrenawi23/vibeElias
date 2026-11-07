@@ -12,6 +12,7 @@ export const vehicleKeys = {
   detail: (id: string) => [...vehicleKeys.all, 'detail', id] as const,
   expenses: (id: string, filters: ExpenseListQuery) =>
     [...vehicleKeys.detail(id), 'expenses', filters] as const,
+  pnl: (id: string) => [...vehicleKeys.detail(id), 'pnl'] as const,
 };
 
 /** Business-scope insurance policies (TRADE / LOT). */

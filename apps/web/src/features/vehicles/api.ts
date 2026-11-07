@@ -24,6 +24,7 @@ import type {
   VehicleExpense,
   VehicleListItem,
   VehicleListQuery,
+  VehiclePnl,
 } from './types';
 
 const vehiclePath = (id: string) => `/vehicles/${encodeURIComponent(id)}`;
@@ -163,4 +164,26 @@ export function consignVehicle(vehicleId: string, body: Consign): Promise<Vehicl
  */
 export function returnCycle(cycleId: string, body: CycleReturn): Promise<VehicleDetail> {
   return http.post<VehicleDetail>(`/cycles/${encodeURIComponent(cycleId)}/return`, body);
+}
+
+/* ---- P&L & rebilling ----------------------------------------------------------------------- */
+
+/** `GET /api/vehicles/:id/pnl`: profit and loss per inventory cycle and in total. */
+export function fetchVehiclePnl(vehicleId: string, signal?: AbortSignal): Promise<VehiclePnl> {
+  return http.get<VehiclePnl>(`${vehiclePath(vehicleId)}/pnl`, { signal });
+}
+
+export interface ExpenseRebillBody {
+  /** Override of the driver matched by date. */
+  driverId?: string;
+  date?: string;
+  description?: string;
+}
+
+/**
+ * `POST /api/expenses/:id/rebill`: charge an expense we paid to the driver who had the car
+ * (409 `errors.noDriverMatched` / `errors.alreadyRebilled`); returns the expense.
+ */
+export function rebillExpense(id: string, body: ExpenseRebillBody): Promise<VehicleExpense> {
+  return http.post<VehicleExpense>(`/expenses/${encodeURIComponent(id)}/rebill`, body);
 }

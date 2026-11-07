@@ -11,14 +11,19 @@ import {
   Query,
 } from '@nestjs/common';
 import {
+  ApiBody,
   ApiConflictResponse,
   ApiCookieAuth,
   ApiNoContentResponse,
   ApiOperation,
   ApiTags,
 } from '@nestjs/swagger';
+import { ExpenseRebillRequestSchema } from '@renawi/shared';
+import type { AuthenticatedUser } from '../auth/auth.types';
+import { CurrentUser } from '../auth/decorators';
 import { Audited } from '../common/audit/audit.decorator';
-import { ExpenseCreateDto, ExpenseQueryDto, ExpenseUpdateDto } from './dto';
+import { parseOptionalBody } from '../common/zod-body';
+import { ExpenseCreateDto, ExpenseQueryDto, ExpenseRebillDto, ExpenseUpdateDto } from './dto';
 import { ExpenseList, ExpensesService, ExpenseView } from './expenses.service';
 
 @ApiTags('expenses')
@@ -55,6 +60,28 @@ export class ExpensesController {
   @ApiConflictResponse({ description: 'errors.expenseRebilled (amount of a rebilled expense)' })
   update(@Param('id') id: string, @Body() dto: ExpenseUpdateDto): Promise<ExpenseView> {
     return this.expenses.update(id, dto);
+  }
+
+  @Post('expenses/:id/rebill')
+  @HttpCode(HttpStatus.OK)
+  @Audited('VehicleExpense')
+  @ApiBody({ type: ExpenseRebillDto, required: false })
+  @ApiOperation({
+    summary:
+      'Pass an expense we paid on to a driver: CHARGE (FINE / REPAIR / INSURANCE / TEST by ' +
+      'category, else OTHER) on the driver of the lease segment holding the car on the expense ' +
+      'date (or driverId), linked via rebilledEntryId; FIFO re-allocated. Returns the expense',
+  })
+  @ApiConflictResponse({
+    description:
+      'errors.alreadyRebilled | errors.noDriverMatched | errors.invalidTransition (not paid by us)',
+  })
+  rebill(
+    @Param('id') id: string,
+    @Body() body: unknown,
+    @CurrentUser() user: AuthenticatedUser,
+  ): Promise<ExpenseView> {
+    return this.expenses.rebill(id, parseOptionalBody(ExpenseRebillRequestSchema, body), user.id);
   }
 
   @Delete('expenses/:id')

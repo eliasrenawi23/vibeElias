@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ContactsModule } from '../contacts/contacts.module';
 import { DocumentsModule } from '../documents/documents.module';
+import { LedgerModule } from '../ledger/ledger.module';
 import { CyclesController } from './cycles.controller';
 import { CyclesService } from './cycles.service';
 import { ExpensesController } from './expenses.controller';
@@ -14,7 +15,7 @@ import { VehiclesService } from './vehicles.service';
 
 /** Vehicles with their expenses, insurance (incl. business policies), odometer and cycles. */
 @Module({
-  imports: [ContactsModule, DocumentsModule],
+  imports: [ContactsModule, DocumentsModule, LedgerModule],
   controllers: [
     VehiclesController,
     ExpensesController,

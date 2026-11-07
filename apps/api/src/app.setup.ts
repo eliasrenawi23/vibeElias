@@ -57,9 +57,20 @@ export const SWAGGER_TAGS: readonly { name: string; description: string }[] = [
     description: 'Traffic fines: auto-matched driver, reassignment deadline, rebill to the driver',
   },
   {
+    name: 'deals',
+    description:
+      'Deals: purchase (vehicle upsert, buy-back), sale with trade-in, consignment sale ' +
+      '(commission / payout); VAT on the margin; payments; disclosure gate; completion / ' +
+      'cancellation; ownership-transfer checklist and 6-working-day deadline',
+  },
+  {
     name: 'documents',
     description:
       'Uploads (pdf / jpeg / png / webp, sniffed), thumbnails and authenticated file streaming',
+  },
+  {
+    name: 'dashboard',
+    description: 'Dashboard KPIs: stock, active leases, receivables, month profit, open deals',
   },
   { name: 'health', description: 'Liveness / readiness' },
 ];

@@ -248,6 +248,28 @@ async function mockApi(page: Page) {
         expenses.unshift(created);
         return json(route, 201, created);
       }
+      if (sub === '/pnl' && method === 'GET') {
+        return json(route, 200, {
+          cycles: [
+            {
+              id: 'cyc_1',
+              kind: 'OWNED',
+              startedAt: '2026-09-01',
+              endedAt: null,
+              open: true,
+              purchasePrice: 60000,
+              salePrice: null,
+              listingPrice: 72000,
+              commission: null,
+              revenue: { sale: 72000, commission: 0, leaseIncome: 0, rebilled: 0, total: 72000 },
+              costs: { purchase: 60000, expenses: 1500, vatOnMargin: 1601.69, total: 63101.69 },
+              profit: 8898.31,
+              unrealised: true,
+            },
+          ],
+          totals: { revenue: 72000, costs: 63101.69, profit: 8898.31 },
+        });
+      }
       if (sub === '/odometer' && method === 'POST') {
         const entry = { id: 'odo_2', ...(body as Json) };
         vehicle.odometer = [entry, ...(vehicle.odometer as Json[])];
@@ -463,7 +485,7 @@ test('phone layout: vehicle actions collapse into a menu', async ({ page }) => {
   await expect(async () => {
     await page.locator('.rm-detail-tabs .ant-tabs-nav-more').click();
     await page.getByRole('option', { name: 'P&L' }).click({ timeout: 2000 });
-    await expect(page.getByText('Coming in milestone 4')).toBeVisible({ timeout: 1000 });
+    await expect(page.getByTestId('pnl-totals')).toBeVisible({ timeout: 1000 });
   }).toPass({ timeout: 15_000 });
   expect(problems).toEqual([]);
 });

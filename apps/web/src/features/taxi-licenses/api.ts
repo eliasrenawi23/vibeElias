@@ -1,6 +1,11 @@
 import type { Paginated, TaxiLicenseCreate, TaxiLicenseUpdate } from '@renawi/shared';
 import { http } from '../../shared/lib/http';
-import type { TaxiLicenseDetail, TaxiLicenseListItem, TaxiLicenseListQuery } from './types';
+import type {
+  TaxiLicenseDetail,
+  TaxiLicenseListItem,
+  TaxiLicenseListQuery,
+  TaxiLicensePnl,
+} from './types';
 
 const licensePath = (id: string) => `/taxi-licenses/${encodeURIComponent(id)}`;
 
@@ -34,4 +39,9 @@ export function updateTaxiLicense(id: string, body: TaxiLicenseUpdate): Promise<
  */
 export function registerVehicle(id: string, vehicleId: string | null): Promise<TaxiLicenseDetail> {
   return http.post<TaxiLicenseDetail>(`${licensePath(id)}/register-vehicle`, { vehicleId });
+}
+
+/** `GET /api/taxi-licenses/:id/pnl` */
+export function fetchTaxiLicensePnl(id: string, signal?: AbortSignal): Promise<TaxiLicensePnl> {
+  return http.get<TaxiLicensePnl>(`${licensePath(id)}/pnl`, { signal });
 }

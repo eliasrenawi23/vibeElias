@@ -13,3 +13,11 @@ export function parseOptionalBody<T>(schema: ZodType<T, ZodTypeDef, unknown>, bo
   }
   return parsed.data;
 }
+
+/**
+ * Parses a REQUIRED request body against a schema the global pipe cannot use (e.g. a
+ * discriminated union, which cannot back a DTO class). Failures become 400 `errors.validation`.
+ */
+export function parseBody<T>(schema: ZodType<T, ZodTypeDef, unknown>, body: unknown): T {
+  return parseOptionalBody(schema, body);
+}

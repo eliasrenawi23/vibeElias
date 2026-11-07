@@ -347,6 +347,17 @@ export type LeaseAlert = z.infer<typeof LeaseAlert>;
 export const FineAlert = z.enum(['reassignDueSoon', 'reassignOverdue']);
 export type FineAlert = z.infer<typeof FineAlert>;
 
+/**
+ * Computed deal alert codes (`alerts` on `GET /deals` items and `GET /deals/:id`).
+ * - disclosureMissing: DRAFT / PENDING sale or consignment sale without a signed disclosure form
+ * - transferDue: completed sale, transfer not DONE, `transferDueAt` within
+ *   `Settings.reminderLeadDays.transfer` days (default 2)
+ * - transferOverdue: completed sale past `transferDueAt` with the transfer not DONE
+ * - unpaid: completed deal with `balanceDue > 0` (or `payoutDue > 0` on a consignment sale)
+ */
+export const DealAlert = z.enum(['disclosureMissing', 'transferDue', 'transferOverdue', 'unpaid']);
+export type DealAlert = z.infer<typeof DealAlert>;
+
 /** What happens to the held deposit when a lease ends (`POST /leases/:id/end`). */
 export const DepositEndAction = z.enum(['HOLD', 'RETURN', 'APPLY']);
 export type DepositEndAction = z.infer<typeof DepositEndAction>;

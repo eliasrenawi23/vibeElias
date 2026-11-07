@@ -36,6 +36,13 @@ export const ErrorKey = {
   alreadyVoided: 'errors.alreadyVoided',
   fineNoDriver: 'errors.fineNoDriver',
   alreadyRebilled: 'errors.alreadyRebilled',
+  // Milestone 4: deals, transfer, expense rebill.
+  disclosureRequired: 'errors.disclosureRequired',
+  dealNotEditable: 'errors.dealNotEditable',
+  dealNotCancellable: 'errors.dealNotCancellable',
+  dealHasPayments: 'errors.dealHasPayments',
+  systemPayment: 'errors.systemPayment',
+  noDriverMatched: 'errors.noDriverMatched',
   invalidCredentials: 'auth.invalidCredentials',
   sessionExpired: 'auth.sessionExpired',
   tooManyAttempts: 'auth.tooManyAttempts',

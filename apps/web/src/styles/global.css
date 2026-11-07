@@ -665,3 +665,69 @@ body {
 .rm-filter-custom .ant-select {
   min-width: 200px;
 }
+
+/* ---- Deals & P&L ---------------------------------------------------------------------------- */
+
+/* Profit / loss: positive green, zero grey, negative red (opposite of a driver balance). */
+.rm-profit {
+  font-weight: var(--rm-font-weight-medium);
+}
+
+.rm-profit-positive {
+  color: var(--rm-color-success);
+}
+
+.rm-profit-zero {
+  color: var(--rm-color-text-tertiary);
+}
+
+.rm-profit-negative {
+  color: var(--rm-color-error);
+}
+
+.rm-small-text {
+  font-size: var(--rm-text-small-size);
+}
+
+.rm-section-title.ant-typography {
+  margin: 0;
+}
+
+.rm-plain-list {
+  margin: 0;
+  padding-inline-start: 18px;
+}
+
+.rm-muted-label {
+  color: var(--rm-color-text-tertiary);
+}
+
+.rm-kpi-alert .ant-statistic-content {
+  color: var(--rm-color-error);
+}
+
+.rm-paid-due {
+  line-height: 1.3;
+}
+
+.rm-list-gap {
+  font-size: var(--rm-text-small-size);
+}
+
+.rm-pnl-card .ant-descriptions {
+  margin-top: 4px;
+}
+
+.rm-pnl-profit-row {
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid var(--rm-color-border);
+}
+
+.rm-pnl-figure {
+  min-width: 140px;
+}
+
+.rm-deal-vehicle {
+  color: inherit;
+}

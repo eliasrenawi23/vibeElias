@@ -66,6 +66,14 @@ describe('Health (e2e)', () => {
         '/api/ledger/balances',
         '/api/ledger/{id}/void',
         '/api/fines/{id}/rebill',
+        '/api/deals',
+        '/api/deals/{id}/complete',
+        '/api/deals/{id}/transfer',
+        '/api/deal-payments/{id}',
+        '/api/vehicles/{id}/pnl',
+        '/api/taxi-licenses/{id}/pnl',
+        '/api/expenses/{id}/rebill',
+        '/api/dashboard/kpis',
       ]),
     );
   });

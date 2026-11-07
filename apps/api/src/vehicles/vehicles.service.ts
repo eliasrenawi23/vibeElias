@@ -294,6 +294,17 @@ export class VehiclesService {
     const result = checkStatusTransition(before.status, dto.status, { hasOpenSegment });
     if (!result.ok) throw AppException.conflict(result.error);
     if (result.noop) return this.get(id);
+    if (before.status === 'RESERVED') {
+      // A car reserved by a draft / pending sale is released by cancelling that deal.
+      const pendingSales = await this.prisma.deal.count({
+        where: {
+          vehicleId: id,
+          type: { in: ['SALE', 'CONSIGNMENT_SALE'] },
+          status: { in: ['DRAFT', 'PENDING'] },
+        },
+      });
+      if (pendingSales > 0) throw AppException.conflict(ErrorKey.dealPending);
+    }
 
     const today = this.clock.today();
     const after = await this.prisma.$transaction(async (tx) => {

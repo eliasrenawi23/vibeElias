@@ -14,13 +14,13 @@ import { LicenseTag } from '../../../shared/ui/LicenseTag';
 import { LoadError } from '../../../shared/ui/LoadError';
 import { Money } from '../../../shared/ui/Money';
 import { PageHeader } from '../../../shared/ui/PageHeader';
-import { PlaceholderPage } from '../../../shared/ui/PlaceholderPage';
 import { PlateNo } from '../../../shared/ui/PlateNo';
 import { StatusTag } from '../../../shared/ui/StatusTag';
 import { EntityDocuments } from '../../documents/components/EntityDocuments';
 import { vehicleKeys } from '../../vehicles/queryKeys';
 import { fetchTaxiLicense, updateTaxiLicense } from '../api';
 import { AnnualFeeText } from '../components/AnnualFeeText';
+import { LicensePnlTab } from '../components/LicensePnlTab';
 import { RegisterVehicleDialog } from '../dialogs/RegisterVehicleDialog';
 import { TaxiLicenseForm } from '../forms/TaxiLicenseForm';
 import { LICENSE_ALERT_COLORS } from '../lib/licenseRules';
@@ -34,9 +34,6 @@ type LicenseTab = (typeof TAB_KEYS)[number];
 function isTab(value: string | null): value is LicenseTab {
   return TAB_KEYS.includes(value as LicenseTab);
 }
-
-/** Milestone that delivers the licence P&L. */
-const PNL_MILESTONE = 4;
 
 const empty = <span className="rm-empty-value">—</span>;
 const leasePath = (id: string) => `/leases/${encodeURIComponent(id)}`;
@@ -182,12 +179,7 @@ function LicenseView({ id }: { id: string }) {
             {
               key: 'pnl',
               label: t('taxiLicenses.tabs.pnl'),
-              children: (
-                <PlaceholderPage
-                  descriptionKey="placeholder.taxiLicensePnl"
-                  milestone={PNL_MILESTONE}
-                />
-              ),
+              children: <LicensePnlTab licenseId={license.id} />,
             },
           ]}
         />

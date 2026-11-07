@@ -26,6 +26,7 @@ import {
   unarchiveContact,
   updateContact,
 } from '../api';
+import { ContactDealsSection } from '../components/ContactDealsSection';
 import { ContactTags } from '../components/ContactTags';
 import { ContactForm } from '../forms/ContactForm';
 import { contactName, isCompany } from '../lib';
@@ -202,6 +203,8 @@ function ContactView({ id }: { id: string }) {
       ) : (
         <ContactSummary contact={contact} />
       )}
+
+      {!editing && <ContactDealsSection contactId={id} />}
 
       <EntityDocuments owner={{ contactId: id }} onChange={() => void refresh()} />
 

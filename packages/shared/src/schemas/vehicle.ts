@@ -214,6 +214,23 @@ export const ExpenseRebillSchema = z.object({
 });
 export type ExpenseRebill = z.infer<typeof ExpenseRebillSchema>;
 
+/**
+ * Body of `POST /expenses/:id/rebill` as implemented by the API (milestone 4): a CHARGE on the
+ * driver whose lease segment held the car on the expense date (or `driverId`). Charge kind by
+ * category: FINE / REPAIR / INSURANCE / TEST keep their name, everything else is OTHER; amount =
+ * the expense amount; date (and due date) default to today.
+ */
+export const ExpenseRebillRequestSchema = z.object({
+  /** Override the driver matched from the lease segment. */
+  driverId: idString.optional(),
+  /** Charge date and due date (default: today). */
+  date: isoDate.optional(),
+  /** Defaults to the expense description. */
+  description: optionalText(500),
+});
+export type ExpenseRebillRequest = z.infer<typeof ExpenseRebillRequestSchema>;
+export type ExpenseRebillRequestInput = z.input<typeof ExpenseRebillRequestSchema>;
+
 /* ------------------------------------------------------------------------------------------ */
 /* Insurance                                                                                  */
 /* ------------------------------------------------------------------------------------------ */

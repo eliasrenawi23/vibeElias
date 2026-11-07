@@ -9,7 +9,6 @@ import { useEnumLabel } from '../../../shared/lib/enums';
 import { LicenseTag } from '../../../shared/ui/LicenseTag';
 import { LoadError } from '../../../shared/ui/LoadError';
 import { PageHeader } from '../../../shared/ui/PageHeader';
-import { PlaceholderPage } from '../../../shared/ui/PlaceholderPage';
 import { PlateNo } from '../../../shared/ui/PlateNo';
 import { StatusTag } from '../../../shared/ui/StatusTag';
 import { YearText } from '../../../shared/ui/YearText';
@@ -17,11 +16,13 @@ import { EntityDocuments } from '../../documents/components/EntityDocuments';
 import { fetchVehicle, updateVehicle } from '../api';
 import { AlertBadges } from '../components/AlertBadges';
 import { VehicleActions, type VehicleActionKey } from '../components/VehicleActions';
+import { VehicleDealsTab } from '../components/VehicleDealsTab';
 import { VehicleExpensesTab } from '../components/VehicleExpensesTab';
 import { VehicleFinesTab } from '../components/VehicleFinesTab';
 import { VehicleInfoTab } from '../components/VehicleInfoTab';
 import { VehicleInsuranceTab } from '../components/VehicleInsuranceTab';
 import { VehicleLeasesTab } from '../components/VehicleLeasesTab';
+import { VehiclePnlTab } from '../components/VehiclePnlTab';
 import { VehiclesBackLink } from '../components/VehiclesBackLink';
 import { ConsignDialog } from '../dialogs/ConsignDialog';
 import { ExpenseDialog } from '../dialogs/ExpenseDialog';
@@ -49,9 +50,6 @@ type VehicleTab = (typeof TAB_KEYS)[number];
 function isTab(value: string | null): value is VehicleTab {
   return TAB_KEYS.includes(value as VehicleTab);
 }
-
-/** Milestone that delivers the placeholder tabs (see the plan). */
-const DEALS_MILESTONE = 4;
 
 /** `/vehicles/:id`: header with actions, and the vehicle file in tabs. */
 export function VehicleDetailPage() {
@@ -193,6 +191,7 @@ function VehicleView({ id }: { id: string }) {
               children: (
                 <VehicleExpensesTab
                   vehicleId={vehicle.id}
+                  isTaxi={vehicle.isTaxi}
                   onAdd={() => setDialog('expense')}
                   onChanged={() => void refresh()}
                 />
@@ -223,12 +222,7 @@ function VehicleView({ id }: { id: string }) {
             {
               key: 'deals',
               label: t('vehicles.detailTabs.deals'),
-              children: (
-                <PlaceholderPage
-                  descriptionKey="placeholder.vehicleDeals"
-                  milestone={DEALS_MILESTONE}
-                />
-              ),
+              children: <VehicleDealsTab vehicle={vehicle} />,
             },
             {
               key: 'leases',
@@ -243,12 +237,7 @@ function VehicleView({ id }: { id: string }) {
             {
               key: 'pnl',
               label: t('vehicles.detailTabs.pnl'),
-              children: (
-                <PlaceholderPage
-                  descriptionKey="placeholder.vehiclePnl"
-                  milestone={DEALS_MILESTONE}
-                />
-              ),
+              children: <VehiclePnlTab vehicleId={vehicle.id} />,
             },
           ]}
         />

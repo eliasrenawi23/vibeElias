@@ -1,17 +1,22 @@
+import { http } from '../../shared/lib/http';
+
 /**
- * Dashboard data. `GET /dashboard/kpis` and `GET /reminders/feed` arrive in milestone 5; until
- * then "profit this month" is a zero sample. Live already: vehicles in stock
- * (`GET /vehicles?status=IN_STOCK&pageSize=1`), active leases (`GET /leases?status=ACTIVE&pageSize=1`)
- * and driver receivables (sum of the positive balances of `GET /ledger/balances`).
+ * Dashboard data. The KPIs come from `GET /dashboard/kpis` (live since milestone 4); the expiry
+ * feed (`GET /reminders/feed`) arrives in milestone 5.
  */
 
+/** `GET /api/dashboard/kpis` */
 export interface DashboardKpis {
   vehiclesInStock: number;
   activeLeases: number;
   /** Sum of positive driver balances (ILS). */
   receivables: number;
-  /** Realised profit of the current month (ILS). */
+  /** Realised profit of the current month (ILS; negative = loss). */
   monthProfit: number;
+  /** Draft and pending deals. */
+  openDeals: number;
+  /** Completed sales past their 6-working-day transfer deadline. */
+  transfersOverdue: number;
 }
 
 export interface ExpiringItem {
@@ -23,18 +28,8 @@ export interface ExpiringItem {
 /** Days ahead shown in the "expiring soon" list. */
 export const EXPIRING_WINDOW_DAYS = 30;
 
-/** Milestone that replaces the sample figures with live data. */
-export const LIVE_DASHBOARD_MILESTONE = 5;
-
-export const SAMPLE_KPIS: Readonly<DashboardKpis> = Object.freeze({
-  vehiclesInStock: 0,
-  activeLeases: 0,
-  receivables: 0,
-  monthProfit: 0,
-});
-
-export async function fetchKpis(): Promise<DashboardKpis> {
-  return { ...SAMPLE_KPIS };
+export function fetchKpis(signal?: AbortSignal): Promise<DashboardKpis> {
+  return http.get<DashboardKpis>('/dashboard/kpis', { signal });
 }
 
 export async function fetchExpiring(_days: number): Promise<ExpiringItem[]> {

@@ -1,6 +1,7 @@
 import { Prisma } from '@prisma/client';
 import {
   DEFAULT_LEASE_TERMS,
+  DEFAULT_VAT_RATE,
   DEFAULT_REMINDER_LEAD_DAYS,
   DefaultLeaseTermsSchema,
   ReminderLeadDaysSchema,
@@ -18,6 +19,12 @@ export async function readLeadDays(prisma: Reader): Promise<ReminderLeadDays> {
   });
   const parsed = ReminderLeadDaysSchema.safeParse(row?.reminderLeadDays ?? {});
   return parsed.success ? parsed.data : { ...DEFAULT_REMINDER_LEAD_DAYS };
+}
+
+/** `Settings.vatRate` (percent; 18 when the row does not exist yet). Read-only. */
+export async function readVatRate(prisma: Reader): Promise<Prisma.Decimal> {
+  const row = await prisma.settings.findUnique({ where: { id: 1 }, select: { vatRate: true } });
+  return row?.vatRate ?? new Prisma.Decimal(DEFAULT_VAT_RATE);
 }
 
 /** `Settings.defaultLeaseTerms.responsibilities` (default: the driver pays everything). */

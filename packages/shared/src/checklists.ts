@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { FuelLevel } from './enums.js';
+import { FuelLevel, type TransferStatus } from './enums.js';
 import { isoDate, nonNegativeMoney, optionalText } from './primitives.js';
 
 /**
@@ -60,6 +60,22 @@ export function isTransferChecklistComplete(
 ): boolean {
   if (!checklist) return false;
   return transferChecklistKeysFor(isTaxi).every((k) => checklist[k] === true);
+}
+
+/**
+ * Transfer status implied by the ticked items: none -> NOT_STARTED, some -> IN_PROGRESS,
+ * every applicable item -> DONE. (`PATCH /deals/:id/transfer` never lowers the stored status
+ * unless a status is sent explicitly; an explicit DONE wins.)
+ */
+export function transferStatusFromChecklist(
+  checklist: Partial<TransferChecklist> | null | undefined,
+  isTaxi: boolean,
+): TransferStatus {
+  if (!checklist) return 'NOT_STARTED';
+  const keys = transferChecklistKeysFor(isTaxi);
+  const ticked = keys.filter((k) => checklist[k] === true).length;
+  if (ticked === 0) return 'NOT_STARTED';
+  return ticked === keys.length ? 'DONE' : 'IN_PROGRESS';
 }
 
 /* ------------------------------------------------------------------------------------------ */

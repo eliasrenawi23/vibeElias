@@ -13,6 +13,7 @@
  * `npm run db:reset` drops everything and seeds again with fresh relative dates.
  */
 import {
+  CommissionMode,
   LedgerEntry,
   PaymentMethod,
   Prisma,
@@ -211,6 +212,40 @@ async function migrateLegacySpelling(): Promise<void> {
   });
   if (licences.count)
     console.log(`Fixed the holder name spelling on ${licences.count} demo licences.`);
+}
+
+/**
+ * Milestone 4 deal rules applied to demo rows of earlier seed versions (no-op on fresh or already
+ * fixed data; rows changed in the app are left alone): a consignment sale has VAT mode NONE and
+ * the commission / payout of its cycle rule, and a car with a draft / pending sale is RESERVED.
+ */
+async function fixDemoDeals(consignment: { commission: number; payout: number }): Promise<void> {
+  const rav4 = await prisma.deal.updateMany({
+    where: {
+      id: 'seed_deal_consign_rav4',
+      status: { in: ['DRAFT', 'PENDING'] },
+      OR: [{ vatMode: { not: 'NONE' } }, { commissionAmount: null }, { payoutAmount: null }],
+    },
+    data: {
+      vatMode: 'NONE',
+      commissionAmount: ils(consignment.commission),
+      payoutAmount: ils(consignment.payout),
+    },
+  });
+  const draft = await prisma.deal.findUnique({
+    where: { id: 'seed_deal_draft_sportage' },
+    select: { status: true },
+  });
+  const sportage =
+    draft && (draft.status === 'DRAFT' || draft.status === 'PENDING')
+      ? await prisma.vehicle.updateMany({
+          where: { id: 'seed_v_kia_sportage', status: 'IN_STOCK' },
+          data: { status: 'RESERVED' },
+        })
+      : { count: 0 };
+  if (rav4.count || sportage.count) {
+    console.log('Applied the deal rules to older demo deals (consignment VAT, reserved car).');
+  }
 }
 
 /* ------------------------------------------------------------------------------------------ */
@@ -795,7 +830,8 @@ async function seedDemo(adminId: string, T: string): Promise<void> {
       gearbox: 'AUTO',
       engineCc: 1598,
       hand: 2,
-      status: 'IN_STOCK',
+      // A draft sale (seed_deal_draft_sportage) reserves the car.
+      status: 'RESERVED',
       ownership: 'OWNED',
       currentKm: 58_000,
       registrationExpiry: day(addDays(T, 200)),
@@ -1016,7 +1052,16 @@ async function seedDemo(adminId: string, T: string): Promise<void> {
 
   /* ---------------------------------- Deals ---------------------------------- */
   const vatRate = new Prisma.Decimal('18.00');
-  const consignment = computeCommission('PERCENT', 5, 128_000, 120_000);
+  const rav4Cycle = cycles.find(
+    (c) => c.id === 'seed_cyc_rav4',
+  ) as Prisma.InventoryCycleUncheckedCreateInput;
+  const consignmentPrice = 128_000;
+  const consignment = computeCommission(
+    rav4Cycle.commissionMode as CommissionMode,
+    Number(rav4Cycle.commissionValue),
+    consignmentPrice,
+    Number(rav4Cycle.minNetToConsignor),
+  );
   const saleChecklist = {
     ...createTransferChecklist(),
     idCopies: true,
@@ -1105,9 +1150,10 @@ async function seedDemo(adminId: string, T: string): Promise<void> {
       cycleId: 'seed_cyc_rav4',
       counterpartyId: 'seed_c_buyer_levi',
       date: day(addDays(T, -1)),
-      price: ils(128_000),
+      price: ils(consignmentPrice),
       listPrice: ils(131_000),
-      vatMode: 'MARGIN',
+      // The consignor keeps title: VAT is due on our commission at business level.
+      vatMode: 'NONE',
       vatRate,
       commissionAmount: ils(consignment.commission),
       payoutAmount: ils(consignment.payout),
@@ -1138,6 +1184,8 @@ async function seedDemo(adminId: string, T: string): Promise<void> {
       () => prisma.deal.upsert({ where: { id: d.id as string }, update: {}, create: d }),
     );
   }
+
+  await fixDemoDeals(consignment);
 
   // Link cycles to their purchase / sale deals (idempotent update).
   const cycleLinks: [string, Prisma.InventoryCycleUncheckedUpdateInput][] = [

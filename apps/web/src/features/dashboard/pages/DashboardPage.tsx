@@ -1,45 +1,37 @@
-import { CarOutlined, FileProtectOutlined, RiseOutlined, WalletOutlined } from '@ant-design/icons';
+import {
+  CarOutlined,
+  ClockCircleOutlined,
+  FileProtectOutlined,
+  RiseOutlined,
+  SwapOutlined,
+  WalletOutlined,
+} from '@ant-design/icons';
 import { useQuery } from '@tanstack/react-query';
-import { Alert, Card, Col, Flex, Row } from 'antd';
+import { Card, Col, Flex, Row } from 'antd';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../../app/providers/AuthProvider';
 import { isolateAuto } from '../../../shared/lib/bidi';
 import { EmptyState } from '../../../shared/ui/EmptyState';
+import { LoadError } from '../../../shared/ui/LoadError';
 import { PageHeader } from '../../../shared/ui/PageHeader';
-import { countLeases } from '../../leases/api';
-import { leaseKeys } from '../../leases/queryKeys';
-import { fetchReceivables } from '../../ledger/api';
-import { ledgerKeys } from '../../ledger/queryKeys';
-import { countVehicles } from '../../vehicles/api';
-import { vehicleKeys } from '../../vehicles/queryKeys';
-import { EXPIRING_WINDOW_DAYS, fetchExpiring, fetchKpis, LIVE_DASHBOARD_MILESTONE } from '../api';
+import { EXPIRING_WINDOW_DAYS, fetchExpiring, fetchKpis } from '../api';
 import { KpiCard } from '../components/KpiCard';
 import { dashboardKeys } from '../queryKeys';
 
 export function DashboardPage() {
   const { t } = useTranslation();
   const { user } = useAuth();
-  const kpis = useQuery({ queryKey: dashboardKeys.kpis(), queryFn: fetchKpis });
-  // Live since milestone 2: `GET /vehicles?status=IN_STOCK&pageSize=1` -> `total`.
-  const inStock = useQuery({
-    queryKey: vehicleKeys.count('IN_STOCK'),
-    queryFn: ({ signal }) => countVehicles('IN_STOCK', signal),
-  });
-  // Live since milestone 3: `GET /leases?status=ACTIVE&pageSize=1` -> `total`, and the sum of
-  // the positive balances of `GET /ledger/balances`.
-  const activeLeases = useQuery({
-    queryKey: leaseKeys.count('ACTIVE'),
-    queryFn: ({ signal }) => countLeases('ACTIVE', signal),
-  });
-  const receivables = useQuery({
-    queryKey: ledgerKeys.receivables(),
-    queryFn: ({ signal }) => fetchReceivables(signal),
+  // `GET /dashboard/kpis`: stock, active leases, receivables, month profit, open deals, overdue transfers.
+  const kpis = useQuery({
+    queryKey: dashboardKeys.kpis(),
+    queryFn: ({ signal }) => fetchKpis(signal),
   });
   const expiring = useQuery({
     queryKey: dashboardKeys.expiring(EXPIRING_WINDOW_DAYS),
     queryFn: () => fetchExpiring(EXPIRING_WINDOW_DAYS),
   });
   const k = kpis.data;
+  const loading = kpis.isPending;
 
   return (
     <Flex vertical gap={24}>
@@ -48,47 +40,69 @@ export function DashboardPage() {
         title={user ? t('dashboard.welcome', { name: isolateAuto(user.name) }) : undefined}
         subtitle={t('dashboard.subtitle')}
       />
-      <Alert
-        type="info"
-        showIcon
-        title={t('dashboard.sampleData', { n: LIVE_DASHBOARD_MILESTONE })}
-      />
-      <Row gutter={[16, 16]}>
-        <Col xs={24} sm={12} xl={6}>
-          <KpiCard
-            title={t('dashboard.kpis.vehiclesInStock')}
-            value={inStock.data ?? 0}
-            icon={<CarOutlined />}
-            loading={inStock.isPending}
-          />
-        </Col>
-        <Col xs={24} sm={12} xl={6}>
-          <KpiCard
-            title={t('dashboard.kpis.activeLeases')}
-            value={activeLeases.data ?? 0}
-            icon={<FileProtectOutlined />}
-            loading={activeLeases.isPending}
-          />
-        </Col>
-        <Col xs={24} sm={12} xl={6}>
-          <KpiCard
-            title={t('dashboard.kpis.receivables')}
-            value={receivables.data ?? 0}
-            icon={<WalletOutlined />}
-            money
-            loading={receivables.isPending}
-          />
-        </Col>
-        <Col xs={24} sm={12} xl={6}>
-          <KpiCard
-            title={t('dashboard.kpis.monthProfit')}
-            value={k?.monthProfit ?? 0}
-            icon={<RiseOutlined />}
-            money
-            loading={kpis.isPending}
-          />
-        </Col>
-      </Row>
+      {kpis.isError ? (
+        <LoadError error={kpis.error} onRetry={() => void kpis.refetch()} />
+      ) : (
+        <Row gutter={[16, 16]} data-testid="dashboard-kpis">
+          <Col xs={24} sm={12} xl={8}>
+            <KpiCard
+              title={t('dashboard.kpis.vehiclesInStock')}
+              value={k?.vehiclesInStock ?? 0}
+              icon={<CarOutlined />}
+              loading={loading}
+              data-testid="kpi-vehiclesInStock"
+            />
+          </Col>
+          <Col xs={24} sm={12} xl={8}>
+            <KpiCard
+              title={t('dashboard.kpis.activeLeases')}
+              value={k?.activeLeases ?? 0}
+              icon={<FileProtectOutlined />}
+              loading={loading}
+              data-testid="kpi-activeLeases"
+            />
+          </Col>
+          <Col xs={24} sm={12} xl={8}>
+            <KpiCard
+              title={t('dashboard.kpis.receivables')}
+              value={k?.receivables ?? 0}
+              icon={<WalletOutlined />}
+              money
+              loading={loading}
+              data-testid="kpi-receivables"
+            />
+          </Col>
+          <Col xs={24} sm={12} xl={8}>
+            <KpiCard
+              title={t('dashboard.kpis.monthProfit')}
+              value={k?.monthProfit ?? 0}
+              icon={<RiseOutlined />}
+              profit
+              loading={loading}
+              data-testid="kpi-monthProfit"
+            />
+          </Col>
+          <Col xs={24} sm={12} xl={8}>
+            <KpiCard
+              title={t('dashboard.kpis.openDeals')}
+              value={k?.openDeals ?? 0}
+              icon={<SwapOutlined />}
+              loading={loading}
+              data-testid="kpi-openDeals"
+            />
+          </Col>
+          <Col xs={24} sm={12} xl={8}>
+            <KpiCard
+              title={t('dashboard.kpis.transfersOverdue')}
+              value={k?.transfersOverdue ?? 0}
+              icon={<ClockCircleOutlined />}
+              alertWhenPositive
+              loading={loading}
+              data-testid="kpi-transfersOverdue"
+            />
+          </Col>
+        </Row>
+      )}
       <Card title={t('dashboard.expiringSoon')} variant="borderless" loading={expiring.isPending}>
         {expiring.data?.length ? null : (
           <EmptyState

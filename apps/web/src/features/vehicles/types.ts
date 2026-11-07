@@ -161,3 +161,41 @@ export interface ExpenseListQuery {
   paidBy?: PaidBy;
   cycleId?: string;
 }
+
+/** One inventory cycle of `GET /api/vehicles/:id/pnl`. */
+export interface CyclePnl {
+  id: string;
+  kind: CycleKind;
+  startedAt: string;
+  endedAt: string | null;
+  open: boolean;
+  purchasePrice: number | null;
+  salePrice: number | null;
+  listingPrice: number | null;
+  commission: number | null;
+  revenue: {
+    sale: number;
+    commission: number;
+    leaseIncome: number;
+    rebilled: number;
+    total: number;
+  };
+  costs: {
+    purchase: number;
+    expenses: number;
+    vatOnMargin: number;
+    total: number;
+  };
+  profit: number;
+  /**
+   * Open cycle: the profit is an estimate at the listing price. A number is the estimated
+   * profit; `true` flags the cycle's `profit` as unrealised.
+   */
+  unrealised?: number | boolean | null;
+}
+
+/** `GET /api/vehicles/:id/pnl` */
+export interface VehiclePnl {
+  cycles: CyclePnl[];
+  totals: { revenue: number; costs: number; profit: number };
+}

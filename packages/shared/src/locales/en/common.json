@@ -172,7 +172,7 @@
     "invalidTransition": "This status change is not allowed",
     "useDeal": "Purchases and sales are recorded through a deal",
     "cycleOpen": "The vehicle already has an open inventory cycle",
-    "noOpenCycle": "This inventory cycle is already closed",
+    "noOpenCycle": "The car has no open inventory cycle",
     "vehicleLeased": "The vehicle is on an active lease; end the lease segment first",
     "dealPending": "A deal for this vehicle is still pending",
     "expenseRebilled": "This expense was already charged to a driver and cannot be changed",
@@ -188,8 +188,14 @@
     "depositInsufficient": "The amount is more than the deposit held",
     "alreadyVoided": "This entry was already voided",
     "fineNoDriver": "No driver is matched to this fine",
-    "alreadyRebilled": "This fine was already charged to the driver",
-    "vehicleNotTaxi": "This vehicle is not registered as a taxi"
+    "alreadyRebilled": "This was already charged to the driver",
+    "vehicleNotTaxi": "This vehicle is not registered as a taxi",
+    "dealNotEditable": "This deal can no longer be changed this way",
+    "disclosureRequired": "The buyer must sign the disclosure form before the sale is completed",
+    "dealNotCancellable": "This deal can no longer be cancelled",
+    "dealHasPayments": "Delete the deal's payments before cancelling it",
+    "systemPayment": "Trade-in payments are created by the system and cannot be deleted",
+    "noDriverMatched": "No driver had this car on that date; choose the driver"
   },
   "language": {
     "label": "Language",
@@ -543,26 +549,23 @@
       "vehiclesInStock": "Vehicles in stock",
       "activeLeases": "Active leases",
       "receivables": "Driver receivables",
-      "monthProfit": "Profit this month"
+      "monthProfit": "Profit this month",
+      "openDeals": "Open deals",
+      "transfersOverdue": "Transfers overdue"
     },
     "expiringSoon": "Expiring soon",
-    "expiringEmpty": "Nothing expires in the next {{days}} days",
-    "sampleData": "Profit this month is a sample figure until milestone {{n}}."
+    "expiringEmpty": "Nothing expires in the next {{days}} days"
   },
   "placeholder": {
     "title": "This section is on its way",
     "milestone": "Coming in milestone {{n}}",
     "vehicles": "Stock, taxis and drivers' cars with expenses, insurance, odometer and documents.",
-    "deals": "Purchases, sales, trade-ins and consignment with VAT on the margin.",
     "contacts": "Buyers, sellers, garages, insurers and leads with follow-ups.",
     "reminders": "Every expiry and deadline in one feed.",
     "reports": "Profit, inventory ageing, receivables, expenses and the trade book.",
     "settingsContracts": "Default lease terms, responsibilities and contract clauses.",
     "settingsReminders": "How many days ahead each reminder appears.",
-    "settingsBackup": "Nightly backup status.",
-    "vehicleDeals": "Purchase, sale and consignment deals of this vehicle.",
-    "vehiclePnl": "Profit and loss per inventory cycle.",
-    "taxiLicensePnl": "Rent income, fees and the purchase price of this licence."
+    "settingsBackup": "Nightly backup status."
   },
   "settings": {
     "nav": {
@@ -677,7 +680,11 @@
       "noResults": "No contacts found"
     },
     "noDriverProfile": "This contact is tagged as a driver but has no driver profile yet.",
-    "createDriverProfile": "Create a driver profile"
+    "createDriverProfile": "Create a driver profile",
+    "deals": {
+      "title": "Deals",
+      "empty": "No deals with this contact"
+    }
   },
   "vehicles": {
     "tabs": {
@@ -841,7 +848,15 @@
       "deleteTitle": "Delete expense",
       "added": "Expense added",
       "total": "Total expenses",
-      "paidByUs": "Paid by us"
+      "paidByUs": "Paid by us",
+      "rebill": "Rebill to driver",
+      "rebillTitle": "Rebill expense to driver",
+      "rebillConfirm": "Add this expense as a charge to the driver ledger? The driver who had the car on that date is matched automatically.",
+      "rebillDriver": "Driver (optional)",
+      "rebillDriverHelp": "Pick a driver to override the automatic match.",
+      "rebillAuto": "Matched automatically by date",
+      "rebilled": "Expense charged to the driver",
+      "rebilledTag": "Rebilled"
     },
     "insurance": {
       "title": "Insurance policies",
@@ -866,6 +881,32 @@
     "picker": {
       "placeholder": "Search by plate, make or model",
       "noResults": "No vehicles found"
+    },
+    "dealsTab": {
+      "sell": "Sell this car",
+      "purchase": "Record purchase",
+      "consignmentSale": "Consignment sale",
+      "empty": "No deals for this car"
+    },
+    "pnl": {
+      "totals": "All cycles",
+      "revenue": "Revenue",
+      "costs": "Costs",
+      "profit": "Profit",
+      "estimatedProfit": "Estimated profit",
+      "open": "open",
+      "unrealised": "Unrealised",
+      "unrealisedHint": "Estimated at the listing price until the car is sold.",
+      "sale": "Sale price",
+      "commission": "Commission",
+      "leaseIncome": "Lease income",
+      "rebilled": "Rebilled to drivers",
+      "purchase": "Purchase price",
+      "expenses": "Expenses",
+      "vatOnMargin": "VAT on margin",
+      "total": "Total",
+      "empty": "No inventory cycles yet",
+      "atListingPrice": "At the listing price"
     }
   },
   "taxiLicenses": {
@@ -933,6 +974,19 @@
       "detach": "Detach the car",
       "registered": "Car registered on the licence",
       "cleared": "Car detached from the licence"
+    },
+    "pnl": {
+      "acquisitionPrice": "Purchase price",
+      "salePrice": "Sale price",
+      "totalIncome": "Total income",
+      "net": "Net result",
+      "netHint": "Total income minus the purchase price (plus the sale price once sold).",
+      "byYear": "Income by year",
+      "year": "Year",
+      "rentIncome": "Rent",
+      "otherIncome": "Other income",
+      "total": "Total",
+      "empty": "No income recorded yet"
     }
   },
   "drivers": {
@@ -1252,6 +1306,202 @@
     "alerts": {
       "reassignDueSoon": "Reassign soon",
       "reassignOverdue": "Reassignment overdue"
+    }
+  },
+  "deals": {
+    "new": "New deal",
+    "newMenu": "Choose the deal type",
+    "newTitle": "New deal",
+    "detailTitle": "Deal",
+    "listEmpty": "No deals yet",
+    "listEmptyHint": "Record purchases, sales with or without a trade-in, and consignment sales.",
+    "searchPlaceholder": "Search by deal number, plate or name",
+    "notFound": "Deal not found",
+    "loadError": "Could not load the deal",
+    "created": "Deal created",
+    "actionsMenu": "Deal actions",
+    "settled": "Settled",
+    "newOfType": {
+      "PURCHASE": "New purchase",
+      "SALE": "New sale",
+      "CONSIGNMENT_SALE": "New consignment sale"
+    },
+    "defaultWarranty": "30-day warranty on the engine and gearbox. The warranty does not cover wear and tear, tyres, the battery or accident damage.",
+    "fields": {
+      "dealNo": "Deal no.",
+      "type": "Type",
+      "date": "Deal date",
+      "vehicle": "Car",
+      "counterparty": "Counterparty",
+      "buyer": "Buyer",
+      "seller": "Seller",
+      "consignor": "Consignor",
+      "price": "Price",
+      "purchasePrice": "Purchase price",
+      "listPrice": "List price (Levi Yitzhak)",
+      "vatMode": "VAT",
+      "vatRate": "VAT rate",
+      "vatBase": "VAT base",
+      "vatAmount": "VAT amount",
+      "sellerIsVatBusiness": "The seller is a VAT-registered business",
+      "warrantyText": "Warranty",
+      "paidDue": "Paid / due",
+      "due": "Due",
+      "paidIn": "Received",
+      "paidOut": "Paid out",
+      "balanceDue": "Still due",
+      "payoutDue": "Payout still due",
+      "tradeInValue": "Trade-in value",
+      "commission": "Commission",
+      "payout": "Payout to the consignor",
+      "commissionRule": "Commission rule",
+      "askingPrice": "Asking price",
+      "minNet": "Minimum net to the consignor",
+      "transfer": "Transfer",
+      "transferStatus": "Transfer status",
+      "transferDueAt": "Transfer due by",
+      "transferredAt": "Transferred on",
+      "disclosureSignedAt": "Disclosure signed",
+      "completedAt": "Completed",
+      "cancelledAt": "Cancelled",
+      "daysInStock": "Days in stock",
+      "inStockSince": "In stock since"
+    },
+    "alerts": {
+      "disclosureMissing": "Disclosure not signed",
+      "transferDue": "Transfer due",
+      "transferOverdue": "Transfer overdue",
+      "unpaid": "Not fully paid"
+    },
+    "gap": {
+      "below": "{{pct}} below list",
+      "above": "{{pct}} above list",
+      "equal": "Same as the list price"
+    },
+    "commission": {
+      "ruleFixed": "Fixed {{amount}}",
+      "rulePercent": "{{pct}} of the price",
+      "ruleSurplus": "Everything above {{amount}}"
+    },
+    "form": {
+      "sections": {
+        "vehicle": "Car",
+        "terms": "Deal terms",
+        "vat": "VAT",
+        "tradeIn": "Trade-in",
+        "commission": "Commission and payout",
+        "warranty": "Warranty and notes",
+        "notes": "Notes"
+      },
+      "existingVehicle": "Car in the system",
+      "newVehicle": "New car",
+      "purchasePickerHelp": "Cars outside the stock, returned or sold earlier (buy-back). Search by plate.",
+      "salePickerHelp": "Our cars in stock.",
+      "consignmentPickerHelp": "Consignment cars in stock.",
+      "listPriceHelp": "Price-guide value, for comparison",
+      "sellerVatHint": "The seller deducted input VAT: when the car is resold, VAT is charged on the full price instead of the margin.",
+      "purchaseUnknown": "No purchase price recorded",
+      "noConsignmentTerms": "This car has no consignment terms yet.",
+      "vatForcedFull": "This car was bought from a VAT-registered business, so the sale carries full VAT.",
+      "vatMarginBase": "Margin (price minus purchase price)",
+      "vatFullBase": "Price incl. VAT",
+      "vatNoPurchase": "The purchase price is unknown; VAT on the margin is computed when the deal is completed.",
+      "vatEnterPrice": "Enter the price to see the VAT.",
+      "tradeInSwitch": "The buyer trades in a car",
+      "tradeInHelp": "Trade-ins are usually valued 5–15% under the list price.",
+      "tradeInListPrice": "List price of the trade-in",
+      "cashDue": "Cash due from the buyer",
+      "cashDueHint": "(price minus the trade-in value)",
+      "noTradeIn": "No trade-in.",
+      "belowMinNet": "The payout is below the minimum net agreed with the consignor.",
+      "commissionEnterPrice": "Enter the price to compute the commission and the payout.",
+      "warrantyHelp": "Printed on the sale agreement in Hebrew.",
+      "submit": "Create deal"
+    },
+    "validation": {
+      "tradeInOverPrice": "The trade-in value cannot be more than the price"
+    },
+    "tabs": {
+      "summary": "Summary",
+      "payments": "Payments",
+      "transfer": "Transfer",
+      "documents": "Documents"
+    },
+    "summary": {
+      "price": "Price",
+      "vat": "VAT",
+      "tradeIn": "Trade-in",
+      "tradeInDeal": "Purchase deal",
+      "tradeInForText": "This purchase is the trade-in of sale",
+      "consignment": "Consignment",
+      "dates": "Dates"
+    },
+    "edit": {
+      "title": "Edit deal",
+      "completedHint": "A completed deal: only the warranty and notes can be changed."
+    },
+    "disclosure": {
+      "action": "Record disclosure",
+      "title": "Disclosure form",
+      "intro": "The buyer countersigned the disclosure form (required before a sale is completed).",
+      "signedAt": "Signed on",
+      "uploadHint": "Upload the signed form under Documents with the type “Disclosure form”.",
+      "confirm": "Record",
+      "saved": "Disclosure recorded"
+    },
+    "complete": {
+      "action": "Complete deal",
+      "title": "Complete deal",
+      "confirm": "Complete",
+      "saleIntro": "Completing the sale closes the car's inventory cycle and starts the 6-working-day deadline for the ownership transfer.",
+      "purchaseIntro": "Completing the purchase adds the car to the stock.",
+      "blockersTitle": "Before completing:",
+      "blockers": {
+        "disclosureMissing": "The buyer has not signed the disclosure form yet.",
+        "vehicleLeased": "The car is still on an active lease; end the lease first."
+      },
+      "date": "Completion date",
+      "transferDue": "Ownership transfer due by",
+      "done": "Deal completed"
+    },
+    "cancel": {
+      "action": "Cancel deal",
+      "title": "Cancel deal",
+      "intro": "The deal is marked as cancelled and kept for the record.",
+      "reason": "Reason",
+      "confirm": "Cancel deal",
+      "done": "Deal cancelled"
+    },
+    "payments": {
+      "title": "Payments",
+      "add": "Record payment",
+      "addTitle": "Record payment",
+      "empty": "No payments yet",
+      "direction": "Direction",
+      "directions": {
+        "IN": "Money in",
+        "OUT": "Money out"
+      },
+      "system": "System",
+      "systemHint": "Created with the trade-in; it cannot be deleted.",
+      "contact": "Paid by / to",
+      "contactHelp": "Defaults to the buyer or seller (the consignor for a payout).",
+      "stillDue": "Still due:",
+      "deleteTitle": "Delete payment",
+      "deleteConfirm": "Delete this payment?",
+      "saved": "Payment recorded",
+      "deleted": "Payment deleted",
+      "cancelled": "Payments cannot be added to a cancelled deal."
+    },
+    "transfer": {
+      "due": "Due",
+      "overdue": "Overdue",
+      "dueHint": "The buyer must be registered within 6 working days of the sale.",
+      "progress": "{{done}} of {{total}} done",
+      "markDone": "Mark transferred",
+      "markTitle": "Ownership transfer done",
+      "transferred": "Ownership transfer recorded",
+      "doneNotice": "Ownership has been transferred to the buyer."
     }
   }
 }

@@ -4,6 +4,7 @@ import {
   CycleReturnSchema,
   ExpenseCreateSchema,
   ExpenseQuerySchema,
+  ExpenseRebillRequestSchema,
   ExpenseUpdateSchema,
   InsuranceCreateSchema,
   InsuranceQuerySchema,
@@ -25,6 +26,8 @@ export class VehicleStatusChangeDto extends createZodDto(VehicleStatusChangeSche
 export class ExpenseCreateDto extends createZodDto(ExpenseCreateSchema) {}
 export class ExpenseUpdateDto extends createZodDto(ExpenseUpdateSchema) {}
 export class ExpenseQueryDto extends createZodDto(ExpenseQuerySchema) {}
+/** Body of `POST /expenses/:id/rebill` (optional; parsed with `parseOptionalBody`). */
+export class ExpenseRebillDto extends createZodDto(ExpenseRebillRequestSchema) {}
 
 export class InsuranceCreateDto extends createZodDto(InsuranceCreateSchema) {}
 export class BusinessInsuranceCreateDto extends createZodDto(BusinessInsuranceCreateSchema) {}

@@ -72,7 +72,9 @@ export class VehiclesController {
       'LEASED->IN_STOCK (no open lease segment), EXTERNAL->IN_STOCK (becomes OWNED, opens a cycle)',
   })
   @ApiConflictResponse({
-    description: 'errors.invalidTransition | errors.useDeal (SOLD) | errors.vehicleLeased',
+    description:
+      'errors.invalidTransition | errors.useDeal (SOLD) | errors.vehicleLeased | ' +
+      'errors.dealPending (reserved by a draft / pending sale)',
   })
   changeStatus(
     @Param('id') id: string,

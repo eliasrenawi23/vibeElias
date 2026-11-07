@@ -1,10 +1,19 @@
 import { Injectable } from '@nestjs/common';
-import { Prisma, VehicleExpense } from '@prisma/client';
-import { msg, type ExpenseCreate, type ExpenseQuery, type ExpenseUpdate } from '@renawi/shared';
-import { dbDate } from '../common/dates';
+import { ChargeKind, ExpenseCategory, Prisma, VehicleExpense } from '@prisma/client';
+import {
+  EXPENSE_TO_CHARGE_KIND,
+  msg,
+  type ExpenseCreate,
+  type ExpenseQuery,
+  type ExpenseRebillRequest,
+  type ExpenseUpdate,
+} from '@renawi/shared';
+import { Clock } from '../common/clock';
+import { dbDate, isoOf } from '../common/dates';
 import { AppException, ErrorKey } from '../common/errors/app-exception';
 import { CONTACT_NAME_SELECT, contactRef, NamedRef } from '../common/refs';
 import { DocumentsService } from '../documents/documents.service';
+import { LedgerService } from '../ledger/ledger.service';
 import { toDbMoney } from '../prisma/prisma.decimal';
 import { PrismaService } from '../prisma/prisma.service';
 import { ExpenseSummary, summarizeExpenses } from './vehicle-views';
@@ -31,12 +40,19 @@ function toView(row: ExpenseWithVendor): ExpenseView {
   return { ...row, vendor: contactRef(row.vendor) };
 }
 
+/** Charge kind of an expense passed on to a driver (shared table: towing/parts/meter count as repair). */
+export function rebillChargeKind(category: ExpenseCategory): ChargeKind {
+  return EXPENSE_TO_CHARGE_KIND[category];
+}
+
 @Injectable()
 export class ExpensesService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly vehicles: VehiclesService,
     private readonly documents: DocumentsService,
+    private readonly ledger: LedgerService,
+    private readonly clock: Clock,
   ) {}
 
   /** All matching expenses of a vehicle (page/pageSize are ignored) with totals. */
@@ -144,6 +160,66 @@ export class ExpensesService {
     // Document rows cascade with the expense; their files are removed afterwards.
     await this.prisma.vehicleExpense.delete({ where: { id } });
     await this.documents.removeFiles(docs);
+  }
+
+  /**
+   * Passes an expense we paid on to a driver: a CHARGE (kind by category, amount = the expense,
+   * date and due date = `date` or today) on the driver of the lease segment that held the car on
+   * the expense date (DRAFT contracts do not count) or on `driverId`; links it through
+   * `rebilledEntryId` and re-runs the FIFO allocation.
+   */
+  async rebill(id: string, dto: ExpenseRebillRequest, userId: string | null): Promise<ExpenseView> {
+    const expense = await this.getRow(id);
+    if (expense.rebilledEntryId) throw AppException.conflict(ErrorKey.alreadyRebilled);
+    if (expense.paidBy !== 'US') throw AppException.conflict(ErrorKey.invalidTransition);
+    if (dto.driverId) {
+      const found = await this.prisma.driver.findUnique({
+        where: { id: dto.driverId },
+        select: { id: true },
+      });
+      if (!found) throw AppException.notFoundField('driverId');
+    }
+    const day = expense.date;
+    const segment = await this.prisma.leaseSegment.findFirst({
+      where: {
+        vehicleId: expense.vehicleId,
+        startDate: { lte: day },
+        OR: [{ endDate: null }, { endDate: { gte: day } }],
+        contract: {
+          status: { not: 'DRAFT' },
+          ...(dto.driverId ? { driverId: dto.driverId } : {}),
+        },
+      },
+      orderBy: { startDate: 'desc' },
+      select: { taxiLicenseId: true, contract: { select: { id: true, driverId: true } } },
+    });
+    const driverId = dto.driverId ?? segment?.contract.driverId;
+    if (!driverId) throw AppException.conflict(ErrorKey.noDriverMatched);
+    const date = dto.date ?? this.clock.today();
+    const description = dto.description ?? expense.description ?? null;
+    await this.prisma.$transaction(async (tx) => {
+      const charge = await this.ledger.createEntry(tx, {
+        driverId,
+        contractId: segment?.contract.id ?? null,
+        type: 'CHARGE',
+        chargeKind: rebillChargeKind(expense.category),
+        date,
+        dueDate: date,
+        amount: expense.amount,
+        reference: isoOf(expense.date),
+        description,
+        vehicleId: expense.vehicleId,
+        taxiLicenseId: segment?.taxiLicenseId ?? null,
+        userId,
+      });
+      const linked = await tx.vehicleExpense.updateMany({
+        where: { id, rebilledEntryId: null },
+        data: { rebilledEntryId: charge.id },
+      });
+      if (linked.count === 0) throw AppException.conflict(ErrorKey.alreadyRebilled);
+      await this.ledger.reallocateDriver(tx, driverId);
+    });
+    return this.get(id);
   }
 
   private async getRow(id: string): Promise<VehicleExpense> {

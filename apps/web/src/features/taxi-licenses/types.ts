@@ -61,3 +61,12 @@ export interface TaxiLicenseListQuery {
   sort?: string;
   order?: SortOrder;
 }
+
+/** `GET /api/taxi-licenses/:id/pnl`: purchase price, income by year and the net result. */
+export interface TaxiLicensePnl {
+  acquisitionPrice: number | null;
+  salePrice: number | null;
+  byYear: { year: number; rentIncome: number; otherIncome: number }[];
+  totalIncome: number;
+  net: number;
+}

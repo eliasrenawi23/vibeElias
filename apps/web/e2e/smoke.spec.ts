@@ -88,23 +88,16 @@ async function mockApi(page: Page, options: { loggedIn?: boolean } = {}): Promis
       if (method === 'PATCH') api.user = { ...api.user, ...(body as Partial<MockUser>) };
       return json(route, 200, { user: api.user });
     }
-    if (path === '/api/vehicles' && method === 'GET') {
-      // Dashboard KPI "vehicles in stock": `?status=IN_STOCK&pageSize=1` -> `total`.
+    // Dashboard KPIs: stock, leases, receivables, month profit, open deals, overdue transfers.
+    if (path === '/api/dashboard/kpis' && method === 'GET') {
       if (!loggedIn) return json(route, 401, unauthorized);
-      return json(route, 200, { items: [], total: 4, page: 1, pageSize: 1 });
-    }
-    if (path === '/api/leases' && method === 'GET') {
-      // Dashboard KPI "active leases": `?status=ACTIVE&pageSize=1` -> `total`.
-      if (!loggedIn) return json(route, 401, unauthorized);
-      return json(route, 200, { items: [], total: 2, page: 1, pageSize: 1 });
-    }
-    if (path === '/api/ledger/balances' && method === 'GET') {
-      // Dashboard KPI "driver receivables": the sum of the positive balances.
-      if (!loggedIn) return json(route, 401, unauthorized);
-      const row = (driverId: string, balance: number) => ({ driverId, name: driverId, balance });
       return json(route, 200, {
-        items: [row('drv_1', 1500), row('drv_2', -200), row('drv_3', 300)],
-        total: 3,
+        vehiclesInStock: 4,
+        activeLeases: 2,
+        receivables: 1800,
+        monthProfit: 12500,
+        openDeals: 3,
+        transfersOverdue: 1,
       });
     }
     if (path === '/api/settings') {
@@ -163,21 +156,19 @@ test('login, switch language and theme', async ({ page }) => {
   await expect(page.getByRole('heading', { level: 1 })).toHaveText('לוח בקרה');
   await expect(page).toHaveTitle('לוח בקרה · רינאוי מוטורס');
   await expect(page.locator('.ant-statistic').first()).toBeVisible();
-  // Live KPIs: vehicles and active leases from the list totals, receivables = 1,500 + 300.
+  // Live KPIs, all six from `GET /dashboard/kpis`; the month profit is coloured as a profit.
   await expect(page.locator('.ant-statistic-content').first()).toHaveText('4');
   await expect(page.locator('.ant-statistic-content').nth(1)).toHaveText('2');
   await expect(page.locator('.ant-statistic-content').nth(2)).toContainText('1,800');
-  expect(
-    api.calls.some(
-      (c) => c.method === 'GET' && c.path === '/api/leases' && c.search.includes('status=ACTIVE'),
-    ),
-  ).toBe(true);
-  expect(
-    api.calls.some(
-      (c) =>
-        c.method === 'GET' && c.path === '/api/vehicles' && c.search.includes('status=IN_STOCK'),
-    ),
-  ).toBe(true);
+  await expect(page.getByTestId('kpi-monthProfit').locator('[data-profit]')).toHaveAttribute(
+    'data-profit',
+    'profit',
+  );
+  await expect(page.getByTestId('kpi-monthProfit')).toContainText('12,500');
+  await expect(page.getByTestId('kpi-openDeals')).toContainText('3');
+  await expect(page.getByTestId('kpi-transfersOverdue')).toContainText('1');
+  await expect(page.getByTestId('kpi-transfersOverdue')).toHaveClass(/rm-kpi-alert/);
+  expect(api.calls.some((c) => c.method === 'GET' && c.path === '/api/dashboard/kpis')).toBe(true);
 
   // Every request carried the CSRF header.
   expect(api.calls.every((c) => c.headers['x-requested-with'] === 'XMLHttpRequest')).toBe(true);

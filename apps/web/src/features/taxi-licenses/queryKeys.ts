@@ -8,4 +8,5 @@ export const taxiLicenseKeys = {
   /** ACTIVE licences offered by the lease wizard / pickers. */
   available: () => [...taxiLicenseKeys.all, 'available'] as const,
   detail: (id: string) => [...taxiLicenseKeys.all, 'detail', id] as const,
+  pnl: (id: string) => [...taxiLicenseKeys.detail(id), 'pnl'] as const,
 };
