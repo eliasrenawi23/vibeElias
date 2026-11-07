@@ -273,6 +273,66 @@ export const ReminderKind = z.enum([
 ]);
 export type ReminderKind = z.infer<typeof ReminderKind>;
 
+/**
+ * Kinds of items in the reminders feed (`GET /reminders/feed`, milestone 5). camelCase codes,
+ * not a labelled enum: the web translates them under `reminders.kinds.<kind>`. Lead days per
+ * kind: `FEED_KIND_LEAD_DAYS_KEY` (schemas/reminder.ts).
+ * - vehicleRegistration: `Vehicle.registrationExpiry` (vehicle licence / annual test)
+ * - insurance: `InsurancePolicy.endDate` (vehicle and business policies; latest per vehicle + type)
+ * - driverLicense / taxiPermit / medical: driver document expiries (ACTIVE drivers)
+ * - taxiLicenseFee / taxiLicenseRenewal: `TaxiLicense.annualFeeDueAt` / `renewalAt`
+ * - leaseEnd: `LeaseContract.endDate` of ACTIVE contracts
+ * - document: `Document.expiresAt` (latest per owner + kind)
+ * - contactFollowUp: `Contact.followUpAt` (not archived)
+ * - fineReassign: `TrafficFine.reassignDeadline` (NEW / REASSIGN_SUBMITTED)
+ * - dealTransfer: `Deal.transferDueAt` of completed sales whose transfer is not DONE
+ * - dealerRegistration: `Vehicle.dealerRegisteredAt` + 11 months (12-month cap) while in stock
+ * - taxiAge: 12-year taxi limit (1 January of manufacture year + 12)
+ * - taxiSemiAnnual: semi-annual test regime from 1 January of manufacture year + 10
+ * - manual: manual `Reminder` rows not done
+ */
+export const FeedKind = z.enum([
+  'vehicleRegistration',
+  'insurance',
+  'driverLicense',
+  'taxiPermit',
+  'medical',
+  'taxiLicenseFee',
+  'taxiLicenseRenewal',
+  'leaseEnd',
+  'document',
+  'contactFollowUp',
+  'fineReassign',
+  'dealTransfer',
+  'dealerRegistration',
+  'taxiAge',
+  'taxiSemiAnnual',
+  'manual',
+]);
+export type FeedKind = z.infer<typeof FeedKind>;
+
+/** Entity a reminders-feed item points to (`FeedItem.entityType`). */
+export const FeedEntityType = z.enum([
+  'vehicle',
+  'driver',
+  'taxiLicense',
+  'lease',
+  'document',
+  'contact',
+  'fine',
+  'deal',
+  'insurance',
+  'reminder',
+]);
+export type FeedEntityType = z.infer<typeof FeedEntityType>;
+
+/**
+ * Severity of a reminders-feed item: `overdue` = the date has passed; `due` = within the kind's
+ * lead days (`Settings.reminderLeadDays`, today included); `upcoming` = later, within the window.
+ */
+export const FeedSeverity = z.enum(['overdue', 'due', 'upcoming']);
+export type FeedSeverity = z.infer<typeof FeedSeverity>;
+
 /** Deposit action of `POST /leases/:id/deposit`. */
 export const DepositAction = z.enum(['IN', 'OUT', 'APPLY']);
 export type DepositAction = z.infer<typeof DepositAction>;

@@ -39,6 +39,7 @@
     "cookie-parser": "^1.4.7",
     "dayjs": "^1.11.23",
     "decimal.js": "^10.6.0",
+    "exceljs": "^4.4.0",
     "nestjs-zod": "^5.5.0",
     "passport": "^0.7.0",
     "passport-jwt": "^4.0.1",

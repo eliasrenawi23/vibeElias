@@ -40,6 +40,8 @@ export const EnvSchema = z.object({
   UPLOAD_DIR: z.string().min(1).default('./data/uploads'),
   /** Maximum upload size in megabytes (decimals allowed). */
   MAX_UPLOAD_MB: z.coerce.number().positive().max(200).default(20),
+  /** JSON status file written by the backup sidecar after each successful run. */
+  BACKUP_STATUS_FILE: z.string().min(1).default('./data/backup/last-success.json'),
 });
 export type Env = z.infer<typeof EnvSchema>;
 

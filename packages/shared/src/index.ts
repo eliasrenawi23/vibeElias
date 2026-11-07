@@ -22,3 +22,5 @@ export * from './schemas/deal.js';
 export * from './schemas/fine.js';
 export * from './schemas/document.js';
 export * from './schemas/reminder.js';
+export * from './schemas/report.js';
+export * from './schemas/dashboard.js';

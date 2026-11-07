@@ -66,6 +66,8 @@ describe('settings', () => {
       document: 30,
       dealerRegistration: 30,
       transfer: 2,
+      fine: 14,
+      taxiAge: 90,
     });
     expect(DEFAULT_SETTINGS.defaultLeaseTerms.responsibilities).toEqual({
       insurance: 'DRIVER',

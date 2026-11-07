@@ -57,6 +57,10 @@ export const ReminderLeadDaysSchema = z.object({
   dealerRegistration: leadDays.default(30),
   /** Ownership transfer due date (6 working days after a sale). */
   transfer: leadDays.default(2),
+  /** Traffic-fine reassignment deadline (receivedAt + 90 days). */
+  fine: leadDays.default(14),
+  /** Taxi age dates: the 12-year limit and the 10-year semi-annual test regime. */
+  taxiAge: leadDays.default(90),
 });
 export type ReminderLeadDays = z.infer<typeof ReminderLeadDaysSchema>;
 export const REMINDER_LEAD_DAY_KEYS = Object.keys(
@@ -123,3 +127,18 @@ export const DEFAULT_SETTINGS: Readonly<Settings> = Object.freeze({
     clauses: { he: '', ar: '', en: '' },
   },
 });
+
+/**
+ * `GET /settings/backup-status`: last successful nightly backup, read from the status file the
+ * backup sidecar writes (`BACKUP_STATUS_FILE`). `ok` = a backup succeeded within the last
+ * `BACKUP_MAX_AGE_HOURS` hours.
+ */
+export const BackupStatusSchema = z.object({
+  lastSuccessAt: isoDateTime.nullable(),
+  lastFile: z.string().nullable(),
+  ok: z.boolean(),
+});
+export type BackupStatus = z.infer<typeof BackupStatusSchema>;
+
+/** A backup older than this many hours makes `BackupStatus.ok` false (nightly job + slack). */
+export const BACKUP_MAX_AGE_HOURS = 36;
