@@ -20,6 +20,9 @@ export const DocumentMetaSchema = DocumentUpdateSchema.pick({
 export type DocumentMetaInput = z.input<typeof DocumentMetaSchema>;
 export type DocumentMeta = z.output<typeof DocumentMetaSchema>;
 
+/** Inputs of the dialog; API errors on other paths (`file`, the owner id) go to the alert. */
+const META_FIELDS = ['kind', 'title', 'expiresAt'] as const;
+
 export interface DocumentMetaDialogProps {
   mode: 'upload' | 'edit';
   /** Name of the chosen / stored file, shown for reference. */
@@ -51,7 +54,7 @@ export function DocumentMetaDialog({
       expiresAt: initial.expiresAt ?? null,
     },
   });
-  const { formError, handleError } = useFormErrors(form.setError);
+  const { formError, handleError } = useFormErrors(form.setError, { fields: META_FIELDS });
 
   const submit = form.handleSubmit(async (values) => {
     try {

@@ -34,14 +34,14 @@ export function ContactsPage() {
       q: searchParams.get('q') || undefined,
       tag: searchParams.get('tag') || undefined,
       followUpBefore: due ? today : undefined,
-      archived: searchParams.get('archived') === '1' || undefined,
+      includeArchived: searchParams.get('archived') === '1' || undefined,
       page,
       pageSize,
       sort,
       order,
     };
   }, [searchParams, today, page, pageSize, sort, order]);
-  const filtered = Boolean(query.q || query.tag || query.followUpBefore || query.archived);
+  const filtered = Boolean(query.q || query.tag || query.followUpBefore || query.includeArchived);
 
   const list = useQuery({
     queryKey: contactKeys.list(query),
@@ -96,7 +96,8 @@ export function ContactsPage() {
       key: 'city',
       title: t('contacts.fields.city'),
       sortKey: 'city',
-      render: (c) => (c.city ? <AutoDir>{c.city}</AutoDir> : <span className="rm-empty-value">—</span>),
+      render: (c) =>
+        c.city ? <AutoDir>{c.city}</AutoDir> : <span className="rm-empty-value">—</span>,
     },
     {
       key: 'followUpAt',

@@ -1,6 +1,5 @@
 import { z } from 'zod';
 import { DocKind, Locale } from '../enums.js';
-import { msg } from '../messages.js';
 import {
   idString,
   isoDate,
@@ -19,6 +18,12 @@ export const ALLOWED_UPLOAD_MIME_TYPES = [
 ] as const;
 export type AllowedUploadMimeType = (typeof ALLOWED_UPLOAD_MIME_TYPES)[number];
 export const DEFAULT_MAX_UPLOAD_MB = 20;
+
+/**
+ * i18n key (namespace `common`): a document must hang on exactly one owner record
+ * (`POST /documents`; `GET /documents` accepts at most one owner filter).
+ */
+export const DOCUMENT_ONE_OWNER_REQUIRED = 'validation.oneOwnerRequired';
 
 /** Foreign keys a document can hang on; exactly one is set per document. */
 export const DOCUMENT_OWNER_KEYS = [
@@ -60,7 +65,10 @@ export const DocumentCreateSchema = z
     lang: z.union([Locale, z.literal('').transform(() => null)]).nullish(),
     expiresAt: optionalIsoDate,
   })
-  .refine((v) => countOwners(v) === 1, { message: msg.exactlyOneOwner, path: ['vehicleId'] });
+  .refine((v) => countOwners(v) === 1, {
+    message: DOCUMENT_ONE_OWNER_REQUIRED,
+    path: ['vehicleId'],
+  });
 export type DocumentCreate = z.infer<typeof DocumentCreateSchema>;
 export type DocumentCreateInput = z.input<typeof DocumentCreateSchema>;
 /** Alias: the upload metadata schema. */
@@ -86,5 +94,8 @@ export const DocumentQuerySchema = pagination
     /** Documents expiring on/before this date. */
     expiringBefore: isoDate.optional(),
   })
-  .refine((v) => countOwners(v) <= 1, { message: msg.exactlyOneOwner, path: ['vehicleId'] });
+  .refine((v) => countOwners(v) <= 1, {
+    message: DOCUMENT_ONE_OWNER_REQUIRED,
+    path: ['vehicleId'],
+  });
 export type DocumentQuery = z.infer<typeof DocumentQuerySchema>;

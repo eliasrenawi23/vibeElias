@@ -221,6 +221,12 @@ export type ExpenseRebill = z.infer<typeof ExpenseRebillSchema>;
 /** Policy types that cover the business rather than one vehicle. */
 export const BUSINESS_INSURANCE_TYPES: readonly InsuranceType[] = ['TRADE', 'LOT'];
 
+/**
+ * i18n key (namespace `common`): an insurance policy must end after it starts
+ * (`endDate > startDate`). Field error on `endDate` of the insurance endpoints.
+ */
+export const INSURANCE_END_AFTER_START = 'validation.endAfterStart';
+
 const InsuranceBaseSchema = z.object({
   scope: InsuranceScope.default('VEHICLE'),
   /** Required for VEHICLE scope (path param on `/vehicles/:id/insurance`); null for BUSINESS. */
@@ -246,8 +252,12 @@ function refineInsurance(
   },
   ctx: z.RefinementCtx,
 ) {
-  if (v.startDate && v.endDate && v.endDate < v.startDate) {
-    ctx.addIssue({ code: z.ZodIssueCode.custom, path: ['endDate'], message: msg.endBeforeStart });
+  if (v.startDate && v.endDate && v.endDate <= v.startDate) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ['endDate'],
+      message: INSURANCE_END_AFTER_START,
+    });
   }
   if (v.scope === 'BUSINESS' && v.vehicleId) {
     ctx.addIssue({

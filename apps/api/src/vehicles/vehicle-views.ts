@@ -8,7 +8,11 @@ import {
   Prisma,
   Vehicle,
 } from '@prisma/client';
-import { contactDisplayName, ExpenseCategory as ExpenseCategoryEnum, type VehicleAlert } from '@renawi/shared';
+import {
+  contactDisplayName,
+  ExpenseCategory as ExpenseCategoryEnum,
+  type VehicleAlert,
+} from '@renawi/shared';
 import { CONTACT_NAME_SELECT, contactRef, NamedRef } from '../common/refs';
 
 /** Relations loaded for every vehicle list item. */
@@ -111,7 +115,11 @@ export type CycleWithConsignor = Prisma.InventoryCycleGetPayload<{
 /** Cycles + per-cycle totals from a `groupBy(['cycleId', 'paidBy'])` result. */
 export function toCycleViews(
   cycles: readonly CycleWithConsignor[],
-  sums: readonly { cycleId: string | null; paidBy: PaidBy; _sum: { amount: Prisma.Decimal | null } }[],
+  sums: readonly {
+    cycleId: string | null;
+    paidBy: PaidBy;
+    _sum: { amount: Prisma.Decimal | null };
+  }[],
 ): CycleView[] {
   return cycles.map(({ consignor, ...cycle }) => {
     let expenseTotal = ZERO;

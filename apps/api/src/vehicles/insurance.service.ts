@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InsurancePolicy, InsuranceScope, InsuranceType, Prisma } from '@prisma/client';
 import {
   BUSINESS_INSURANCE_TYPES,
+  INSURANCE_END_AFTER_START,
   msg,
   type BusinessInsuranceCreate,
   type InsuranceCreate,
@@ -39,7 +40,9 @@ interface MergedPolicy {
  * business-level and business policies are TRADE / LOT.
  */
 function validatePolicy(p: MergedPolicy): void {
-  if (p.endDate <= p.startDate) throw AppException.fieldError('endDate', msg.endBeforeStart);
+  if (p.endDate <= p.startDate) {
+    throw AppException.fieldError('endDate', INSURANCE_END_AFTER_START);
+  }
   const businessType = BUSINESS_INSURANCE_TYPES.includes(p.type);
   if (p.scope === 'VEHICLE' && businessType) {
     throw AppException.fieldError('type', msg.businessPolicyType);

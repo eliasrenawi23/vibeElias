@@ -35,6 +35,9 @@ export interface ContactListQuery {
   /** Comma-separated tags. */
   tag?: string;
   followUpBefore?: string;
+  /** Also list archived contacts (`archived` alone would list only archived ones). */
+  includeArchived?: boolean;
+  /** true = archived only, false = active only. */
   archived?: boolean;
   page?: number;
   pageSize?: number;

@@ -147,7 +147,9 @@
     "nothingToChange": "Nothing to change",
     "depositKindRequired": "Choose the deposit type",
     "duplicate": "A record with this value already exists",
-    "odometerDecreasing": "The reading is lower than an earlier reading"
+    "odometerDecreasing": "The reading is lower than an earlier reading",
+    "endAfterStart": "End date must be after the start date",
+    "oneOwnerRequired": "Attach the document to exactly one record"
   },
   "errors": {
     "generic": "Something went wrong. Please try again.",
@@ -548,7 +550,8 @@
     "vehicleLeases": "Lease contracts and segments this vehicle was part of.",
     "vehicleFines": "Traffic fines received for this vehicle.",
     "vehiclePnl": "Profit and loss per inventory cycle.",
-    "driverProfile": "Driver profile with permits, contracts, ledger and documents."
+    "driverProfile": "Driver profile with permits, contracts, ledger and documents.",
+    "taxiLicenseDetail": "The licence file: the car it is registered on, annual fee, leases and profit."
   },
   "settings": {
     "nav": {
@@ -721,9 +724,15 @@
       "taxiPlateHint": "Plates ending in 25 or 26 are taxi plates.",
       "markAsTaxi": "Mark as taxi",
       "ownerDriverHint": "Choose a contact tagged as driver.",
-      "ownerDriverNoProfile": "This contact has no driver profile yet. Driver profiles arrive in milestone {{n}}.",
+      "ownerDriverNoProfile": "The owner must be a driver: this contact has no driver profile yet (driver profiles arrive in milestone {{n}}).",
       "ownerDriverCurrent": "Current owner: {{name}}",
-      "statusHelp": "Later status changes are made from the vehicle page."
+      "statusHelp": "Later status changes are made from the vehicle page.",
+      "isTaxiLabel": "This vehicle is a taxi",
+      "handHelp": "Ownership hand: 1 = first owner",
+      "consignedHelp": "After saving, record the consignment terms with “Take on consignment”.",
+      "dealerRegisteredHelp": "Registration in the dealer’s name is limited to 12 months.",
+      "locationHelp": "Lot, garage or address",
+      "saveBlocked": "Choose an owner who has a driver profile to save."
     },
     "actions": {
       "changeStatus": "Change status",
@@ -749,7 +758,8 @@
       "note": "Note",
       "noTargets": "No status change is available from the current status.",
       "saleHint": "To mark the vehicle as sold, record a sale deal.",
-      "changed": "Status updated"
+      "changed": "Status updated",
+      "current": "Current status"
     },
     "alerts": {
       "registrationExpired": "Licence expired",
@@ -768,7 +778,8 @@
       "sourceHelp": "For example handover, annual test, service",
       "added": "Reading added",
       "empty": "No readings yet",
-      "dialogTitle": "Add odometer reading"
+      "dialogTitle": "Add odometer reading",
+      "lastReading": "Last reading: {{km}}"
     },
     "cycles": {
       "title": "Inventory cycles",
@@ -794,7 +805,9 @@
       "returnNote": "Note",
       "returnConfirm": "The consignment cycle ends and the car goes back to its owner.",
       "returned": "Vehicle returned to the consignor",
-      "surplusHint": "We keep everything above the minimum net to the consignor."
+      "surplusHint": "We keep everything above the minimum net to the consignor.",
+      "now": "now",
+      "noAgreement": "This consignment car has no open agreement. Record the terms to put it on sale."
     },
     "expenses": {
       "title": "Expenses",
@@ -814,7 +827,8 @@
       "editTitle": "Edit expense",
       "deleteTitle": "Delete expense",
       "added": "Expense added",
-      "total": "Total expenses"
+      "total": "Total expenses",
+      "paidByUs": "Paid by us"
     },
     "insurance": {
       "title": "Insurance policies",

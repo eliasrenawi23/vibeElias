@@ -25,9 +25,7 @@ export type TransitionResult =
   | {
       ok: false;
       error:
-        | typeof ErrorKey.useDeal
-        | typeof ErrorKey.invalidTransition
-        | typeof ErrorKey.vehicleLeased;
+        typeof ErrorKey.useDeal | typeof ErrorKey.invalidTransition | typeof ErrorKey.vehicleLeased;
     };
 
 export interface TransitionContext {

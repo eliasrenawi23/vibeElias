@@ -1,7 +1,15 @@
 import { addDays, DEFAULT_BUSINESS_TZ, todayInBusinessTz } from '@renawi/shared';
 import request from 'supertest';
 import type { Response } from 'supertest';
-import { accessCookie, createTestApp, createUser, login, resetDatabase, TestApp, XHR } from './utils';
+import {
+  accessCookie,
+  createTestApp,
+  createUser,
+  login,
+  resetDatabase,
+  TestApp,
+  XHR,
+} from './utils';
 
 /** Authenticated request helpers (mutations carry X-Requested-With). */
 export interface Api {
@@ -56,14 +64,19 @@ export function israeliId(first8: string): string {
   return `${first8}${(10 - (sum % 10)) % 10}`;
 }
 
-/** Superagent parser that keeps binary bodies as a Buffer. */
+/**
+ * Superagent parser that keeps binary bodies as a Buffer: `.buffer(true).parse(binaryParser)`.
+ * (Superagent hands the raw Node response stream to custom parsers; its typings do not say so.)
+ */
 export function binaryParser(
-  res: NodeJS.ReadableStream,
+  res: unknown,
   callback: (err: Error | null, body: Buffer) => void,
 ): void {
+  const stream = res as NodeJS.ReadableStream;
   const chunks: Buffer[] = [];
-  res.on('data', (chunk: Buffer) => chunks.push(chunk));
-  res.on('end', () => callback(null, Buffer.concat(chunks)));
+  stream.on('data', (chunk: Buffer) => chunks.push(chunk));
+  stream.on('end', () => callback(null, Buffer.concat(chunks)));
+  stream.on('error', (err: Error) => callback(err, Buffer.alloc(0)));
 }
 
 /** Expects `{ statusCode, message, errors? }` with the given key and (optionally) field errors. */

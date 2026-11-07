@@ -1,6 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { Document, Prisma } from '@prisma/client';
 import {
+  DOCUMENT_ONE_OWNER_REQUIRED,
   DOCUMENT_OWNER_KEYS,
   msg,
   type DocumentCreate,
@@ -238,7 +239,7 @@ export class DocumentsService {
     });
     const [owner] = owners;
     if (owners.length !== 1 || !owner) {
-      throw AppException.fieldError(DOCUMENT_OWNER_KEYS[0], msg.exactlyOneOwner);
+      throw AppException.fieldError(DOCUMENT_OWNER_KEYS[0], DOCUMENT_ONE_OWNER_REQUIRED);
     }
     return owner;
   }

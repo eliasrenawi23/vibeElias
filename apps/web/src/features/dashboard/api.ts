@@ -1,6 +1,7 @@
 /**
  * Dashboard data. `GET /dashboard/kpis` and `GET /reminders/feed` arrive in milestone 5; until
- * then the page shows these zero figures so the layout can be reviewed.
+ * then the page shows these zero figures so the layout can be reviewed. "Vehicles in stock" is
+ * already live (counted with `GET /vehicles?status=IN_STOCK&pageSize=1`).
  */
 
 export interface DashboardKpis {

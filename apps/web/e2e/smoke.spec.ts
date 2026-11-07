@@ -16,7 +16,13 @@ interface MockUser {
 }
 
 interface MockApi {
-  calls: { method: string; path: string; body: unknown; headers: Record<string, string> }[];
+  calls: {
+    method: string;
+    path: string;
+    search: string;
+    body: unknown;
+    headers: Record<string, string>;
+  }[];
   user: MockUser;
   settings: Record<string, unknown>;
 }
@@ -56,10 +62,11 @@ async function mockApi(page: Page, options: { loggedIn?: boolean } = {}): Promis
 
   await page.route('/api/**', async (route) => {
     const request = route.request();
-    const path = new URL(request.url()).pathname;
+    const url = new URL(request.url());
+    const path = url.pathname;
     const method = request.method();
     const body = request.postDataJSON() as unknown;
-    api.calls.push({ method, path, body, headers: request.headers() });
+    api.calls.push({ method, path, search: url.search, body, headers: request.headers() });
 
     if (path === '/api/auth/login' && method === 'POST') {
       const { email, password } = (body ?? {}) as { email?: string; password?: string };
@@ -80,6 +87,11 @@ async function mockApi(page: Page, options: { loggedIn?: boolean } = {}): Promis
       if (!loggedIn) return json(route, 401, unauthorized);
       if (method === 'PATCH') api.user = { ...api.user, ...(body as Partial<MockUser>) };
       return json(route, 200, { user: api.user });
+    }
+    if (path === '/api/vehicles' && method === 'GET') {
+      // Dashboard KPI "vehicles in stock": `?status=IN_STOCK&pageSize=1` -> `total`.
+      if (!loggedIn) return json(route, 401, unauthorized);
+      return json(route, 200, { items: [], total: 4, page: 1, pageSize: 1 });
     }
     if (path === '/api/settings') {
       if (!loggedIn) return json(route, 401, unauthorized);
@@ -137,6 +149,14 @@ test('login, switch language and theme', async ({ page }) => {
   await expect(page.getByRole('heading', { level: 1 })).toHaveText('לוח בקרה');
   await expect(page).toHaveTitle('לוח בקרה · רנאוי מוטורס');
   await expect(page.locator('.ant-statistic').first()).toBeVisible();
+  // Live KPI from the vehicles list total.
+  await expect(page.locator('.ant-statistic-content').first()).toHaveText('4');
+  expect(
+    api.calls.some(
+      (c) =>
+        c.method === 'GET' && c.path === '/api/vehicles' && c.search.includes('status=IN_STOCK'),
+    ),
+  ).toBe(true);
 
   // Every request carried the CSRF header.
   expect(api.calls.every((c) => c.headers['x-requested-with'] === 'XMLHttpRequest')).toBe(true);

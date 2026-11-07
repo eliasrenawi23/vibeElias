@@ -126,7 +126,11 @@ describe('Contacts (e2e)', () => {
         phones: ['046557812'],
         followUpAt: daysFromToday(-2),
       });
-      await create({ tags: ['INSURER'], companyName: 'Galil Insurance', email: 'noy@galil.example' });
+      await create({
+        tags: ['INSURER'],
+        companyName: 'Galil Insurance',
+        email: 'noy@galil.example',
+      });
     });
 
     it('paginates with total and sorts', async () => {
@@ -177,7 +181,7 @@ describe('Contacts (e2e)', () => {
   it('archives and restores; lists honour archived / includeArchived', async () => {
     const c = await create({ firstName: 'To', lastName: 'Archive' });
     const count = async (query = '') =>
-      ((await s.api.get(`/api/contacts?pageSize=200${query}`).expect(200)).body.total as number);
+      (await s.api.get(`/api/contacts?pageSize=200${query}`).expect(200)).body.total as number;
     const activeBefore = await count();
 
     const archived = await s.api.post(`/api/contacts/${c.id}/archive`).expect(200);

@@ -108,8 +108,14 @@ export class DocumentsController {
 
   @Get(':id/file')
   @ApiProduces('application/pdf', 'image/jpeg', 'image/png', 'image/webp')
-  @ApiQuery({ name: 'download', required: false, description: '1 = Content-Disposition attachment' })
-  @ApiOperation({ summary: 'Stream the stored file (cookie auth works for <img>/<a> on the same origin)' })
+  @ApiQuery({
+    name: 'download',
+    required: false,
+    description: '1 = Content-Disposition attachment',
+  })
+  @ApiOperation({
+    summary: 'Stream the stored file (cookie auth works for <img>/<a> on the same origin)',
+  })
   async file(
     @Param('id') id: string,
     @Query('download') download: string | undefined,

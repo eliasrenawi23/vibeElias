@@ -1,4 +1,5 @@
 import request from 'supertest';
+import { buildOpenApiDocument, SWAGGER_TAGS } from '../src/app.setup';
 import { createTestApp, resetDatabase, TestApp } from './utils';
 
 describe('Health (e2e)', () => {
@@ -31,6 +32,33 @@ describe('Health (e2e)', () => {
   it('unknown routes return 404 with an i18n key', async () => {
     const res = await request(t.http).get('/api/does-not-exist').expect(404);
     expect(res.body).toEqual({ statusCode: 404, message: 'errors.notFound' });
+  });
+
+  it('OpenAPI: tags are declared in order and every operation uses a declared tag', () => {
+    const doc = buildOpenApiDocument(t.app);
+    const declared = SWAGGER_TAGS.map((tag) => tag.name);
+    expect((doc.tags ?? []).map((tag) => tag.name)).toEqual(declared);
+
+    const used = new Set<string>();
+    const untagged: string[] = [];
+    for (const [path, item] of Object.entries(doc.paths)) {
+      for (const [method, op] of Object.entries(item as Record<string, { tags?: string[] }>)) {
+        if (!op || typeof op !== 'object' || !('responses' in op)) continue;
+        if (!op.tags?.length) untagged.push(`${method.toUpperCase()} ${path}`);
+        for (const tag of op.tags ?? []) used.add(tag);
+      }
+    }
+    expect(untagged).toEqual([]);
+    expect([...used].sort()).toEqual([...declared].sort());
+    expect(Object.keys(doc.paths)).toEqual(
+      expect.arrayContaining([
+        '/api/contacts/{id}/unarchive',
+        '/api/vehicles/{id}/consign',
+        '/api/cycles/{id}/return',
+        '/api/documents/{id}/thumb',
+        '/api/insurance',
+      ]),
+    );
   });
 
   it('allows the web origin with credentials and the X-Requested-With header (CORS)', async () => {

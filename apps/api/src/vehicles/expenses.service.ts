@@ -13,9 +13,13 @@ import { VehiclesService } from './vehicles.service';
 /** Expense row + its vendor `{ id, name }`. */
 export type ExpenseView = VehicleExpense & { vendor: NamedRef | null };
 
-/** `GET /vehicles/:id/expenses`: matching expenses (newest first) + totals over them. */
+/**
+ * `GET /vehicles/:id/expenses`: matching expenses (newest first), `total` = sum of their amounts
+ * and the per-category / paid-by-us breakdown in `summary`.
+ */
 export interface ExpenseList {
   items: ExpenseView[];
+  total: Prisma.Decimal;
   summary: ExpenseSummary;
 }
 
@@ -54,7 +58,8 @@ export class ExpensesService {
       orderBy: [{ date: 'desc' }, { createdAt: 'desc' }],
       include: VENDOR_INCLUDE,
     });
-    return { items: rows.map(toView), summary: summarizeExpenses(rows) };
+    const summary = summarizeExpenses(rows);
+    return { items: rows.map(toView), total: summary.total, summary };
   }
 
   async get(id: string): Promise<ExpenseView> {

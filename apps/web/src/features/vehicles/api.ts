@@ -14,11 +14,11 @@ import type {
 } from '@renawi/shared';
 import { asItems } from '../../shared/lib/collections';
 import { http } from '../../shared/lib/http';
+import { summarizeExpenses } from './lib/vehicleRules';
 import type {
   ExpenseListQuery,
   ExpenseSummary,
   InsurancePolicy,
-  InventoryCycle,
   OdometerEntry,
   VehicleDetail,
   VehicleExpense,
@@ -63,7 +63,10 @@ export function updateVehicle(id: string, body: VehicleUpdate): Promise<VehicleD
   return http.patch<VehicleDetail>(vehiclePath(id), body);
 }
 
-/** `POST /api/vehicles/:id/status` (409 `errors.invalidTransition` / `errors.useDeal`). */
+/**
+ * `POST /api/vehicles/:id/status` (409 `errors.invalidTransition` / `errors.useDeal` /
+ * `errors.vehicleLeased`); returns the full vehicle file.
+ */
 export function changeVehicleStatus(id: string, body: VehicleStatusChange): Promise<VehicleDetail> {
   return http.post<VehicleDetail>(`${vehiclePath(id)}/status`, body);
 }
@@ -72,20 +75,26 @@ export function changeVehicleStatus(id: string, body: VehicleStatusChange): Prom
 
 export interface ExpenseList {
   items: VehicleExpense[];
-  summary?: ExpenseSummary;
+  /** Totals over `items` (from the API when it sends them, else computed here). */
+  summary: ExpenseSummary;
 }
 
-/** `GET /api/vehicles/:id/expenses?from&to&category` */
+/**
+ * `GET /api/vehicles/:id/expenses?from&to&category&paidBy&cycleId`: every matching expense
+ * (unpaged) as `{ items, total, summary }` (`total` = sum of amounts). A bare array or a body
+ * without `summary` is accepted too (totals are then computed here).
+ */
 export async function fetchExpenses(
   vehicleId: string,
   query: ExpenseListQuery,
   signal?: AbortSignal,
 ): Promise<ExpenseList> {
-  const res = await http.get<VehicleExpense[] | ExpenseList>(`${vehiclePath(vehicleId)}/expenses`, {
-    query: { ...query },
-    signal,
-  });
-  return Array.isArray(res) ? { items: res } : { items: res.items ?? [], summary: res.summary };
+  const res = await http.get<
+    VehicleExpense[] | { items?: VehicleExpense[]; summary?: ExpenseSummary }
+  >(`${vehiclePath(vehicleId)}/expenses`, { query: { ...query }, signal });
+  const items = asItems(res);
+  const summary = !Array.isArray(res) && res.summary ? res.summary : summarizeExpenses(items);
+  return { items, summary };
 }
 
 export function createExpense(vehicleId: string, body: ExpenseCreate): Promise<VehicleExpense> {
@@ -136,16 +145,22 @@ export function deleteInsurance(id: string): Promise<void> {
 /* ---- Odometer & cycles --------------------------------------------------------------------- */
 
 /** `POST /api/vehicles/:id/odometer` (400 `validation.odometerDecreasing`). */
-export function addOdometerReading(vehicleId: string, body: OdometerCreate): Promise<OdometerEntry> {
+export function addOdometerReading(
+  vehicleId: string,
+  body: OdometerCreate,
+): Promise<OdometerEntry> {
   return http.post<OdometerEntry>(`${vehiclePath(vehicleId)}/odometer`, body);
 }
 
-/** `POST /api/vehicles/:id/consign`: opens a CONSIGNED cycle. */
+/** `POST /api/vehicles/:id/consign`: opens a CONSIGNED cycle; returns the full vehicle file. */
 export function consignVehicle(vehicleId: string, body: Consign): Promise<VehicleDetail> {
   return http.post<VehicleDetail>(`${vehiclePath(vehicleId)}/consign`, body);
 }
 
-/** `POST /api/cycles/:id/return`: consignment car back to its owner. */
-export function returnCycle(cycleId: string, body: CycleReturn): Promise<InventoryCycle> {
-  return http.post<InventoryCycle>(`/cycles/${encodeURIComponent(cycleId)}/return`, body);
+/**
+ * `POST /api/cycles/:id/return`: consignment car back to its owner (409 `errors.dealPending`,
+ * 400 `validation.endBeforeStart`); returns the full vehicle file.
+ */
+export function returnCycle(cycleId: string, body: CycleReturn): Promise<VehicleDetail> {
+  return http.post<VehicleDetail>(`/cycles/${encodeURIComponent(cycleId)}/return`, body);
 }

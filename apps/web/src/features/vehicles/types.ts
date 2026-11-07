@@ -71,7 +71,10 @@ export interface InventoryCycle {
   commissionMode: CommissionMode | null;
   commissionValue: number | null;
   agreementEndsAt: string | null;
+  /** All expenses of the cycle (whoever paid). */
   expenseTotal: number | null;
+  /** Expenses of the cycle paid by the business. */
+  expensePaidByUs?: number | null;
 }
 
 export interface InsurancePolicy {
@@ -86,7 +89,8 @@ export interface InsurancePolicy {
   premium: number | null;
   paidBy: PaidBy;
   hasTaxiExtension: boolean;
-  vehicle?: { id: string; plateNo: string; make: string; model: string } | null;
+  /** Vehicle ref on business-level lists (`GET /insurance`). */
+  vehicle?: { id: string; plateNo: string; make?: string; model?: string } | null;
 }
 
 export interface OdometerEntry {
@@ -113,7 +117,13 @@ export interface VehicleExpense {
 }
 
 export interface ExpenseSummary {
+  /** Sum of the amounts (whoever paid). */
   total: number;
+  /** Sum of the amounts paid by the business. */
+  paidByUs?: number;
+  count?: number;
+  /** Cycle the totals cover (`expenseSummary` of the vehicle: the open cycle). */
+  cycleId?: string | null;
   byCategory: { category: ExpenseCategory; total: number }[];
 }
 
@@ -148,4 +158,6 @@ export interface ExpenseListQuery {
   to?: string;
   /** Comma-separated categories. */
   category?: string;
+  paidBy?: PaidBy;
+  cycleId?: string;
 }

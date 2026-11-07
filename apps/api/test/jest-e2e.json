@@ -1,10 +1,6 @@
 {
   "rootDir": "..",
-  "moduleFileExtensions": [
-    "ts",
-    "js",
-    "json"
-  ],
+  "moduleFileExtensions": ["ts", "js", "json"],
   "testEnvironment": "node",
   "testRegex": "test/.*\\.e2e-spec\\.ts$",
   "transform": {
@@ -16,11 +12,7 @@
     ]
   },
   "globalSetup": "<rootDir>/test/global-setup.ts",
-  "setupFiles": [
-    "<rootDir>/test/setup-env.ts"
-  ],
+  "setupFiles": ["<rootDir>/test/setup-env.ts"],
   "testTimeout": 30000,
-  "setupFilesAfterEnv": [
-    "<rootDir>/test/cleanup-uploads.ts"
-  ]
+  "setupFilesAfterEnv": ["<rootDir>/test/cleanup-uploads.ts"]
 }

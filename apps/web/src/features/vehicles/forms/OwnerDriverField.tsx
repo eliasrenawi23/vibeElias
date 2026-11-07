@@ -19,24 +19,31 @@ export interface OwnerDriverFieldProps {
   control: Control<VehicleFormInput, unknown, VehicleFormOutput>;
   /** The stored owner (edit mode). */
   current?: NamedRef | null;
+  /** The picked contact has no driver profile (the form cannot be saved). */
+  noProfile: boolean;
+  onNoProfileChange: (noProfile: boolean) => void;
 }
 
 /**
  * `ownerDriverId` of a THIRD_PARTY vehicle. Drivers are picked as contacts tagged DRIVER; the
  * field takes the contact's driver profile id. A contact without a profile cannot be chosen yet
- * (profiles arrive with the drivers module) and the field explains why.
+ * (profiles arrive with the drivers module): the field explains why and the form blocks saving.
  */
-export function OwnerDriverField({ control, current }: OwnerDriverFieldProps) {
+export function OwnerDriverField({
+  control,
+  current,
+  noProfile,
+  onNoProfileChange,
+}: OwnerDriverFieldProps) {
   const { t } = useTranslation();
   const id = useId();
   const queryClient = useQueryClient();
   const { field, fieldState } = useController({ control, name: 'ownerDriverId' });
   const [contactId, setContactId] = useState<string | null>(null);
-  const [noProfile, setNoProfile] = useState(false);
 
   const pick = async (pickedId: string | null, contact: Contact | null) => {
     setContactId(pickedId);
-    setNoProfile(false);
+    onNoProfileChange(false);
     if (!pickedId) {
       field.onChange(current?.id ?? null);
       return;
@@ -57,19 +64,20 @@ export function OwnerDriverField({ control, current }: OwnerDriverFieldProps) {
       field.onChange(driver.id);
     } else {
       field.onChange(null);
-      setNoProfile(true);
+      onNoProfileChange(true);
     }
   };
 
-  const help = noProfile ? (
-    <Typography.Text type="warning">
-      {t('vehicles.form.ownerDriverNoProfile', { n: DRIVERS_MILESTONE })}
-    </Typography.Text>
-  ) : current && field.value === current.id && !contactId ? (
-    t('vehicles.form.ownerDriverCurrent', { name: isolateAuto(current.name) })
-  ) : (
-    t('vehicles.form.ownerDriverHint')
-  );
+  const help =
+    noProfile && contactId ? (
+      <Typography.Text type="warning" data-testid="owner-driver-no-profile">
+        {t('vehicles.form.ownerDriverNoProfile', { n: DRIVERS_MILESTONE })}
+      </Typography.Text>
+    ) : current && field.value === current.id && !contactId ? (
+      t('vehicles.form.ownerDriverCurrent', { name: isolateAuto(current.name) })
+    ) : (
+      t('vehicles.form.ownerDriverHint')
+    );
 
   return (
     <FieldShell
@@ -77,16 +85,18 @@ export function OwnerDriverField({ control, current }: OwnerDriverFieldProps) {
       label={t('vehicles.fields.ownerDriver')}
       required
       help={help}
-      error={fieldState.error}
+      error={noProfile && contactId ? undefined : fieldState.error}
     >
-      <ContactPicker
-        id={id}
-        tag="DRIVER"
-        value={contactId}
-        onChange={(value, contact) => void pick(value, contact)}
-        onBlur={field.onBlur}
-        status={fieldState.error ? 'error' : undefined}
-      />
+      <div data-testid="owner-driver-field">
+        <ContactPicker
+          id={id}
+          tag="DRIVER"
+          value={contactId}
+          onChange={(value, contact) => void pick(value, contact)}
+          onBlur={field.onBlur}
+          status={fieldState.error || (noProfile && contactId) ? 'error' : undefined}
+        />
+      </div>
     </FieldShell>
   );
 }

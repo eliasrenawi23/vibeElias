@@ -6,6 +6,8 @@ import { useAuth } from '../../../app/providers/AuthProvider';
 import { isolateAuto } from '../../../shared/lib/bidi';
 import { EmptyState } from '../../../shared/ui/EmptyState';
 import { PageHeader } from '../../../shared/ui/PageHeader';
+import { countVehicles } from '../../vehicles/api';
+import { vehicleKeys } from '../../vehicles/queryKeys';
 import { EXPIRING_WINDOW_DAYS, fetchExpiring, fetchKpis, LIVE_DASHBOARD_MILESTONE } from '../api';
 import { KpiCard } from '../components/KpiCard';
 import { dashboardKeys } from '../queryKeys';
@@ -14,6 +16,11 @@ export function DashboardPage() {
   const { t } = useTranslation();
   const { user } = useAuth();
   const kpis = useQuery({ queryKey: dashboardKeys.kpis(), queryFn: fetchKpis });
+  // Live since milestone 2: `GET /vehicles?status=IN_STOCK&pageSize=1` -> `total`.
+  const inStock = useQuery({
+    queryKey: vehicleKeys.count('IN_STOCK'),
+    queryFn: ({ signal }) => countVehicles('IN_STOCK', signal),
+  });
   const expiring = useQuery({
     queryKey: dashboardKeys.expiring(EXPIRING_WINDOW_DAYS),
     queryFn: () => fetchExpiring(EXPIRING_WINDOW_DAYS),
@@ -36,9 +43,9 @@ export function DashboardPage() {
         <Col xs={24} sm={12} xl={6}>
           <KpiCard
             title={t('dashboard.kpis.vehiclesInStock')}
-            value={k?.vehiclesInStock ?? 0}
+            value={inStock.data ?? 0}
             icon={<CarOutlined />}
-            loading={kpis.isPending}
+            loading={inStock.isPending}
           />
         </Col>
         <Col xs={24} sm={12} xl={6}>

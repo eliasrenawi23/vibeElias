@@ -4,13 +4,17 @@ import type { Contact, ContactDetail, ContactListQuery } from './types';
 
 const path = (id: string) => `/contacts/${encodeURIComponent(id)}`;
 
-/** `GET /api/contacts?q&tag&followUpBefore&archived&page&pageSize&sort&order` */
+/** `GET /api/contacts?q&tag&followUpBefore&includeArchived&archived&page&pageSize&sort&order` */
 export function fetchContacts(
   query: ContactListQuery,
   signal?: AbortSignal,
 ): Promise<Paginated<Contact>> {
   return http.get<Paginated<Contact>>('/contacts', {
-    query: { ...query, archived: query.archived ? true : undefined },
+    query: {
+      ...query,
+      includeArchived: query.includeArchived ? true : undefined,
+      archived: query.archived ?? undefined,
+    },
     signal,
   });
 }

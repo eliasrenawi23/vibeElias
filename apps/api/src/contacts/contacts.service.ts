@@ -30,7 +30,13 @@ const SORTABLE_FIELDS = new Set([
   'city',
   'followUpAt',
 ]);
-const NULLABLE_SORT_FIELDS = new Set(['firstName', 'lastName', 'companyName', 'city', 'followUpAt']);
+const NULLABLE_SORT_FIELDS = new Set([
+  'firstName',
+  'lastName',
+  'companyName',
+  'city',
+  'followUpAt',
+]);
 
 const DRIVER_SELECT = { select: { id: true, status: true } } as const;
 

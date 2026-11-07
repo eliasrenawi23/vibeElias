@@ -55,7 +55,7 @@ export class CyclesController {
   })
   @ApiConflictResponse({
     description:
-      'errors.noOpenCycle (already ended) | errors.invalidTransition (OWNED cycle) | ' +
+      'errors.noOpenCycle (not an open CONSIGNED cycle) | ' +
       'errors.dealPending (draft / pending deal on the cycle)',
   })
   returnToConsignor(

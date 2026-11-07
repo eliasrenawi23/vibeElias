@@ -31,7 +31,8 @@ export class ExpensesController {
   @ApiOperation({
     summary:
       'Expenses of a vehicle, newest first, filtered by from/to/category/paidBy/cycleId ' +
-      '(no paging) + summary { total, paidByUs, count, byCategory }',
+      '(no paging): { items, total (sum of amounts), summary { total, paidByUs, count, ' +
+      'byCategory } }',
   })
   list(@Param('id') vehicleId: string, @Query() query: ExpenseQueryDto): Promise<ExpenseList> {
     return this.expenses.list(vehicleId, query);

@@ -1,9 +1,11 @@
 import { createBrowserRouter, Navigate, type RouteObject } from 'react-router';
 import { RequireAuth } from '../features/auth/components/RequireAuth';
 import { LoginPage } from '../features/auth/pages/LoginPage';
+import { ContactDetailPage } from '../features/contacts/pages/ContactDetailPage';
 import { ContactsPage } from '../features/contacts/pages/ContactsPage';
 import { DashboardPage } from '../features/dashboard/pages/DashboardPage';
 import { DealsPage } from '../features/deals/pages/DealsPage';
+import { DriverDetailPage } from '../features/drivers/pages/DriverDetailPage';
 import { DriversPage } from '../features/drivers/pages/DriversPage';
 import { FinesPage } from '../features/fines/pages/FinesPage';
 import { LeasesPage } from '../features/leases/pages/LeasesPage';
@@ -15,7 +17,10 @@ import {
   ContractSettingsPage,
   ReminderSettingsPage,
 } from '../features/settings/pages/SettingsPlaceholderPages';
+import { TaxiLicenseDetailPage } from '../features/taxi-licenses/pages/TaxiLicenseDetailPage';
 import { TaxiLicensesPage } from '../features/taxi-licenses/pages/TaxiLicensesPage';
+import { VehicleDetailPage } from '../features/vehicles/pages/VehicleDetailPage';
+import { VehicleNewPage } from '../features/vehicles/pages/VehicleNewPage';
 import { VehiclesPage } from '../features/vehicles/pages/VehiclesPage';
 import { AppShell } from './layout/AppShell';
 import { NotFoundPage } from './pages/NotFoundPage';
@@ -25,7 +30,7 @@ import type { RouteHandle } from './routeTitle';
 
 const handle = (titleKey: RouteHandle['titleKey']): RouteHandle => ({ titleKey });
 
-/** Route table (see the plan's "Frontend routes"; detail/new routes arrive with each milestone). */
+/** Route table (see the plan's "Frontend routes"; the remaining detail routes arrive with their milestones). */
 export const routes: RouteObject[] = [
   {
     element: <RootLayout />,
@@ -44,15 +49,41 @@ export const routes: RouteObject[] = [
           { index: true, element: <DashboardPage />, handle: handle('nav.dashboard') },
           { path: 'vehicles', element: <VehiclesPage />, handle: handle('nav.vehicles') },
           {
+            path: 'vehicles/new',
+            element: <VehicleNewPage />,
+            handle: handle('vehicles.newTitle'),
+          },
+          {
+            path: 'vehicles/:id',
+            element: <VehicleDetailPage />,
+            handle: handle('vehicles.detailTitle'),
+          },
+          {
             path: 'taxi-licenses',
             element: <TaxiLicensesPage />,
             handle: handle('nav.taxiLicenses'),
           },
+          {
+            path: 'taxi-licenses/:id',
+            element: <TaxiLicenseDetailPage />,
+            handle: handle('nav.taxiLicenses'),
+          },
           { path: 'drivers', element: <DriversPage />, handle: handle('nav.drivers') },
+          { path: 'drivers/:id', element: <DriverDetailPage />, handle: handle('nav.drivers') },
           { path: 'leases', element: <LeasesPage />, handle: handle('nav.leases') },
           { path: 'deals', element: <DealsPage />, handle: handle('nav.deals') },
           { path: 'fines', element: <FinesPage />, handle: handle('nav.fines') },
           { path: 'contacts', element: <ContactsPage />, handle: handle('nav.contacts') },
+          {
+            path: 'contacts/new',
+            element: <ContactDetailPage />,
+            handle: handle('contacts.newTitle'),
+          },
+          {
+            path: 'contacts/:id',
+            element: <ContactDetailPage />,
+            handle: handle('contacts.detailTitle'),
+          },
           { path: 'reminders', element: <RemindersPage />, handle: handle('nav.reminders') },
           { path: 'reports', element: <ReportsPage />, handle: handle('nav.reports') },
           {

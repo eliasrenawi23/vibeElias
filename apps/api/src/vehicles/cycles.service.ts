@@ -88,7 +88,8 @@ export class CyclesService {
 
   /**
    * Ends an open CONSIGNED cycle with RETURNED_TO_CONSIGNOR; the vehicle becomes RETURNED and
-   * stays CONSIGNED. Blocked while a draft / pending deal is attached to the cycle.
+   * stays CONSIGNED. Anything but an open CONSIGNED cycle -> 409 `errors.noOpenCycle`; blocked
+   * while a draft / pending deal is attached to the cycle (`errors.dealPending`).
    */
   async returnToConsignor(
     cycleId: string,
@@ -97,8 +98,9 @@ export class CyclesService {
   ): Promise<VehicleDetail> {
     const cycle = await this.prisma.inventoryCycle.findUnique({ where: { id: cycleId } });
     if (!cycle) throw AppException.notFound();
-    if (cycle.endedAt) throw AppException.conflict(ErrorKey.noOpenCycle);
-    if (cycle.kind !== 'CONSIGNED') throw AppException.conflict(ErrorKey.invalidTransition);
+    if (cycle.endedAt || cycle.kind !== 'CONSIGNED') {
+      throw AppException.conflict(ErrorKey.noOpenCycle);
+    }
     const pendingDeals = await this.prisma.deal.count({
       where: { cycleId, status: { in: ['DRAFT', 'PENDING'] } },
     });

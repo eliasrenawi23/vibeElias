@@ -1,6 +1,6 @@
 import { ConfigService } from '@nestjs/config';
 import type { NestExpressApplication } from '@nestjs/platform-express';
-import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { DocumentBuilder, OpenAPIObject, SwaggerModule } from '@nestjs/swagger';
 import { installValidationErrorMap } from '@renawi/shared';
 import cookieParser from 'cookie-parser';
 import { cleanupOpenApiDoc } from 'nestjs-zod';
@@ -9,6 +9,37 @@ import type { Env } from './config/env';
 
 export const GLOBAL_PREFIX = 'api';
 export const SWAGGER_PATH = 'api/docs';
+
+/** Swagger tags in display order (each controller uses one of these in `@ApiTags`). */
+export const SWAGGER_TAGS: readonly { name: string; description: string }[] = [
+  { name: 'auth', description: 'Login / refresh / logout (httpOnly cookies) and the current user' },
+  { name: 'users', description: 'User accounts (ADMIN)' },
+  { name: 'settings', description: 'Business settings singleton (names, VAT, reminder lead days)' },
+  {
+    name: 'contacts',
+    description: 'Contacts and leads: search, tags, follow-up dates, archive / unarchive',
+  },
+  {
+    name: 'vehicles',
+    description: 'Vehicles: list with computed alerts, vehicle file, manual status changes',
+  },
+  {
+    name: 'expenses',
+    description: 'Per-vehicle expenses (auto-linked to the open inventory cycle)',
+  },
+  { name: 'insurance', description: 'Vehicle policies and business-level TRADE / LOT policies' },
+  { name: 'odometer', description: 'Odometer readings (the latest by date sets currentKm)' },
+  {
+    name: 'cycles',
+    description: 'Inventory cycles: list, consignment intake, return to the consignor',
+  },
+  {
+    name: 'documents',
+    description:
+      'Uploads (pdf / jpeg / png / webp, sniffed), thumbnails and authenticated file streaming',
+  },
+  { name: 'health', description: 'Liveness / readiness' },
+];
 
 /**
  * HTTP-level setup shared by `main.ts` and the e2e tests: `/api` prefix, cookies, CORS with
@@ -41,22 +72,24 @@ export function configureApp(app: NestExpressApplication): void {
   });
 }
 
+/** The OpenAPI document of the app (tags from `SWAGGER_TAGS`, zod DTOs cleaned up). */
+export function buildOpenApiDocument(app: NestExpressApplication): OpenAPIObject {
+  const builder = new DocumentBuilder()
+    .setTitle('Renawi Motors API')
+    .setDescription(
+      'Dealership + taxi-licence leasing API. Log in with POST /api/auth/login (sets httpOnly ' +
+        'cookies); every mutating request needs the header X-Requested-With: XMLHttpRequest ' +
+        '(added automatically by this page). Errors: { statusCode, message: <i18n key>, errors? }.',
+    )
+    .setVersion('0.1.0')
+    .addCookieAuth(ACCESS_COOKIE);
+  for (const tag of SWAGGER_TAGS) builder.addTag(tag.name, tag.description);
+  return cleanupOpenApiDoc(SwaggerModule.createDocument(app, builder.build()));
+}
+
 /** Swagger UI at `/api/docs` (JSON at `/api/docs-json`), authenticated by the access cookie. */
 export function setupSwagger(app: NestExpressApplication): void {
-  const document = SwaggerModule.createDocument(
-    app,
-    new DocumentBuilder()
-      .setTitle('Renawi Motors API')
-      .setDescription(
-        'Dealership + taxi-licence leasing API. Log in with POST /api/auth/login (sets httpOnly ' +
-          'cookies); every mutating request needs the header X-Requested-With: XMLHttpRequest ' +
-          '(added automatically by this page). Errors: { statusCode, message: <i18n key>, errors? }.',
-      )
-      .setVersion('0.1.0')
-      .addCookieAuth(ACCESS_COOKIE)
-      .build(),
-  );
-  SwaggerModule.setup(SWAGGER_PATH, app, cleanupOpenApiDoc(document), {
+  SwaggerModule.setup(SWAGGER_PATH, app, buildOpenApiDocument(app), {
     customSiteTitle: 'Renawi Motors API',
     swaggerOptions: {
       persistAuthorization: true,

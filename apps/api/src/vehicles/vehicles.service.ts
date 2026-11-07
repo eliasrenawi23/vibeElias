@@ -236,10 +236,10 @@ export class VehiclesService {
       if (ownership === 'CONSIGNED') throw AppException.conflict(ErrorKey.invalidTransition);
       if (await this.openCycle(id)) throw AppException.conflict(ErrorKey.cycleOpen);
     }
-    let ownerDriverId =
-      dto.ownerDriverId !== undefined ? dto.ownerDriverId : current.ownerDriverId;
+    let ownerDriverId = dto.ownerDriverId !== undefined ? dto.ownerDriverId : current.ownerDriverId;
     if (ownership !== 'THIRD_PARTY') ownerDriverId = null;
-    else if (!ownerDriverId) throw AppException.fieldError('ownerDriverId', msg.ownerDriverRequired);
+    else if (!ownerDriverId)
+      throw AppException.fieldError('ownerDriverId', msg.ownerDriverRequired);
     else if (ownerDriverId !== current.ownerDriverId) await this.assertDriver(ownerDriverId);
 
     const today = this.clock.today();

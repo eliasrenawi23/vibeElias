@@ -3,13 +3,13 @@ import { VehicleAlert } from '@renawi/shared';
 import { Flex, Tag } from 'antd';
 import { useTranslation } from 'react-i18next';
 
-/** AntD preset colour per alert code: red = blocking / expired, amber/orange = attention. */
+/** AntD preset colour per alert code: red = blocking / expired, amber = attention. */
 export const ALERT_COLORS: Readonly<Record<VehicleAlert, string>> = {
   registrationExpired: 'error',
   registrationExpiring: 'warning',
   dealerRegistration11Months: 'orange',
   taxiAge10: 'gold',
-  taxiAgeNearLimit: 'volcano',
+  taxiAgeNearLimit: 'warning',
   taxiAgeBlocked: 'error',
 };
 

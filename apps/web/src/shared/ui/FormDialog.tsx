@@ -12,6 +12,8 @@ export interface FormDialogProps {
   submitting?: boolean;
   okText?: ReactNode;
   okDanger?: boolean;
+  /** Disable the OK button (e.g. nothing can be submitted). */
+  okDisabled?: boolean;
   /** Form-level error (API message that is not tied to a field). */
   error?: ReactNode;
   width?: number;
@@ -27,6 +29,7 @@ export function FormDialog({
   submitting = false,
   okText,
   okDanger = false,
+  okDisabled = false,
   error,
   width = 560,
   children,
@@ -37,10 +40,12 @@ export function FormDialog({
       open={open}
       title={title}
       onCancel={onCancel}
-      onOk={() => void onSubmit()}
+      onOk={() => {
+        if (!okDisabled) void onSubmit();
+      }}
       okText={okText ?? t('actions.save')}
       cancelText={t('actions.cancel')}
-      okButtonProps={{ loading: submitting, danger: okDanger }}
+      okButtonProps={{ loading: submitting, danger: okDanger, disabled: okDisabled }}
       destroyOnHidden
       width={width}
     >
