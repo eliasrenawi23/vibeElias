@@ -37,7 +37,7 @@ export function SideNav({ collapsed = false, onNavigate }: SideNavProps) {
         <BrandLogo
           variant={collapsed ? 'icon' : 'horizontal'}
           onDark
-          height={collapsed ? 36 : 34}
+          height={collapsed ? 30 : 34}
         />
       </Link>
       <Menu

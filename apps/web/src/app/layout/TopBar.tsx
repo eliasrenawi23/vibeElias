@@ -2,6 +2,7 @@ import { MenuFoldOutlined, MenuOutlined, MenuUnfoldOutlined } from '@ant-design/
 import { Button, Flex, Layout, Typography } from 'antd';
 import { useTranslation } from 'react-i18next';
 import { BrandLogo } from '../../shared/ui/BrandLogo';
+import { useUi } from '../providers/UiProvider';
 import { useRouteTitle } from '../routeTitle';
 import { LangMenu } from './LangMenu';
 import { ThemeToggle } from './ThemeToggle';
@@ -16,6 +17,7 @@ export interface TopBarProps {
 /** Page title (the page's `<h1>`) plus language, theme and user menus. */
 export function TopBar({ isMobile, collapsed, onToggleNav }: TopBarProps) {
   const { t } = useTranslation();
+  const { themeMode } = useUi();
   const title = useRouteTitle();
 
   const toggleLabel = isMobile
@@ -34,7 +36,7 @@ export function TopBar({ isMobile, collapsed, onToggleNav }: TopBarProps) {
   return (
     <Layout.Header className="rm-topbar">
       <Button type="text" icon={toggleIcon} aria-label={toggleLabel} onClick={onToggleNav} />
-      {isMobile && <BrandLogo variant="icon" height={28} />}
+      {isMobile && <BrandLogo variant="icon" onDark={themeMode === 'dark'} height={28} />}
       <Typography.Title level={1} className="rm-topbar-title" ellipsis>
         {title}
       </Typography.Title>

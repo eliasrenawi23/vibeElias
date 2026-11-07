@@ -13,7 +13,7 @@ export const XHR = { 'X-Requested-With': 'XMLHttpRequest' } as const;
 export const TEST_USER = {
   email: 'owner@renawi.test',
   password: 'Secret123!',
-  name: 'אליאס רנאוי',
+  name: 'אליאס רינאוי',
 } as const;
 
 export interface TestApp {

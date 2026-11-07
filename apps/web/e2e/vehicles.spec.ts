@@ -71,7 +71,7 @@ async function mockApi(page: Page) {
   let user = {
     id: 'usr_admin',
     email: 'admin@renawi.local',
-    name: 'אליאס רנאוי',
+    name: 'אליאס רינאוי',
     role: 'ADMIN',
     locale: 'en',
     theme: 'light',

@@ -66,7 +66,7 @@ describe('bidi', () => {
   it('wraps text in isolates', () => {
     expect(isolateLtr('050-123-4567')).toBe(`${LRI}050-123-4567${PDI}`);
     expect(isolateRtl('שלום')).toBe(`${RLI}שלום${PDI}`);
-    expect(isolateAuto('رناوي')).toBe(`${FSI}رناوي${PDI}`);
+    expect(isolateAuto('ريناوي')).toBe(`${FSI}ريناوي${PDI}`);
     expect(LRI.codePointAt(0)).toBe(0x2066);
     expect(FSI.codePointAt(0)).toBe(0x2068);
     expect(PDI.codePointAt(0)).toBe(0x2069);

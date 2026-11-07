@@ -50,14 +50,14 @@ describe('DecimalToNumberInterceptor', () => {
         { id: 'a', amount: new Prisma.Decimal('10.5'), date: new Date('2026-01-31T00:00:00Z') },
         { id: 'b', amount: new Prisma.Decimal('0'), date: new Date('2026-02-28T00:00:00Z') },
       ],
-      meta: { total: BigInt(2), ok: true, label: 'רנאוי', tags: ['DRIVER'] },
+      meta: { total: BigInt(2), ok: true, label: 'רינאוי', tags: ['DRIVER'] },
     });
     expect(result).toEqual({
       items: [
         { id: 'a', amount: 10.5, date: '2026-01-31' },
         { id: 'b', amount: 0, date: '2026-02-28' },
       ],
-      meta: { total: 2, ok: true, label: 'רנאוי', tags: ['DRIVER'] },
+      meta: { total: 2, ok: true, label: 'רינאוי', tags: ['DRIVER'] },
     });
   });
 

@@ -8,7 +8,8 @@
  *   icons/maskable-512.png          full-bleed square, glyph inside the 80% safe-zone circle
  *
  * Usage: node scripts/build-icons.mjs [--concept a|b] [--out <dir>]
- * Concept A (the road R) is the default; pass `--concept b` to build the set from the roof sign.
+ * Concept B (the roof sign, the chosen logo) is the default; pass `--concept a` to build the set
+ * from the road R instead.
  */
 import { readFile, mkdir } from 'node:fs/promises';
 import path from 'node:path';
@@ -22,7 +23,7 @@ const arg = (name, fallback) => {
   const i = process.argv.indexOf(`--${name}`);
   return i > -1 ? process.argv[i + 1] : fallback;
 };
-const CONCEPT = arg('concept', 'a');
+const CONCEPT = arg('concept', 'b');
 const OUT_DIR = path.resolve(arg('out', path.join(ROOT, 'icons')));
 
 const TILE = '#0F0F10';

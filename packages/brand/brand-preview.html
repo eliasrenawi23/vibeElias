@@ -6,7 +6,7 @@
     <title>Renawi Motors Brand</title>
     <meta
       name="description"
-      content="Renawi Motors brand preview: logo concepts A and B, colours, type and UI tone in Hebrew, Arabic and English."
+      content="Renawi Motors brand preview: logo (concept B, with concept A as an alternative), colours, type and UI tone in Hebrew, Arabic and English."
     />
     <meta name="theme-color" content="#0F0F10" />
     <link rel="icon" href="logo/favicon.svg" type="image/svg+xml" />
@@ -252,6 +252,10 @@
         font-size: var(--rm-text-caption-size);
         line-height: 20px;
         font-weight: var(--rm-font-weight-semibold);
+      }
+      .badge.alt {
+        background: var(--rm-color-bg-sunken);
+        color: var(--rm-color-text-secondary);
       }
       .concept ul {
         margin: 0;
@@ -693,11 +697,11 @@
   </head>
   <body>
     <header class="topbar">
-      <img id="header-logo" class="lockup" src="logo/a-on-dark-en.svg" alt="Renawi Motors" />
+      <img id="header-logo" class="lockup" src="logo/b-on-dark-en.svg" alt="Renawi Motors" />
       <div class="controls">
         <div class="seg" role="group" aria-label="Logo concept">
-          <button type="button" data-concept="a" aria-pressed="true">Concept A</button>
-          <button type="button" data-concept="b" aria-pressed="false">Concept B</button>
+          <button type="button" data-concept="b" aria-pressed="true">Concept B</button>
+          <button type="button" data-concept="a" aria-pressed="false">Concept A</button>
         </div>
         <div class="seg" role="group" aria-label="Theme">
           <button type="button" data-theme-set="light" aria-pressed="false">Light</button>
@@ -714,50 +718,19 @@
     <main>
       <section id="pick">
         <div class="section-head">
-          <span class="eyebrow">Decision needed</span>
-          <h1>Pick a logo concept</h1>
+          <span class="eyebrow">Decided</span>
+          <h1>The logo is concept B, the roof sign</h1>
           <p class="muted">
-            Two directions, both in taxi yellow and black, both with a Latin, Hebrew and Arabic
-            lockup. Use the Concept switch at the top to try each one in the header and the app
-            mock-up further down. Everything else on this page (colours, type, UI tone) is the same
-            for either choice.
+            The owner chose concept B as the logo for the whole business: the app, documents,
+            signage and the favicon. Concept A stays in the package as an alternative and for
+            illustration. Both are in taxi yellow and black with a Latin, Hebrew and Arabic lockup;
+            the Concept switch at the top still shows A in the header and the app mock-up for
+            comparison. Everything else on this page (colours, type, UI tone) is the same for both.
           </p>
         </div>
         <div class="grid">
           <article class="card concept stack">
-            <h3>A. Road R <span class="badge">Recommended</span></h3>
-            <div class="pair">
-              <figure class="on-light">
-                <img class="icon-sq" src="logo/a-icon.svg" alt="Concept A icon" />
-              </figure>
-              <figure class="on-dark">
-                <img class="icon-sq" src="logo/a-icon-inverse.svg" alt="Concept A icon, inverse" />
-              </figure>
-            </div>
-            <figure class="on-light">
-              <img class="lockup" src="logo/a-horizontal-en.svg" alt="Renawi Motors" />
-            </figure>
-            <p>
-              A rounded black tile with a yellow R. A dashed centre line runs up the stem and round
-              the bowl, so the R is drawn as a road; the leg is the way out.
-            </p>
-            <ul>
-              <li>
-                Reads at every size: the tile is the app icon as-is; favicon keeps the R, drops the
-                road line.
-              </li>
-              <li>Fits both businesses: says "motors", not only "taxi".</li>
-              <li>
-                Black on yellow inverse for dark screens; one-colour version for stamps and forms.
-              </li>
-              <li>
-                <span class="label">Watch out:</span> the road line needs about 48&nbsp;px or more;
-                below that use <code>favicon.svg</code>.
-              </li>
-            </ul>
-          </article>
-          <article class="card concept stack">
-            <h3>B. Roof sign</h3>
+            <h3>B. Roof sign <span class="badge">Chosen</span></h3>
             <div class="pair">
               <figure class="on-light">
                 <img class="icon-wide" src="logo/b-icon.svg" alt="Concept B icon" />
@@ -785,8 +758,10 @@
               </li>
               <li>Same R letterform as A, so the two can live together.</li>
               <li>
-                <span class="label">Watch out:</span> the R is small inside the sign, so app icons
-                need the black tile (<code>build:icons --concept b</code>) and the favicon is weak.
+                The R is small inside the sign, so the app icons put the sign on the black tile
+                (<code>npm run build:icons</code>) and <code>favicon.svg</code> is a simplified
+                sign: a taller silhouette on a bold roof line with a larger R, no feet and no thin
+                strokes, so it holds up at 16&nbsp;px.
               </li>
               <li>
                 <span class="label">Watch out:</span> yellow on white is low contrast (1.6:1); the
@@ -794,10 +769,42 @@
               </li>
             </ul>
           </article>
+          <article class="card concept stack">
+            <h3>A. Road R <span class="badge alt">Alternative</span></h3>
+            <div class="pair">
+              <figure class="on-light">
+                <img class="icon-sq" src="logo/a-icon.svg" alt="Concept A icon" />
+              </figure>
+              <figure class="on-dark">
+                <img class="icon-sq" src="logo/a-icon-inverse.svg" alt="Concept A icon, inverse" />
+              </figure>
+            </div>
+            <figure class="on-light">
+              <img class="lockup" src="logo/a-horizontal-en.svg" alt="Renawi Motors" />
+            </figure>
+            <p>
+              A rounded black tile with a yellow R. A dashed centre line runs up the stem and round
+              the bowl, so the R is drawn as a road; the leg is the way out.
+            </p>
+            <ul>
+              <li>
+                Reads at every size: the tile works as an app icon as-is (build it with
+                <code>--concept a</code>); at favicon size keep the R and drop the road line.
+              </li>
+              <li>Fits both businesses: says "motors", not only "taxi".</li>
+              <li>
+                Black on yellow inverse for dark screens; one-colour version for stamps and forms.
+              </li>
+              <li>
+                <span class="label">Watch out:</span> the road line needs about 48&nbsp;px or more;
+                below that drop it.
+              </li>
+            </ul>
+          </article>
         </div>
         <p class="muted" style="margin-block-start: var(--rm-space-4); max-width: 72ch">
-          Suggestion: choose A as the logo for the whole business and keep B's roof sign as an
-          illustration for the taxi side (licence pages, driver contracts, vehicle stickers).
+          Use the <code>b-</code> files everywhere. The <code>a-</code> files are kept for reference
+          and as an alternative mark; do not mix the two concepts on the same page or document.
         </p>
       </section>
 
@@ -819,9 +826,11 @@
           <span class="eyebrow">App icons</span>
           <h2>Favicon and PWA icons</h2>
           <p class="muted">
-            <code>logo/favicon.svg</code> is the concept A tile with a slightly larger R and no road
-            line, built to hold up at 16&nbsp;px. The PNGs in <code>icons/</code> come from
-            <code>npm run build:icons</code>.
+            <code>logo/favicon.svg</code> is concept B simplified for 16&nbsp;px: the yellow roof
+            sign, taller than in the full mark, sitting on a bold black roof line, with a larger
+            black R snapped to the pixel grid. The PNGs in <code>icons/</code> (the full sign on the
+            black tile) come from <code>npm run build:icons</code>, which builds concept B by
+            default.
           </p>
         </div>
         <div class="grid">
@@ -958,11 +967,11 @@
           <div class="card stack">
             <h4>Body text</h4>
             <p lang="he" dir="rtl">
-              רנאוי מוטורס משכירה מספרים ירוקים ומוניות לנהגים ומוכרת רכבים משומשים. החוזה, התשלומים
-              והיתרה של כל נהג נמצאים במקום אחד.
+              רינאוי מוטורס משכירה מספרים ירוקים ומוניות לנהגים ומוכרת רכבים משומשים. החוזה,
+              התשלומים והיתרה של כל נהג נמצאים במקום אחד.
             </p>
             <p lang="ar" dir="rtl">
-              رناوي موتورز تؤجّر أرقام التاكسي الخضراء وسيارات الأجرة للسائقين وتبيع السيارات
+              ريناوي موتورز تؤجّر أرقام التاكسي الخضراء وسيارات الأجرة للسائقين وتبيع السيارات
               المستعملة. العقد والدفعات ورصيد كل سائق في مكان واحد.
             </p>
             <p lang="en" dir="ltr">
@@ -1043,7 +1052,7 @@
         </div>
         <div class="app" id="app">
           <nav aria-label="Demo navigation">
-            <img class="lockup app-logo" src="logo/a-on-dark-en.svg" alt="Renawi Motors" />
+            <img class="lockup app-logo" src="logo/b-on-dark-en.svg" alt="Renawi Motors" />
             <a href="#ui">Dashboard</a>
             <a href="#ui" aria-current="page">Drivers</a>
             <a href="#ui">Taxi licences</a>
@@ -1180,12 +1189,12 @@
             }
           },
         };
-        var state = { concept: 'a', theme: 'system', dir: 'ltr' };
+        var state = { concept: 'b', theme: 'system', dir: 'ltr' };
 
         // ---- Logo variant grids -------------------------------------------------------------
         var concepts = {
-          a: { name: 'Concept A, Road R', iconClass: 'icon-sq' },
-          b: { name: 'Concept B, Roof sign', iconClass: 'icon-wide' },
+          b: { name: 'Concept B, Roof sign (the logo)', iconClass: 'icon-wide' },
+          a: { name: 'Concept A, Road R (alternative)', iconClass: 'icon-sq' },
         };
         var langs = ['en', 'he', 'ar'];
         function tile(bg, src, cls, caption, extra) {
@@ -1452,9 +1461,11 @@
           document.getElementById('header-logo').src = src;
           document.querySelector('.app-logo').src = src;
         }
-        function setConcept(c) {
+        // Only an explicit click is remembered, under a new key: B is the default for everyone,
+        // including viewers whose browser saved the old default (A) before B was chosen.
+        function setConcept(c, remember) {
           state.concept = c;
-          store.set('concept', c);
+          if (remember) store.set('concept-choice', c);
           press('[data-concept]', 'data-concept', c);
           updateLogos();
         }
@@ -1475,7 +1486,7 @@
         }
         document.querySelectorAll('[data-concept]').forEach(function (b) {
           b.addEventListener('click', function () {
-            setConcept(b.getAttribute('data-concept'));
+            setConcept(b.getAttribute('data-concept'), true);
           });
         });
         document.querySelectorAll('[data-theme-set]').forEach(function (b) {
@@ -1492,12 +1503,12 @@
           if (state.theme === 'system') renderColour();
         });
 
-        // Initial state: ?concept=b&theme=dark&dir=rtl in the URL wins over the saved choice.
+        // Initial state: ?concept=a&theme=dark&dir=rtl in the URL wins over the saved choice.
         var params = new URLSearchParams(window.location.search);
         function initial(key) {
           return params.get(key) || store.get(key);
         }
-        setConcept(initial('concept') === 'b' ? 'b' : 'a');
+        setConcept((params.get('concept') || store.get('concept-choice')) === 'a' ? 'a' : 'b');
         setDir(initial('dir') === 'rtl' ? 'rtl' : 'ltr');
         var savedTheme = initial('theme');
         setTheme(savedTheme === 'light' || savedTheme === 'dark' ? savedTheme : 'system');

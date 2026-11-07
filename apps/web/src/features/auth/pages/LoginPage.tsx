@@ -39,7 +39,7 @@ export function LoginPage() {
       <Card className="rm-login-card" variant="borderless">
         <Flex vertical gap={20}>
           <Flex justify="center">
-            <BrandLogo variant="horizontal" onDark={themeMode === 'dark'} height={48} />
+            <BrandLogo variant="horizontal" onDark={themeMode === 'dark'} height={36} />
           </Flex>
           <div className="rm-login-heading">
             <Typography.Title level={1}>{t('auth.loginTitle')}</Typography.Title>

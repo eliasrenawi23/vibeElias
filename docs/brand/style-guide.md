@@ -4,9 +4,9 @@ Version 0.1 (November 2026). Source files live in `packages/brand`; open
 `packages/brand/brand-preview.html` in a browser to see everything in this guide rendered,
 in light and dark, left-to-right and right-to-left.
 
-> **Open decision:** the owner picks logo concept **A (Road R)** or **B (Roof sign)**.
-> Everything else in this guide (colour, type, UI rules) is the same for both. See
-> [Choosing a concept](#10-choosing-a-concept).
+> **Decided (November 2026):** the logo is concept **B (Roof sign)**. Concept **A (Road R)**
+> stays in the package as an alternative and for illustration. Everything else in this guide
+> (colour, type, UI rules) is the same for both. See [The chosen concept](#11-the-chosen-concept).
 
 ## 1. Brand story
 
@@ -28,9 +28,12 @@ look like they come from the same place.
 ### 2.1 Parts
 
 - **Icon mark**: script-neutral, never mirrored, works on its own (app icon, favicon, stamp).
-- **Wordmark**: Renawi Motors / רנאוי מוטורס / رناوي موتورز, set in Rubik at weight 650 and
+- **Wordmark**: Renawi Motors / רינאוי מוטורס / ريناوي موتورز, set in Rubik at weight 650 and
   converted to vector outlines (no live text, no font needed). Latin is uppercase with +45/1000
   letter-spacing; Hebrew +20/1000; **Arabic is never letter-spaced** (it breaks the joins).
+- **Spelling**: the owner's spelling is **רינאוי** in Hebrew (yod after the resh) and
+  **ريناوي** in Arabic (ya after the ra), in the logo, the app, documents and signage alike; not
+  the older רנאוי / رناوي. "Motors" is מוטורס / موتورز.
 - **Lockups**: icon + wordmark in English, Hebrew and Arabic. The icon always sits on the
   **leading side**: left of English, right of Hebrew and Arabic. The wordmark's cap height lines
   up with the icon: concept A centres the cap band on the tile; concept B aligns it with the R
@@ -38,16 +41,17 @@ look like they come from the same place.
 
 ### 2.2 Concepts
 
-|             | A. Road R (recommended)                                                                                            | B. Roof sign                                                                                |
-| ----------- | ------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------- |
-| Mark        | Rounded black tile, yellow geometric R. A dashed centre line runs up the stem and round the bowl: the R is a road. | The yellow taxi roof sign on its roof line, with the R where the sign's lettering would be. |
-| On dark     | Inverse: yellow tile, black R.                                                                                     | Yellow sign, R cut out, white roof (the white taxi body).                                   |
-| Small sizes | Strong. `favicon.svg` drops the road line and enlarges the R for 16 px.                                            | Weak: the R is small inside the sign. App icons put the sign on a black tile.               |
-| Says        | "Motors": covers both businesses.                                                                                  | "Taxi": strongest for the taxi side.                                                        |
+|             | B. Roof sign (**the logo**)                                                                                                                      | A. Road R (alternative)                                                                                            |
+| ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------ |
+| Mark        | The yellow taxi roof sign on its roof line, with the R where the sign's lettering would be.                                                      | Rounded black tile, yellow geometric R. A dashed centre line runs up the stem and round the bowl: the R is a road. |
+| On dark     | Yellow sign, R cut out, white roof (the white taxi body).                                                                                        | Inverse: yellow tile, black R.                                                                                     |
+| Small sizes | The R is small inside the full sign, so app icons put the sign on a black tile and `favicon.svg` is a simplified sign with a larger R (see 2.3). | Strong; at favicon size keep the R and drop the road line.                                                         |
+| Says        | "Taxi": strongest for the taxi side.                                                                                                             | "Motors": covers both businesses.                                                                                  |
 
 ### 2.3 Files
 
-All in `packages/brand/logo/`. `x` is `a` or `b`.
+All in `packages/brand/logo/`. `x` is `b` (the logo) everywhere; the `a-` files are kept as
+an alternative and for illustration. Do not mix the two concepts on one page or document.
 
 | File                          | Use it for                                                                           |
 | ----------------------------- | ------------------------------------------------------------------------------------ |
@@ -57,8 +61,13 @@ All in `packages/brand/logo/`. `x` is `a` or `b`.
 | `x-horizontal-{en,he,ar}.svg` | Default lockup on light backgrounds: documents, PDFs, emails, website.               |
 | `x-on-dark-{en,he,ar}.svg`    | Lockup on dark backgrounds: the app's side navigation, dark mode, signage on black.  |
 | `x-stacked-{en,he,ar}.svg`    | Narrow or square spaces: login screen, splash, social avatar card, vehicle sticker.  |
-| `favicon.svg`                 | Browser tab icon (concept A, no road line).                                          |
-| `../icons/*.png`              | PWA and home-screen icons (192, 512, Apple touch 180, maskable 512).                 |
+| `favicon.svg`                 | Browser tab icon: concept B simplified for 16 px (see below).                        |
+| `../icons/*.png`              | PWA and home-screen icons (192, 512, Apple touch 180, maskable 512): B on the tile.  |
+
+`favicon.svg` is not the full mark scaled down: the roof sign is taller and narrower so it fills
+the square, it sits directly on a bold black roof line (no feet, no thin strokes), and the R is
+about twice as tall as in the full mark scaled to the same width, with its top and bottom on the
+16 px pixel grid. It reads at 16 px on light and dark browser tabs.
 
 Pick the lockup that matches the **language of the page or document**, not the user's name or
 the customer: a Hebrew contract gets `x-horizontal-he.svg`, an Arabic one `x-horizontal-ar.svg`.
@@ -71,9 +80,9 @@ are fixed.
 
 - **Clear space**: keep a margin of **¼ of the icon height** free on every side of any lockup
   (16 px around a 64 px-high lockup). Nothing else (text, edges, other logos) enters it.
-- **Minimum sizes (screen)**: horizontal lockup 24 px high (A) / 28 px high (B); stacked lockup
-  64 px high; icon 16 px with `favicon.svg`. Use `a-icon.svg` (with the road line) at 48 px and
-  above; below 48 px use `favicon.svg`.
+- **Minimum sizes (screen)**: horizontal lockup 28 px high (B; 24 px for A); stacked lockup
+  64 px high; `b-icon.svg` 28 px high (about 50 px wide). Below that, and in browser tabs, use
+  `favicon.svg` (16 px and up).
 - **Minimum sizes (print)**: horizontal lockup 25 mm wide; icon 6 mm.
 
 ### 2.5 Do not
@@ -360,9 +369,9 @@ PWA manifest icons:
 | `package.json`                                                                       | hand           | `@renawi/brand`; exports `./tokens.css`, `./tokens`, `./logo/*`, `./icons/*`, `./fonts/*`. |
 | `logo/a-icon.svg`, `a-icon-inverse.svg`, `a-icon-mono.svg`                           | hand           | Concept A mark.                                                                            |
 | `logo/b-icon.svg`, `b-icon-inverse.svg`, `b-icon-mono.svg`                           | hand           | Concept B mark.                                                                            |
-| `logo/favicon.svg`                                                                   | hand           | Small-size concept A mark.                                                                 |
+| `logo/favicon.svg`                                                                   | hand           | Small-size concept B mark (simplified roof sign, larger R).                                |
 | `logo/{a,b}-{horizontal,stacked,on-dark}-{en,he,ar}.svg`                             | `build:logos`  | 18 lockups; wordmarks as outlines.                                                         |
-| `icons/icon-192.png`, `icon-512.png`, `apple-touch-icon-180.png`, `maskable-512.png` | `build:icons`  | App icons (concept A; `--concept b` for B).                                                |
+| `icons/icon-192.png`, `icon-512.png`, `apple-touch-icon-180.png`, `maskable-512.png` | `build:icons`  | App icons (concept B by default; `--concept a` for A).                                     |
 | `fonts/Rubik[wght].ttf`, `fonts/OFL.txt`                                             | downloaded     | Rubik variable font from google/fonts and its licence.                                     |
 | `tokens.ts`                                                                          | hand           | Source of truth for all tokens and the AntD theme.                                         |
 | `tokens.css`, `tokens.js`                                                            | `build:tokens` | CSS variables; JS build of `tokens.ts`.                                                    |
@@ -378,7 +387,7 @@ From `packages/brand` (or with `-w packages/brand` from the repo root):
 
 ```sh
 npm run build:logos    # lockups from the hand-written marks + Rubik
-npm run build:icons    # PNG icons (add -- --concept b for concept B)
+npm run build:icons    # PNG icons, concept B (add -- --concept a for concept A)
 npm run build:tokens   # tokens.css + tokens.js; add -- --contrast for the contrast table
 npm run verify         # sanity checks
 ```
@@ -387,14 +396,22 @@ To change a colour, edit `tokens.ts` and run `build:tokens`; never edit `tokens.
 `tokens.js` by hand. To change a mark, edit its hand-written SVG and run `build:logos` and
 `build:icons`.
 
-## 11. Choosing a concept
+## 11. The chosen concept
 
-**Recommendation: A (Road R)** as the logo for the whole business. It holds up from a 16 px
-favicon to a sign, it is already an app icon, and it says "motors" rather than only "taxi", so
-it fits the car dealership as well as the taxi station. Keep B's roof sign as an illustration
-for the taxi side (licence pages, driver contracts, vehicle stickers), where its "this is a
-taxi" message helps.
+**The owner chose B (Roof sign)** as the logo for the whole business: the app (side navigation,
+login, top bar, PWA icons, favicon), documents, signage and vehicles. The yellow roof sign is what
+every customer and driver already associates with the taxi station, and it is a distinctive
+silhouette on cars and on the office door.
 
-Choose **B** if the taxi station is the face of the business and recognisability on vehicles
-matters more than small sizes. Then run `npm run build:icons -- --concept b`, use the `b-`
-lockups, and keep `favicon.svg` (concept A) or commission a dedicated small B mark.
+How its weak points are handled:
+
+- **Small sizes**: the PNG app icons put the sign on the black tile (`npm run build:icons`, B
+  by default), and `favicon.svg` is a simplified sign with a larger R for 16 px (see 2.3).
+- **Yellow on white** (1.6:1): the black R and roof line carry the mark on light backgrounds;
+  never use the sign below 28 px high on white without the tile.
+- **Wide lockups**: the horizontal lockups are wider than A's for the same height, so narrow
+  containers (the app's 248 px side navigation, the login card on a phone) scale them down to
+  the available width instead of letting them overflow.
+
+**A (Road R)** stays in `packages/brand/logo/a-*` as an alternative and for illustration (for
+example, as a secondary motif on dealership material). Do not use A and B together as logos.

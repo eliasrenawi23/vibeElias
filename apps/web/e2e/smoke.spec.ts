@@ -31,7 +31,7 @@ async function mockApi(page: Page, options: { loggedIn?: boolean } = {}): Promis
   const api: MockApi = {
     calls: [],
     settings: {
-      businessName: { he: 'רנאוי מוטורס', ar: 'رناوي موتورز', en: 'Renawi Motors' },
+      businessName: { he: 'רינאוי מוטורס', ar: 'ريناوي موتورز', en: 'Renawi Motors' },
       legalId: null,
       dealerLicenseNo: null,
       address: null,
@@ -44,7 +44,7 @@ async function mockApi(page: Page, options: { loggedIn?: boolean } = {}): Promis
     user: {
       id: 'usr_admin',
       email: 'admin@renawi.local',
-      name: 'אליאס רנאוי',
+      name: 'אליאס רינאוי',
       role: 'ADMIN',
       locale: 'he',
       theme: 'system',
@@ -147,7 +147,7 @@ test('login, switch language and theme', async ({ page }) => {
   // Dashboard in the authenticated shell.
   await expect(page).toHaveURL(/\/$/);
   await expect(page.getByRole('heading', { level: 1 })).toHaveText('לוח בקרה');
-  await expect(page).toHaveTitle('לוח בקרה · רנאוי מוטורס');
+  await expect(page).toHaveTitle('לוח בקרה · רינאוי מוטורס');
   await expect(page.locator('.ant-statistic').first()).toBeVisible();
   // Live KPI from the vehicles list total.
   await expect(page.locator('.ant-statistic-content').first()).toHaveText('4');
@@ -217,8 +217,8 @@ test('login, switch language and theme', async ({ page }) => {
   await page.getByRole('menuitem', { name: 'الإعدادات' }).click();
   await page.getByRole('menuitem', { name: 'بيانات العمل' }).click();
   await expect(page).toHaveURL(/\/settings\/business$/);
-  await expect(page).toHaveTitle('بيانات العمل · رناوي موتورز');
-  await expect(page.locator('input[name="businessName.ar"]')).toHaveValue('رناوي موتورز');
+  await expect(page).toHaveTitle('بيانات العمل · ريناوي موتورز');
+  await expect(page.locator('input[name="businessName.ar"]')).toHaveValue('ريناوي موتورز');
 
   expect(problems).toEqual([]);
 });
@@ -250,7 +250,7 @@ test('business settings load, validate and save', async ({ page }) => {
   // PATCH carries the parsed schema output: trimmed, normalised, '' -> null.
   const patch = api.calls.find((c) => c.method === 'PATCH' && c.path === '/api/settings');
   expect(patch?.body).toMatchObject({
-    businessName: { he: 'רנאוי מוטורס', ar: 'رناوي موتورز', en: 'Renawi Motors Ltd' },
+    businessName: { he: 'רינאוי מוטורס', ar: 'ريناوي موتورز', en: 'Renawi Motors Ltd' },
     email: 'office@renawi.co.il',
     phone: '0501234567',
     legalId: null,

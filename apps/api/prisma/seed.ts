@@ -7,7 +7,8 @@
  *
  * Every demo row has a fixed `seed_*` id and is upserted with `update: {}`: re-running creates
  * what is missing and never overwrites data (or the admin password) changed in the app. The only
- * exception is `migrateLegacyDemo()`, which once rewrites the demo rows of older seed versions.
+ * exceptions are `migrateLegacyDemo()`, which once rewrites the demo rows of older seed versions,
+ * and `migrateLegacySpelling()`, which once fixes the old spelling of the business name.
  * Demo documents write small placeholder files (PDF / PNG) into UPLOAD_DIR.
  * `npm run db:reset` drops everything and seeds again with fresh relative dates.
  */
@@ -25,6 +26,7 @@ import {
   addWorkingDays,
   annualFeeDueDate,
   BUSINESS_NAME,
+  BusinessNameSchema,
   computeCommission,
   createTransferChecklist,
   daysInMonth,
@@ -173,6 +175,37 @@ async function seedSettings() {
         },
       }),
   );
+}
+
+/** Demo taxi licences are held by the company. */
+const LICENSE_HOLDER = `${BUSINESS_NAME.he} בע״מ`;
+
+/**
+ * Older seed versions (and the app's defaults before November 2026) spelled the name רנאוי /
+ * رناوي; the owner's spelling is רינאוי / ريناوي. Rewrites the word in the stored business name
+ * (he/ar only; the rest of a name edited in the app is kept) and in the holder name of the demo
+ * licences that still have the old seed value. No-op on fresh or already fixed data.
+ */
+async function migrateLegacySpelling(): Promise<void> {
+  const settings = await prisma.settings.findUnique({ where: { id: 1 } });
+  const name = BusinessNameSchema.safeParse(settings?.businessName);
+  if (name.success) {
+    const fixed = {
+      ...name.data,
+      he: name.data.he.replaceAll('רנאוי', 'רינאוי'),
+      ar: name.data.ar.replaceAll('رناوي', 'ريناوي'),
+    };
+    if (fixed.he !== name.data.he || fixed.ar !== name.data.ar) {
+      await prisma.settings.update({ where: { id: 1 }, data: { businessName: fixed } });
+      console.log(`Fixed the business name spelling: ${fixed.he} / ${fixed.ar}.`);
+    }
+  }
+  const licences = await prisma.taxiLicense.updateMany({
+    where: { id: { startsWith: 'seed_tl_' }, holderName: 'רנאוי מוטורס בע״מ' },
+    data: { holderName: LICENSE_HOLDER },
+  });
+  if (licences.count)
+    console.log(`Fixed the holder name spelling on ${licences.count} demo licences.`);
 }
 
 /* ------------------------------------------------------------------------------------------ */
@@ -882,7 +915,7 @@ async function seedDemo(adminId: string, T: string): Promise<void> {
     {
       id: 'seed_tl_24718',
       licenseNo: '24718',
-      holderName: 'רנאוי מוטורס בע״מ',
+      holderName: LICENSE_HOLDER,
       acquiredAt: day('2019-05-20'),
       acquisitionPrice: ils(215_000),
       annualFeeDueAt: feeDue,
@@ -891,7 +924,7 @@ async function seedDemo(adminId: string, T: string): Promise<void> {
     {
       id: 'seed_tl_31952',
       licenseNo: '31952',
-      holderName: 'רנאוי מוטורס בע״מ',
+      holderName: LICENSE_HOLDER,
       acquiredAt: day('2021-02-11'),
       acquisitionPrice: ils(238_000),
       annualFeeDueAt: feeDue,
@@ -901,7 +934,7 @@ async function seedDemo(adminId: string, T: string): Promise<void> {
     {
       id: 'seed_tl_40633',
       licenseNo: '40633',
-      holderName: 'רנאוי מוטורס בע״מ',
+      holderName: LICENSE_HOLDER,
       acquiredAt: day(addDays(T, -200)),
       acquisitionPrice: ils(262_000),
       annualFeeDueAt: feeDue,
@@ -1723,6 +1756,7 @@ async function main(): Promise<void> {
   const today = todayInBusinessTz(tz);
   const admin = await seedAdmin();
   await seedSettings();
+  await migrateLegacySpelling();
 
   const demo = !['false', '0', 'no'].includes((process.env.SEED_DEMO ?? 'true').toLowerCase());
   if (demo) await seedDemo(admin.id, today);

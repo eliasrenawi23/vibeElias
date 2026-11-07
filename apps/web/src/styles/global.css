@@ -117,9 +117,23 @@ body {
   color: var(--rm-color-chrome-selected-bg);
 }
 
-.rm-sidenav-logo .rm-logo {
+/* Never wider than its container (login card on a phone, sider, drawer): scale down, keep ratio. */
+.rm-logo {
   max-width: 100%;
   object-fit: contain;
+}
+
+/* The wide roof-sign mark needs more room than the 72 px rail's usual 16 px padding leaves. */
+.rm-sider.ant-layout-sider-collapsed .rm-sidenav-logo {
+  padding: 0 8px;
+}
+
+/*
+ * Concept B lockups are wide (English about 9.6:1). In the 248 px sider the English and Hebrew
+ * lockups are wider than the 216 px content box at height 34, so they scale down to the full
+ * width (object-fit) instead of overflowing; Arabic, with its descenders, fits almost as is.
+ */
+.rm-sidenav-logo .rm-logo {
   object-position: center;
 }
 

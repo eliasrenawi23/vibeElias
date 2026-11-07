@@ -1,11 +1,11 @@
-import iconOnLight from '@renawi/brand/logo/a-icon.svg';
-import horizontalAr from '@renawi/brand/logo/a-horizontal-ar.svg';
-import horizontalEn from '@renawi/brand/logo/a-horizontal-en.svg';
-import horizontalHe from '@renawi/brand/logo/a-horizontal-he.svg';
-import iconOnDark from '@renawi/brand/logo/a-icon-inverse.svg';
-import onDarkAr from '@renawi/brand/logo/a-on-dark-ar.svg';
-import onDarkEn from '@renawi/brand/logo/a-on-dark-en.svg';
-import onDarkHe from '@renawi/brand/logo/a-on-dark-he.svg';
+import iconOnLight from '@renawi/brand/logo/b-icon.svg';
+import horizontalAr from '@renawi/brand/logo/b-horizontal-ar.svg';
+import horizontalEn from '@renawi/brand/logo/b-horizontal-en.svg';
+import horizontalHe from '@renawi/brand/logo/b-horizontal-he.svg';
+import iconOnDark from '@renawi/brand/logo/b-icon-inverse.svg';
+import onDarkAr from '@renawi/brand/logo/b-on-dark-ar.svg';
+import onDarkEn from '@renawi/brand/logo/b-on-dark-en.svg';
+import onDarkHe from '@renawi/brand/logo/b-on-dark-he.svg';
 import { toLocale, type Locale } from '@renawi/shared';
 import { useTranslation } from 'react-i18next';
 
@@ -24,7 +24,10 @@ export interface BrandLogoProps {
   className?: string;
 }
 
-/** Logo concept A (road-chevron "R"). The wordmark follows the UI language. */
+/**
+ * Logo concept B (the taxi roof sign with the R), the chosen brand mark. The wordmark follows the
+ * UI language. The mark is wide (64 x 36), so `height` 28 gives an icon about 50 px wide.
+ */
 export function BrandLogo({
   variant = 'horizontal',
   onDark = false,
