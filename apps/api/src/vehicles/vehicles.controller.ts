@@ -10,11 +10,17 @@ import {
   Query,
 } from '@nestjs/common';
 import { ApiConflictResponse, ApiCookieAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import type { Paginated } from '@renawi/shared';
+import type { VehicleSummary, Paginated } from '@renawi/shared';
 import type { AuthenticatedUser } from '../auth/auth.types';
 import { CurrentUser } from '../auth/decorators';
 import { Audited } from '../common/audit/audit.decorator';
-import { VehicleCreateDto, VehicleQueryDto, VehicleStatusChangeDto, VehicleUpdateDto } from './dto';
+import {
+  VehicleCreateDto,
+  VehicleQueryDto,
+  VehicleSummaryQueryDto,
+  VehicleStatusChangeDto,
+  VehicleUpdateDto,
+} from './dto';
 import { VehicleDetail, VehicleListItem } from './vehicle-views';
 import { VehiclesService } from './vehicles.service';
 
@@ -32,6 +38,15 @@ export class VehiclesController {
   })
   list(@Query() query: VehicleQueryDto): Promise<Paginated<VehicleListItem>> {
     return this.vehicles.list(query);
+  }
+
+  @Get('summary')
+  @ApiOperation({
+    summary:
+      'Vehicle counts per status (every status present, 0 when none) under the list filters, ignoring status',
+  })
+  summary(@Query() query: VehicleSummaryQueryDto): Promise<VehicleSummary> {
+    return this.vehicles.summary(query);
   }
 
   @Post()

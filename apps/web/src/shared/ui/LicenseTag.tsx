@@ -1,6 +1,6 @@
-import { Tag } from 'antd';
 import { Link } from 'react-router';
 import { Ltr } from '../lib/bidi';
+import { ToneTag } from './ToneTag';
 
 export interface LicenseTagProps {
   /** Taxi licence ("green number") identifier. */
@@ -10,15 +10,15 @@ export interface LicenseTagProps {
 }
 
 /**
- * A taxi licence number in the brand's green licence accent, isolated left-to-right so it is
+ * A taxi licence number in the brand's green licence tone, isolated left-to-right so it is
  * never reordered inside Hebrew / Arabic text.
  */
 export function LicenseTag({ licenseNo, id }: LicenseTagProps) {
   if (!licenseNo) return <span className="rm-empty-value">—</span>;
   const tag = (
-    <Tag className="rm-license-tag" data-testid="license-tag">
+    <ToneTag tone="license" className="rm-license-tag" data-testid="license-tag">
       <Ltr className="rm-license-no">{licenseNo}</Ltr>
-    </Tag>
+    </ToneTag>
   );
   if (!id) return tag;
   return (

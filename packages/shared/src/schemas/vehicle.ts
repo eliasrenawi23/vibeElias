@@ -414,3 +414,13 @@ export const CycleReturnSchema = z.object({
   note: optionalText(1000),
 });
 export type CycleReturn = z.infer<typeof CycleReturnSchema>;
+
+/** `GET /vehicles/summary`: the list filters minus status and paging. */
+export const VehicleSummaryQuerySchema = VehicleQuerySchema.omit({
+  status: true,
+  page: true,
+  pageSize: true,
+  sort: true,
+  order: true,
+});
+export type VehicleSummaryQuery = z.infer<typeof VehicleSummaryQuerySchema>;

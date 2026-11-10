@@ -19,7 +19,7 @@ import { PlateNo } from '../../../shared/ui/PlateNo';
 import { StatusTag } from '../../../shared/ui/StatusTag';
 import { fetchTaxiLicenses } from '../api';
 import { AnnualFeeText } from '../components/AnnualFeeText';
-import { LICENSE_ALERT_COLORS, licensePath } from '../lib/licenseRules';
+import { licensePath } from '../lib/licenseRules';
 import { taxiLicenseKeys } from '../queryKeys';
 import type { TaxiLicenseListItem, TaxiLicenseListQuery } from '../types';
 
@@ -110,7 +110,7 @@ export function TaxiLicensesPage() {
       key: 'alerts',
       title: t('vehicles.fields.alerts'),
       render: (l) => (
-        <AlertTags alerts={l.alerts} group="taxiLicenses.alerts" colors={LICENSE_ALERT_COLORS} />
+        <AlertTags enumName="TaxiLicenseAlert" alerts={l.alerts} />
       ),
     },
   ];

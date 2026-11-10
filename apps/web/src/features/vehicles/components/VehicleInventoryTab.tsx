@@ -1,28 +1,30 @@
 import { PlusOutlined } from '@ant-design/icons';
 import { VehicleOwnership, VehicleStatus } from '@renawi/shared';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
-import { Button, Flex, Tag, Typography } from 'antd';
+import { Button, Flex, Typography } from 'antd';
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useNavigate } from 'react-router';
-import { AutoDir, Ltr } from '../../../shared/lib/bidi';
+import { AutoDir } from '../../../shared/lib/bidi';
 import { useEnumLabel, useEnumOptions } from '../../../shared/lib/enums';
 import { useListParams } from '../../../shared/lib/listParams';
+import { AlertTags } from '../../../shared/ui/AlertTags';
 import { DataTable, type DataTableColumn } from '../../../shared/ui/DataTable';
 import { DateText } from '../../../shared/ui/DateText';
 import { EmptyState } from '../../../shared/ui/EmptyState';
 import { FilterBar } from '../../../shared/ui/FilterBar';
 import { KmText } from '../../../shared/ui/KmText';
+import { LicenseTag } from '../../../shared/ui/LicenseTag';
 import { LoadError } from '../../../shared/ui/LoadError';
 import { Money } from '../../../shared/ui/Money';
 import { PlateNo } from '../../../shared/ui/PlateNo';
 import { StatusTag } from '../../../shared/ui/StatusTag';
+import { ToneTag } from '../../../shared/ui/ToneTag';
 import { YearText } from '../../../shared/ui/YearText';
 import { fetchVehicles } from '../api';
 import { COMMON_MAKES } from '../lib/makes';
 import { vehicleKeys } from '../queryKeys';
 import type { VehicleListItem, VehicleListQuery } from '../types';
-import { AlertBadges } from './AlertBadges';
 
 const MIN_FILTER_YEAR = 1990;
 
@@ -134,12 +136,8 @@ export function VehicleInventoryTab() {
       render: (v) =>
         v.isTaxi ? (
           <Flex gap={4} wrap>
-            <Tag color="gold">{t('vehicles.taxi')}</Tag>
-            {v.registeredLicense && (
-              <Tag className="rm-license-tag">
-                <Ltr>{v.registeredLicense.licenseNo}</Ltr>
-              </Tag>
-            )}
+            <ToneTag tone="accent">{t('vehicles.taxi')}</ToneTag>
+            {v.registeredLicense && <LicenseTag licenseNo={v.registeredLicense.licenseNo} />}
           </Flex>
         ) : (
           <span className="rm-empty-value">—</span>
@@ -165,7 +163,7 @@ export function VehicleInventoryTab() {
     {
       key: 'alerts',
       title: t('vehicles.fields.alerts'),
-      render: (v) => <AlertBadges alerts={v.alerts} />,
+      render: (v) => <AlertTags enumName="VehicleAlert" alerts={v.alerts} />,
     },
   ];
 

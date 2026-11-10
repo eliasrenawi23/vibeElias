@@ -27,10 +27,10 @@ import { DateTimeText } from '../../../shared/ui/DateTimeText';
 import { Money } from '../../../shared/ui/Money';
 import { PlateNo } from '../../../shared/ui/PlateNo';
 import { StatusTag } from '../../../shared/ui/StatusTag';
+import { ToneTag } from '../../../shared/ui/ToneTag';
 import { DriverPicker } from '../../drivers/components/DriverPicker';
 import { rebillFine, updateFine, type FineUpdateBody } from '../api';
 import type { TrafficFine } from '../types';
-import { FINE_ALERT_COLORS } from './fineRules';
 
 export interface FineDrawerProps {
   fine: TrafficFine;
@@ -143,12 +143,7 @@ export function FineDrawer({ fine, onClose, onSaved }: FineDrawerProps) {
               children: (
                 <Flex gap={6} wrap align="center">
                   <DateText value={fine.reassignDeadline} />
-                  <AlertTags
-                    alerts={fine.alerts}
-                    group="fines.alerts"
-                    colors={FINE_ALERT_COLORS}
-                    hideEmpty
-                  />
+                  <AlertTags enumName="FineAlert" alerts={fine.alerts} hideEmpty />
                 </Flex>
               ),
             },
@@ -179,7 +174,7 @@ export function FineDrawer({ fine, onClose, onSaved }: FineDrawerProps) {
             {
               key: 'rebilled',
               label: t('fines.fields.rebilled'),
-              children: rebilled ? <Tag color="success">{t('fines.rebilledTag')}</Tag> : empty,
+              children: rebilled ? <ToneTag tone="success">{t('fines.rebilledTag')}</ToneTag> : empty,
             },
             {
               key: 'notes',

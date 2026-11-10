@@ -38,6 +38,7 @@ import {
   type DealFormValues,
 } from './dealFormSchema';
 import { VehicleChoiceFields } from './VehicleChoiceFields';
+import { DESCRIPTION_COLUMNS } from '../../../shared/ui/descriptionColumns';
 
 type FormControl = Control<DealFormValues, unknown, DealCreateBody>;
 
@@ -292,7 +293,7 @@ function SaleVehicleInfo({
   return (
     <Descriptions
       size="small"
-      column={{ xs: 1, sm: 2, lg: 4 }}
+      column={DESCRIPTION_COLUMNS}
       data-testid="sale-vehicle-info"
       items={[
         {
@@ -340,7 +341,7 @@ function ConsignmentInfo({ cycle }: { cycle: InventoryCycle | null }) {
   return (
     <Descriptions
       size="small"
-      column={{ xs: 1, sm: 2, lg: 4 }}
+      column={DESCRIPTION_COLUMNS}
       data-testid="consignment-info"
       items={[
         {
@@ -416,7 +417,7 @@ function VatSection({
         {vat ? (
           <Descriptions
             size="small"
-            column={{ xs: 1, sm: 3 }}
+            column={DESCRIPTION_COLUMNS}
             items={[
               {
                 key: 'base',
@@ -547,7 +548,7 @@ function CommissionSection({
         <Flex vertical gap={8} data-testid="commission-preview">
           <Descriptions
             size="small"
-            column={{ xs: 1, sm: 3 }}
+            column={DESCRIPTION_COLUMNS}
             items={[
               {
                 key: 'rule',

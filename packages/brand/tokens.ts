@@ -110,6 +110,8 @@ export interface ColorRoles {
   primaryActive: string;
   /** Tinted background for selected rows and menu items. */
   primarySoft: string;
+  /** Border around `primarySoft` surfaces (the `accent` tone tag). */
+  primaryBorder: string;
   /** Yellow-family colour that is safe for text on `bgContainer`. */
   primaryText: string;
   /** Text and icons on a `primary` fill. */
@@ -134,6 +136,14 @@ export interface ColorRoles {
   license: string;
   licenseBg: string;
   licenseBorder: string;
+  /** Neutral tone: grey tags (ended, sold, cancelled); identical to AntD's default tag. */
+  neutral: string;
+  neutralBg: string;
+  neutralBorder: string;
+  /** Purple tone: consignment, returned cars, fines we paid ourselves. Never for money. */
+  purple: string;
+  purpleBg: string;
+  purpleBorder: string;
   /** App chrome (side navigation, top bar on mobile). */
   chromeBg: string;
   chromeText: string;
@@ -165,6 +175,7 @@ export const colors: Record<ThemeMode, ColorRoles> = {
     primaryHover: yellow[400],
     primaryActive: yellow[600],
     primarySoft: yellow[100],
+    primaryBorder: yellow[300],
     primaryText: yellow[800],
     onPrimary: grey[950],
     focusRing: 'rgba(245, 197, 24, 0.45)',
@@ -185,6 +196,12 @@ export const colors: Record<ThemeMode, ColorRoles> = {
     license: brand.colors.licenseGreen,
     licenseBg: '#E6F4EE',
     licenseBorder: '#9ED2BC',
+    neutral: grey[950],
+    neutralBg: grey[100],
+    neutralBorder: grey[300],
+    purple: '#6B3FA0',
+    purpleBg: '#F4EEFB',
+    purpleBorder: '#D3C2EE',
     chromeBg: grey[950],
     chromeText: '#EDEDEF',
     chromeTextSecondary: '#A6A6AE',
@@ -209,6 +226,7 @@ export const colors: Record<ThemeMode, ColorRoles> = {
     primaryHover: '#F0CB55',
     primaryActive: '#C99F1F',
     primarySoft: 'rgba(232, 189, 48, 0.14)',
+    primaryBorder: '#7A6420',
     primaryText: brand.colors.yellowOnDark,
     onPrimary: grey[950],
     focusRing: 'rgba(232, 189, 48, 0.32)',
@@ -229,6 +247,12 @@ export const colors: Record<ThemeMode, ColorRoles> = {
     license: '#3CCB94',
     licenseBg: 'rgba(60, 203, 148, 0.14)',
     licenseBorder: '#1F6B50',
+    neutral: '#EDEDEF',
+    neutralBg: '#1F1F23',
+    neutralBorder: '#2E2E33',
+    purple: '#B79CF2',
+    purpleBg: 'rgba(183, 156, 242, 0.14)',
+    purpleBorder: '#4F3F7A',
     chromeBg: '#0A0A0B',
     chromeText: '#EDEDEF',
     chromeTextSecondary: '#A6A6AE',
@@ -440,7 +464,7 @@ function antdToken(mode: ThemeMode): AntdToken {
     colorPrimaryActive: c.primaryActive,
     colorPrimaryBg: mode === 'light' ? yellow[50] : 'rgba(232, 189, 48, 0.12)',
     colorPrimaryBgHover: c.primarySoft,
-    colorPrimaryBorder: mode === 'light' ? yellow[300] : '#7A6420',
+    colorPrimaryBorder: c.primaryBorder,
     colorPrimaryBorderHover: mode === 'light' ? yellow[400] : '#A6862A',
     // AntD paints some text in the primary colour; keep it readable (yellow fails on white).
     colorPrimaryText: c.primaryText,
@@ -654,7 +678,7 @@ function antdComponentTokens(mode: ThemeMode): AntdComponents {
     Radio: { colorWhite: c.onPrimary, buttonSolidCheckedColor: c.onPrimary },
     Steps: { colorTextLightSolid: c.onPrimary },
     Badge: { colorTextLightSolid: c.onStatus }, // count on the error red
-    Tag: { defaultBg: light ? grey[100] : '#1F1F23', defaultColor: c.text },
+    Tag: { defaultBg: c.neutralBg, defaultColor: c.neutral },
     Layout: {
       siderBg: c.chromeBg,
       headerBg: c.bgContainer,

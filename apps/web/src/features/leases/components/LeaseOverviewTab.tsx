@@ -1,10 +1,11 @@
 import { EditOutlined } from '@ant-design/icons';
 import { RESPONSIBILITY_KEYS, todayInBusinessTz } from '@renawi/shared';
-import { Button, Card, Col, Descriptions, Flex, Row, Tag, Timeline, Typography } from 'antd';
+import { Button, Card, Col, Descriptions, Flex, Row, Timeline, Typography } from 'antd';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
 import { AutoDir } from '../../../shared/lib/bidi';
 import { useEnumLabel } from '../../../shared/lib/enums';
+import { TONE_DOT_COLORS } from '../../../shared/lib/statusTones';
 import { DataTable, type DataTableColumn } from '../../../shared/ui/DataTable';
 import { DateText } from '../../../shared/ui/DateText';
 import { EmptyState } from '../../../shared/ui/EmptyState';
@@ -12,10 +13,12 @@ import { LicenseTag } from '../../../shared/ui/LicenseTag';
 import { Money } from '../../../shared/ui/Money';
 import { MonthText } from '../../../shared/ui/MonthText';
 import { PlateNo } from '../../../shared/ui/PlateNo';
+import { StatusTag } from '../../../shared/ui/StatusTag';
 import { LedgerTypeTag } from '../../ledger/components/LedgerTable';
 import { leasePath } from '../lib/leaseRules';
 import type { LeaseDetail, OpenCharge } from '../types';
 import { ChecklistView } from './ChecklistView';
+import { DESCRIPTION_COLUMNS_NARROW } from '../../../shared/ui/descriptionColumns';
 
 export interface LeaseOverviewTabProps {
   lease: LeaseDetail;
@@ -76,7 +79,7 @@ export function LeaseOverviewTab({ lease: l, onEditChecklist }: LeaseOverviewTab
           <Card variant="borderless" title={t('leases.sections.terms')} className="rm-full-height">
             <Descriptions
               size="small"
-              column={{ xs: 1, sm: 2 }}
+              column={DESCRIPTION_COLUMNS_NARROW}
               items={[
                 {
                   key: 'type',
@@ -221,9 +224,7 @@ export function LeaseOverviewTab({ lease: l, onEditChecklist }: LeaseOverviewTab
                   return (
                     <Flex key={k} justify="space-between" align="center">
                       <span>{t(`responsibility.${k}`)}</span>
-                      <Tag color={party === 'US' ? 'gold' : 'default'}>
-                        {enumLabel('ResponsibleParty', party)}
-                      </Tag>
+                      <StatusTag enumName="ResponsibleParty" value={party} />
                     </Flex>
                   );
                 })}
@@ -235,7 +236,7 @@ export function LeaseOverviewTab({ lease: l, onEditChecklist }: LeaseOverviewTab
                   data-testid="lease-segments"
                   items={l.segments.map((s) => ({
                     key: s.id,
-                    color: s.endDate ? 'gray' : 'green',
+                    color: TONE_DOT_COLORS[s.endDate ? 'neutral' : 'success'],
                     content: (
                       <Flex vertical gap={4} data-testid="segment-item">
                         <Flex gap={6} wrap align="center">

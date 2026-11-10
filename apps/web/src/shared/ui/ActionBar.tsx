@@ -10,6 +10,8 @@ export interface ActionDef<K extends string = string> {
   primary?: boolean;
   danger?: boolean;
   disabled?: boolean;
+  /** Spinner on the button while the action runs (desktop; the phone menu disables the item). */
+  loading?: boolean;
 }
 
 export interface ActionBarProps<K extends string> {
@@ -21,7 +23,10 @@ export interface ActionBarProps<K extends string> {
   testIdPrefix: string;
 }
 
-/** Page-header actions: buttons from `md` up, one "more" dropdown on phones. */
+/**
+ * Page-header actions of every detail page (`DetailPageLayout`): buttons from `md` up, one
+ * "more" dropdown on phones. The one `primary` action is the thing to do next.
+ */
 export function ActionBar<K extends string>({
   actions,
   onAction,
@@ -44,7 +49,7 @@ export function ActionBar<K extends string>({
             label: a.label,
             icon: a.icon,
             danger: a.danger,
-            disabled: a.disabled,
+            disabled: a.disabled || a.loading,
           })),
           onClick: ({ key }) => onAction(key as K),
         }}
@@ -69,6 +74,7 @@ export function ActionBar<K extends string>({
           type={a.primary ? 'primary' : 'default'}
           danger={a.danger}
           disabled={a.disabled}
+          loading={a.loading}
           onClick={() => onAction(a.key)}
           data-testid={`${testIdPrefix}-${a.key}`}
         >

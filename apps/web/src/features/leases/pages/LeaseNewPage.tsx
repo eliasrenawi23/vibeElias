@@ -1,9 +1,9 @@
-import { ArrowLeftOutlined } from '@ant-design/icons';
 import { useQueryClient } from '@tanstack/react-query';
 import { App, Button, Card, Flex, Result } from 'antd';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Link, useNavigate, useSearchParams } from 'react-router';
+import { useNavigate, useSearchParams } from 'react-router';
+import { PageBreadcrumbs } from '../../../shared/ui/PageBreadcrumbs';
 import { driverKeys } from '../../drivers/queryKeys';
 import { taxiLicenseKeys } from '../../taxi-licenses/queryKeys';
 import { vehicleKeys } from '../../vehicles/queryKeys';
@@ -13,15 +13,6 @@ import { leasePath } from '../lib/leaseRules';
 import { leaseKeys } from '../queryKeys';
 import type { LeaseDetail } from '../types';
 import { LeaseWizard } from '../wizard/LeaseWizard';
-
-export function LeasesBackLink() {
-  const { t } = useTranslation();
-  return (
-    <Link to="/leases" className="rm-back-link">
-      <ArrowLeftOutlined className="rm-flip-rtl" /> {t('common.backToList')}
-    </Link>
-  );
-}
 
 /**
  * `/leases/new` (optionally `?driverId=`): the lease wizard. The DRAFT it creates can be
@@ -44,7 +35,9 @@ export function LeaseNewPage() {
 
   return (
     <Flex vertical gap={16}>
-      <LeasesBackLink />
+      <PageBreadcrumbs
+        items={[{ title: t('nav.leases'), to: '/leases' }, { title: t('leases.newTitle') }]}
+      />
       {created ? (
         <Card variant="borderless">
           <Result

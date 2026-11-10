@@ -16,6 +16,7 @@ import { StatusTag } from '../../../shared/ui/StatusTag';
 import { YearText } from '../../../shared/ui/YearText';
 import type { OdometerEntry, VehicleDetail } from '../types';
 import { CyclesTimeline } from './CyclesTimeline';
+import { DESCRIPTION_COLUMNS } from '../../../shared/ui/descriptionColumns';
 
 export interface VehicleInfoTabProps {
   vehicle: VehicleDetail;
@@ -182,7 +183,7 @@ export function VehicleInfoTab({ vehicle: v, onAddOdometer }: VehicleInfoTabProp
   return (
     <Flex vertical gap={16}>
       <Card variant="borderless" title={t('common.details')}>
-        <Descriptions column={{ xs: 1, sm: 2, lg: 3 }} size="small" items={items} />
+        <Descriptions column={DESCRIPTION_COLUMNS} size="small" items={items} />
       </Card>
 
       <Card

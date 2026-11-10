@@ -25,10 +25,3 @@ export function expiryState(
 export function daysUntil(iso: string, today: string = todayInBusinessTz()): number {
   return diffDays(today, iso);
 }
-
-/** AntD preset colour for an expiry state. */
-export const EXPIRY_COLORS: Readonly<Record<ExpiryState, string>> = {
-  expired: 'error',
-  soon: 'warning',
-  valid: 'success',
-};

@@ -9,7 +9,7 @@ import { DateText } from '../../../shared/ui/DateText';
 import { Money } from '../../../shared/ui/Money';
 import { StatusTag } from '../../../shared/ui/StatusTag';
 import { ContactLink } from '../../contacts/components/ContactLink';
-import { DEAL_ALERT_COLORS, dealPath, hasTransfer } from '../lib/dealRules';
+import { dealPath, hasTransfer } from '../lib/dealRules';
 import type { DealListItem } from '../types';
 import { DealNo, DealTypeTag, DealVehicleCell, TransferCell } from './DealBits';
 
@@ -134,7 +134,7 @@ export function DealsTable({
       key: 'alerts',
       title: t('vehicles.fields.alerts'),
       render: (d) => (
-        <AlertTags alerts={d.alerts} group="deals.alerts" colors={DEAL_ALERT_COLORS} />
+        <AlertTags enumName="DealAlert" alerts={d.alerts} />
       ),
     },
   ];

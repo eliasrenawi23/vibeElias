@@ -14,6 +14,7 @@ import { EmptyState } from '../../../shared/ui/EmptyState';
 import { FilterBar } from '../../../shared/ui/FilterBar';
 import { LoadError } from '../../../shared/ui/LoadError';
 import { PhoneText } from '../../../shared/ui/PhoneText';
+import { ToneTag } from '../../../shared/ui/ToneTag';
 import { fetchContacts } from '../api';
 import { ContactTags } from '../components/ContactTags';
 import { contactName, personName } from '../lib';
@@ -108,7 +109,7 @@ export function ContactsPage() {
         return (
           <Flex gap={6} align="center" className={overdue ? 'rm-overdue' : undefined}>
             <DateText value={c.followUpAt} />
-            {overdue && <Tag color="error">{t('expiry.overdue')}</Tag>}
+            {overdue && <ToneTag tone="error">{t('expiry.overdue')}</ToneTag>}
           </Flex>
         );
       },

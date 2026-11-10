@@ -1,9 +1,9 @@
-import { ArrowLeftOutlined } from '@ant-design/icons';
 import { DealType } from '@renawi/shared';
 import { useQueryClient } from '@tanstack/react-query';
 import { App, Flex, Segmented } from 'antd';
 import { useTranslation } from 'react-i18next';
-import { Link, useNavigate, useSearchParams } from 'react-router';
+import { useNavigate, useSearchParams } from 'react-router';
+import { PageBreadcrumbs } from '../../../shared/ui/PageBreadcrumbs';
 import { PageHeader } from '../../../shared/ui/PageHeader';
 import { contactKeys } from '../../contacts/queryKeys';
 import { dashboardKeys } from '../../dashboard/queryKeys';
@@ -11,15 +11,6 @@ import { vehicleKeys } from '../../vehicles/queryKeys';
 import { DealForm } from '../forms/DealForm';
 import { dealPath, newDealPath } from '../lib/dealRules';
 import { dealKeys } from '../queryKeys';
-
-export function DealsBackLink() {
-  const { t } = useTranslation();
-  return (
-    <Link to="/deals" className="rm-back-link">
-      <ArrowLeftOutlined className="rm-flip-rtl" /> {t('common.backToList')}
-    </Link>
-  );
-}
 
 /**
  * `/deals/new?type=PURCHASE|SALE|CONSIGNMENT_SALE[&vehicleId=]`: the deal form of that type
@@ -36,7 +27,9 @@ export function DealNewPage() {
 
   return (
     <Flex vertical gap={16}>
-      <DealsBackLink />
+      <PageBreadcrumbs
+        items={[{ title: t('nav.deals'), to: '/deals' }, { title: t('deals.newTitle') }]}
+      />
       <PageHeader
         title={t(`deals.newOfType.${type}`)}
         extra={

@@ -1,14 +1,5 @@
 import type { LicenseSegment, TaxiLicenseListItem } from '../types';
 
-/** AntD preset colour per licence alert code. */
-export const LICENSE_ALERT_COLORS: Readonly<Record<string, string>> = {
-  annualFeeDue: 'warning',
-  annualFeeOverdue: 'error',
-  renewalDue: 'warning',
-  renewalOverdue: 'error',
-  idle: 'default',
-};
-
 /** `/taxi-licenses/:id` link. */
 export function licensePath(id: string): string {
   return `/taxi-licenses/${encodeURIComponent(id)}`;

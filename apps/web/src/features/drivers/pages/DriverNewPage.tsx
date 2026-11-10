@@ -1,4 +1,3 @@
-import { ArrowLeftOutlined } from '@ant-design/icons';
 import { LOCALES } from '@renawi/shared';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Alert, App, Button, Card, Col, Flex, Form, Row, Segmented } from 'antd';
@@ -11,6 +10,7 @@ import { ltrInputProps, numericInputProps, phoneInputProps } from '../../../shar
 import { FormLayout } from '../../../shared/ui/FormLayout';
 import { FormSelect } from '../../../shared/ui/FormSelect';
 import { FormTextField } from '../../../shared/ui/FormTextField';
+import { PageBreadcrumbs } from '../../../shared/ui/PageBreadcrumbs';
 import { FormContactField } from '../../contacts/components/FormContactField';
 import { contactKeys } from '../../contacts/queryKeys';
 import type { Contact } from '../../contacts/types';
@@ -24,15 +24,6 @@ import {
 } from '../forms/driverFormSchema';
 import { driverPath } from '../lib/driverRules';
 import { driverKeys } from '../queryKeys';
-
-function BackLink() {
-  const { t } = useTranslation();
-  return (
-    <Link to="/drivers" className="rm-back-link">
-      <ArrowLeftOutlined className="rm-flip-rtl" /> {t('common.backToList')}
-    </Link>
-  );
-}
 
 /** Top-level fields of the form; API errors on other paths go to the alert. */
 const FORM_FIELDS = [
@@ -108,7 +99,9 @@ export function DriverNewPage() {
 
   return (
     <Flex vertical gap={16}>
-      <BackLink />
+      <PageBreadcrumbs
+        items={[{ title: t('nav.drivers'), to: '/drivers' }, { title: t('drivers.newTitle') }]}
+      />
       <FormLayout onSubmit={submit} aria-label={t('drivers.newTitle')}>
         <Flex vertical gap={16}>
           {formError && <Alert type="error" showIcon title={formError} />}

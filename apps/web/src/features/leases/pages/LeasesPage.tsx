@@ -22,7 +22,7 @@ import { StatusTag } from '../../../shared/ui/StatusTag';
 import { DriverPicker } from '../../drivers/components/DriverPicker';
 import { fetchLeases } from '../api';
 import { ContractNo } from '../components/ContractNo';
-import { LEASE_ALERT_COLORS, leasePath } from '../lib/leaseRules';
+import { leasePath } from '../lib/leaseRules';
 import { leaseKeys } from '../queryKeys';
 import type { LeaseListItem, LeaseListQuery } from '../types';
 
@@ -121,7 +121,7 @@ export function LeasesPage() {
       key: 'alerts',
       title: t('vehicles.fields.alerts'),
       render: (l) => (
-        <AlertTags alerts={l.alerts} group="leases.alerts" colors={LEASE_ALERT_COLORS} />
+        <AlertTags enumName="LeaseAlert" alerts={l.alerts} />
       ),
     },
   ];

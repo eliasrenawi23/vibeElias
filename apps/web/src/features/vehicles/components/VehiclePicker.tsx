@@ -5,12 +5,12 @@ import { useTranslation } from 'react-i18next';
 import { AutoDir } from '../../../shared/lib/bidi';
 import { displayPlate } from '../../../shared/lib/plate';
 import { useDebouncedValue } from '../../../shared/lib/useDebouncedValue';
+import { AlertTags } from '../../../shared/ui/AlertTags';
 import { PlateNo } from '../../../shared/ui/PlateNo';
 import { YearText } from '../../../shared/ui/YearText';
 import { fetchVehicle, fetchVehicles } from '../api';
 import { vehicleKeys } from '../queryKeys';
 import type { VehicleListItem, VehicleListQuery } from '../types';
-import { AlertBadges } from './AlertBadges';
 
 export interface VehiclePickerProps {
   id?: string;
@@ -113,7 +113,11 @@ export function VehiclePicker({
                 <AutoDir>{`${v.make} ${v.model}`}</AutoDir> <YearText value={v.year} />
               </Typography.Text>
             </Flex>
-            <AlertBadges alerts={v.alerts?.filter((a) => a.startsWith('taxiAge'))} hideEmpty />
+            <AlertTags
+              enumName="VehicleAlert"
+              alerts={v.alerts?.filter((a) => a.startsWith('taxiAge'))}
+              hideEmpty
+            />
           </Flex>
         );
       }}

@@ -8,6 +8,7 @@ import { useSearchParams } from 'react-router';
 import { AutoDir } from '../../../shared/lib/bidi';
 import { useEnumLabel, useEnumOptions } from '../../../shared/lib/enums';
 import { useErrorMessage } from '../../../shared/lib/i18n';
+import { toneOf } from '../../../shared/lib/statusTones';
 import { ConfirmDialog } from '../../../shared/ui/ConfirmDialog';
 import { DataTable, type DataTableColumn } from '../../../shared/ui/DataTable';
 import { DateText } from '../../../shared/ui/DateText';
@@ -15,27 +16,14 @@ import { EmptyState } from '../../../shared/ui/EmptyState';
 import { FilterBar } from '../../../shared/ui/FilterBar';
 import { LoadError } from '../../../shared/ui/LoadError';
 import { Money } from '../../../shared/ui/Money';
+import { StatusTag } from '../../../shared/ui/StatusTag';
+import { ToneTag } from '../../../shared/ui/ToneTag';
 import { ContactLink } from '../../contacts/components/ContactLink';
 import { deleteExpense, fetchExpenses } from '../api';
 import { ExpenseDialog } from '../dialogs/ExpenseDialog';
 import { RebillExpenseDialog } from '../dialogs/RebillExpenseDialog';
 import { vehicleKeys } from '../queryKeys';
 import type { ExpenseListQuery, VehicleExpense } from '../types';
-
-/** AntD preset colour per expense category. */
-const CATEGORY_COLORS: Readonly<Record<ExpenseCategory, string>> = {
-  REPAIR: 'volcano',
-  TEST: 'blue',
-  INSURANCE: 'green',
-  FUEL: 'gold',
-  TOWING: 'orange',
-  PARTS: 'geekblue',
-  CLEANING: 'cyan',
-  FINE: 'red',
-  LICENSE_FEE: 'purple',
-  METER: 'lime',
-  OTHER: 'default',
-};
 
 export interface VehicleExpensesTabProps {
   vehicleId: string;
@@ -104,9 +92,11 @@ export function VehicleExpensesTab({
       title: t('vehicles.expenses.category'),
       mobile: 'title',
       render: (e) => (
-        <Tag color={CATEGORY_COLORS[e.category]} className="rm-expense-category">
-          {enumLabel('ExpenseCategory', e.category)}
-        </Tag>
+        <StatusTag
+          enumName="ExpenseCategory"
+          value={e.category}
+          className="rm-expense-category"
+        />
       ),
     },
     {
@@ -138,7 +128,7 @@ export function VehicleExpensesTab({
           <Flex gap={4} wrap>
             {e.vatIncluded && <Tag>{t('vehicles.expenses.vatIncludedShort')}</Tag>}
             {e.vatReclaimable && (
-              <Tag color="green">{t('vehicles.expenses.vatReclaimableShort')}</Tag>
+              <ToneTag tone="success">{t('vehicles.expenses.vatReclaimableShort')}</ToneTag>
             )}
           </Flex>
         ) : (
@@ -164,9 +154,9 @@ export function VehicleExpensesTab({
       render: (e) => (
         <Flex gap={4} justify="flex-end" align="center">
           {e.rebilledEntryId ? (
-            <Tag color="success" data-testid="expense-rebilled">
+            <ToneTag tone="success" data-testid="expense-rebilled">
               {t('vehicles.expenses.rebilledTag')}
-            </Tag>
+            </ToneTag>
           ) : (
             isTaxi &&
             e.paidBy === 'US' && (
@@ -257,14 +247,14 @@ export function VehicleExpensesTab({
             )}
             <Flex gap={8} wrap align="center">
               {summary.byCategory.map((c) => (
-                <Tag
+                <ToneTag
                   key={c.category}
-                  color={CATEGORY_COLORS[c.category]}
+                  tone={toneOf('ExpenseCategory', c.category)}
                   className="rm-expense-total-tag"
                   data-category={c.category}
                 >
                   {enumLabel('ExpenseCategory', c.category)} · <Money amount={c.total} />
-                </Tag>
+                </ToneTag>
               ))}
             </Flex>
           </Flex>

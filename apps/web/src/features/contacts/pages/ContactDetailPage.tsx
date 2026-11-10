@@ -1,23 +1,20 @@
-import {
-  ArrowLeftOutlined,
-  EditOutlined,
-  IdcardOutlined,
-  InboxOutlined,
-  UndoOutlined,
-} from '@ant-design/icons';
+import { EditOutlined, IdcardOutlined, InboxOutlined, UndoOutlined } from '@ant-design/icons';
 import { todayInBusinessTz, type ContactCreate } from '@renawi/shared';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Alert, App, Button, Card, Descriptions, Flex, Skeleton, Tag, Typography } from 'antd';
+import { Alert, App, Card, Descriptions, Flex, Typography } from 'antd';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useNavigate, useParams } from 'react-router';
 import { AutoDir, Ltr } from '../../../shared/lib/bidi';
 import { useErrorMessage } from '../../../shared/lib/i18n';
+import type { ActionDef } from '../../../shared/ui/ActionBar';
 import { ConfirmDialog } from '../../../shared/ui/ConfirmDialog';
 import { DateText } from '../../../shared/ui/DateText';
-import { LoadError } from '../../../shared/ui/LoadError';
-import { PageHeader } from '../../../shared/ui/PageHeader';
+import { DESCRIPTION_COLUMNS } from '../../../shared/ui/descriptionColumns';
+import { DetailPageLayout } from '../../../shared/ui/DetailPageLayout';
+import { PageBreadcrumbs } from '../../../shared/ui/PageBreadcrumbs';
 import { PhoneText } from '../../../shared/ui/PhoneText';
+import { ToneTag } from '../../../shared/ui/ToneTag';
 import { EntityDocuments } from '../../documents/components/EntityDocuments';
 import {
   archiveContact,
@@ -33,19 +30,12 @@ import { contactName, isCompany } from '../lib';
 import { contactKeys } from '../queryKeys';
 import type { ContactDetail } from '../types';
 
+type ContactActionKey = 'edit' | 'archive' | 'restore';
+
 /** `/contacts/new` (create) and `/contacts/:id` (view, edit, archive, documents). */
 export function ContactDetailPage() {
   const { id } = useParams();
   return id ? <ContactView key={id} id={id} /> : <NewContact />;
-}
-
-function BackLink() {
-  const { t } = useTranslation();
-  return (
-    <Link to="/contacts" className="rm-back-link">
-      <ArrowLeftOutlined className="rm-flip-rtl" /> {t('common.backToList')}
-    </Link>
-  );
 }
 
 function NewContact() {
@@ -63,7 +53,9 @@ function NewContact() {
   });
   return (
     <Flex vertical gap={16}>
-      <BackLink />
+      <PageBreadcrumbs
+        items={[{ title: t('nav.contacts'), to: '/contacts' }, { title: t('contacts.newTitle') }]}
+      />
       <ContactForm
         onSubmit={(values) => mutation.mutateAsync(values)}
         submitting={mutation.isPending}
@@ -108,57 +100,57 @@ function ContactView({ id }: { id: string }) {
     onError: (error) => void message.error(errorMessage(error)),
   });
 
-  if (query.isPending) {
+  const section = { title: t('nav.contacts'), to: '/contacts' };
+  if (query.isPending || query.isError) {
     return (
-      <Card variant="borderless">
-        <Skeleton active paragraph={{ rows: 8 }} />
-      </Card>
-    );
-  }
-  if (query.isError) {
-    return (
-      <LoadError
+      <DetailPageLayout
+        testId="contact"
+        breadcrumbs={[section]}
+        loading={query.isPending}
         error={query.error}
-        title={t('contacts.loadError')}
+        errorTitle={t('contacts.loadError')}
         notFoundTitle={t('contacts.notFound')}
         onRetry={() => void query.refetch()}
-        extra={<BackLink />}
       />
     );
   }
 
   const contact = query.data;
   const name = contactName(contact) || '—';
+  const actions: ActionDef<ContactActionKey>[] = [
+    { key: 'edit', label: t('actions.edit'), icon: <EditOutlined /> },
+    contact.archivedAt
+      ? {
+          key: 'restore',
+          label: t('actions.restore'),
+          icon: <UndoOutlined />,
+          loading: archive.isPending,
+        }
+      : { key: 'archive', label: t('actions.archive'), icon: <InboxOutlined /> },
+  ];
+  const onAction = (key: ContactActionKey) => {
+    if (key === 'edit') setEditing(true);
+    else if (key === 'restore') archive.mutate(false);
+    else setConfirmArchive(true);
+  };
 
   return (
-    <Flex vertical gap={16}>
-      <BackLink />
-      <PageHeader
-        title={<AutoDir>{name}</AutoDir>}
-        subtitle={<ContactTags tags={contact.tags} />}
-        extra={
-          !editing && (
-            <>
-              <Button icon={<EditOutlined />} onClick={() => setEditing(true)}>
-                {t('actions.edit')}
-              </Button>
-              {contact.archivedAt ? (
-                <Button
-                  icon={<UndoOutlined />}
-                  loading={archive.isPending}
-                  onClick={() => archive.mutate(false)}
-                >
-                  {t('actions.restore')}
-                </Button>
-              ) : (
-                <Button icon={<InboxOutlined />} onClick={() => setConfirmArchive(true)}>
-                  {t('actions.archive')}
-                </Button>
-              )}
-            </>
-          )
-        }
-      />
+    <DetailPageLayout
+      testId="contact"
+      breadcrumbs={[section, { title: <AutoDir>{name}</AutoDir> }]}
+      title={<AutoDir>{name}</AutoDir>}
+      tags={contact.tags.length > 0 && <ContactTags tags={contact.tags} />}
+      actions={
+        editing
+          ? null
+          : {
+              actions,
+              onAction,
+              menuLabel: t('contacts.actionsMenu'),
+              testIdPrefix: 'contact-action',
+            }
+      }
+    >
       {contact.archivedAt && <Alert type="warning" showIcon title={t('contacts.archivedNotice')} />}
       {!contact.driver && contact.tags.includes('DRIVER') && (
         <Alert
@@ -217,7 +209,7 @@ function ContactView({ id }: { id: string }) {
         onConfirm={() => archive.mutate(true)}
         onCancel={() => setConfirmArchive(false)}
       />
-    </Flex>
+    </DetailPageLayout>
   );
 }
 
@@ -232,7 +224,7 @@ function ContactSummary({ contact }: { contact: ContactDetail }) {
   return (
     <Card variant="borderless" title={t('common.details')}>
       <Descriptions
-        column={{ xs: 1, sm: 2, lg: 3 }}
+        column={DESCRIPTION_COLUMNS}
         size="small"
         items={[
           {
@@ -313,7 +305,7 @@ function ContactSummary({ contact }: { contact: ContactDetail }) {
             children: (
               <Flex gap={6} align="center" className={overdue ? 'rm-overdue' : undefined}>
                 <DateText value={contact.followUpAt} />
-                {overdue && <Tag color="error">{t('expiry.overdue')}</Tag>}
+                {overdue && <ToneTag tone="error">{t('expiry.overdue')}</ToneTag>}
               </Flex>
             ),
           },

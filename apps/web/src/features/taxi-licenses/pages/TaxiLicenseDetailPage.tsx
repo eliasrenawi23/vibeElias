@@ -1,39 +1,43 @@
-import { CarOutlined, EditOutlined } from '@ant-design/icons';
+import {
+  CarOutlined,
+  DollarOutlined,
+  EditOutlined,
+  FileProtectOutlined,
+  UserOutlined,
+} from '@ant-design/icons';
 import type { TaxiLicenseCreate } from '@renawi/shared';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { App, Badge, Button, Card, Descriptions, Flex, Skeleton, Tabs, Typography } from 'antd';
+import { App, Button, Card, Descriptions, Flex, Typography } from 'antd';
 import { useState, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Link, useNavigate, useParams, useSearchParams } from 'react-router';
+import { Link, useNavigate, useParams } from 'react-router';
 import { AutoDir, Ltr } from '../../../shared/lib/bidi';
+import type { ActionDef } from '../../../shared/ui/ActionBar';
 import { AlertTags } from '../../../shared/ui/AlertTags';
 import { DataTable, type DataTableColumn } from '../../../shared/ui/DataTable';
 import { DateText } from '../../../shared/ui/DateText';
+import { DESCRIPTION_COLUMNS } from '../../../shared/ui/descriptionColumns';
+import { DetailPageLayout } from '../../../shared/ui/DetailPageLayout';
 import { EmptyState } from '../../../shared/ui/EmptyState';
+import { FactChips } from '../../../shared/ui/FactChips';
 import { LicenseTag } from '../../../shared/ui/LicenseTag';
-import { LoadError } from '../../../shared/ui/LoadError';
 import { Money } from '../../../shared/ui/Money';
-import { PageHeader } from '../../../shared/ui/PageHeader';
 import { PlateNo } from '../../../shared/ui/PlateNo';
 import { StatusTag } from '../../../shared/ui/StatusTag';
+import { TabLabel } from '../../../shared/ui/TabLabel';
 import { EntityDocuments } from '../../documents/components/EntityDocuments';
+import { driverPath } from '../../drivers/lib/driverRules';
+import { ContractNo } from '../../leases/components/ContractNo';
 import { vehicleKeys } from '../../vehicles/queryKeys';
 import { fetchTaxiLicense, updateTaxiLicense } from '../api';
 import { AnnualFeeText } from '../components/AnnualFeeText';
 import { LicensePnlTab } from '../components/LicensePnlTab';
 import { RegisterVehicleDialog } from '../dialogs/RegisterVehicleDialog';
 import { TaxiLicenseForm } from '../forms/TaxiLicenseForm';
-import { LICENSE_ALERT_COLORS } from '../lib/licenseRules';
 import { taxiLicenseKeys } from '../queryKeys';
 import type { LicenseSegment, TaxiLicenseDetail } from '../types';
-import { LicensesBackLink } from './TaxiLicenseNewPage';
 
-const TAB_KEYS = ['overview', 'documents', 'pnl'] as const;
-type LicenseTab = (typeof TAB_KEYS)[number];
-
-function isTab(value: string | null): value is LicenseTab {
-  return TAB_KEYS.includes(value as LicenseTab);
-}
+type LicenseActionKey = 'edit' | 'register';
 
 const empty = <span className="rm-empty-value">—</span>;
 const leasePath = (id: string) => `/leases/${encodeURIComponent(id)}`;
@@ -48,9 +52,6 @@ function LicenseView({ id }: { id: string }) {
   const { t } = useTranslation();
   const { message } = App.useApp();
   const queryClient = useQueryClient();
-  const [params, setParams] = useSearchParams();
-  const rawTab = params.get('tab');
-  const tab: LicenseTab = isTab(rawTab) ? rawTab : 'overview';
   const [editing, setEditing] = useState(false);
   const [registering, setRegistering] = useState(false);
 
@@ -75,113 +76,145 @@ function LicenseView({ id }: { id: string }) {
     },
   });
 
-  if (query.isPending) {
+  const section = { title: t('nav.taxiLicenses'), to: '/taxi-licenses' };
+  if (query.isPending || query.isError) {
     return (
-      <Card variant="borderless">
-        <Skeleton active paragraph={{ rows: 8 }} />
-      </Card>
-    );
-  }
-  if (query.isError) {
-    return (
-      <LoadError
+      <DetailPageLayout
+        testId="license"
+        breadcrumbs={[section]}
+        loading={query.isPending}
         error={query.error}
-        title={t('taxiLicenses.loadError')}
+        errorTitle={t('taxiLicenses.loadError')}
         notFoundTitle={t('taxiLicenses.notFound')}
         onRetry={() => void query.refetch()}
-        extra={<LicensesBackLink />}
       />
     );
   }
   const license = query.data;
+  const seg = license.currentSegment;
+  const actions: ActionDef<LicenseActionKey>[] = [
+    { key: 'edit', label: t('actions.edit'), icon: <EditOutlined /> },
+    { key: 'register', label: t('taxiLicenses.register.action'), icon: <CarOutlined /> },
+  ];
 
   return (
-    <Flex vertical gap={16} data-testid="license-detail">
-      <LicensesBackLink />
-      <Flex vertical gap={8}>
-        <PageHeader
-          title={
-            <Flex gap={12} align="center" wrap component="span">
-              <span className="rm-license-title">
-                <LicenseTag licenseNo={license.licenseNo} />
-              </span>
-              {license.holderName && <AutoDir>{license.holderName}</AutoDir>}
-            </Flex>
-          }
-          extra={
-            !editing && (
-              <>
-                <Button icon={<EditOutlined />} onClick={() => setEditing(true)}>
-                  {t('actions.edit')}
-                </Button>
-                <Button
-                  icon={<CarOutlined />}
-                  onClick={() => setRegistering(true)}
-                  data-testid="license-action-register"
-                >
-                  {t('taxiLicenses.register.action')}
-                </Button>
-              </>
-            )
-          }
-        />
-        <Flex gap={6} wrap align="center">
-          <StatusTag enumName="TaxiLicenseStatus" value={license.status} />
-          <AlertTags
-            alerts={license.alerts}
-            group="taxiLicenses.alerts"
-            colors={LICENSE_ALERT_COLORS}
-            hideEmpty
-          />
+    <DetailPageLayout
+      testId="license"
+      breadcrumbs={[section, { title: <Ltr>{license.licenseNo}</Ltr> }]}
+      title={
+        <Flex gap={12} align="center" wrap component="span">
+          <span className="rm-license-title">
+            <LicenseTag licenseNo={license.licenseNo} />
+          </span>
+          {license.holderName && <AutoDir>{license.holderName}</AutoDir>}
         </Flex>
-      </Flex>
-
-      {editing ? (
+      }
+      tags={
+        <>
+          <StatusTag enumName="TaxiLicenseStatus" value={license.status} />
+          <AlertTags enumName="TaxiLicenseAlert" alerts={license.alerts} hideEmpty />
+        </>
+      }
+      actions={
+        editing
+          ? null
+          : {
+              actions,
+              onAction: (key) => (key === 'edit' ? setEditing(true) : setRegistering(true)),
+              menuLabel: t('taxiLicenses.actionsMenu'),
+              testIdPrefix: 'license-action',
+            }
+      }
+      facts={
+        !editing && (
+          <FactChips
+            facts={[
+              {
+                key: 'vehicle',
+                icon: <CarOutlined />,
+                label: t('taxiLicenses.fields.registeredVehicle'),
+                value: license.registeredVehicle ? (
+                  <Link
+                    to={`/vehicles/${encodeURIComponent(license.registeredVehicle.id)}`}
+                    aria-label={license.registeredVehicle.plateNo}
+                  >
+                    <PlateNo value={license.registeredVehicle.plateNo} />
+                  </Link>
+                ) : (
+                  empty
+                ),
+              },
+              seg && {
+                key: 'driver',
+                icon: <UserOutlined />,
+                label: t('leases.fields.driver'),
+                value: (
+                  <Link to={driverPath(seg.driver.id)}>
+                    <AutoDir>{seg.driver.name}</AutoDir>
+                  </Link>
+                ),
+              },
+              seg && {
+                key: 'contract',
+                icon: <FileProtectOutlined />,
+                label: t('leases.fields.contractNo'),
+                value: (
+                  <Link to={leasePath(seg.contractId)}>
+                    <ContractNo no={seg.contractNo} />
+                  </Link>
+                ),
+              },
+              seg && {
+                key: 'rent',
+                icon: <DollarOutlined />,
+                label: t('leases.fields.monthlyRent'),
+                value: <Money amount={seg.monthlyRent} />,
+              },
+            ]}
+          />
+        )
+      }
+      tabs={
+        editing
+          ? null
+          : [
+              {
+                key: 'overview',
+                label: t('taxiLicenses.tabs.overview'),
+                children: <LicenseOverview license={license} />,
+              },
+              {
+                key: 'documents',
+                label: (
+                  <TabLabel
+                    label={t('taxiLicenses.tabs.documents')}
+                    count={license.documentCount}
+                  />
+                ),
+                children: (
+                  <EntityDocuments
+                    owner={{ taxiLicenseId: license.id }}
+                    defaultKind="TAXI_LICENSE"
+                    onChange={() =>
+                      void queryClient.invalidateQueries({ queryKey: taxiLicenseKeys.detail(id) })
+                    }
+                  />
+                ),
+              },
+              {
+                key: 'pnl',
+                label: t('taxiLicenses.tabs.pnl'),
+                children: <LicensePnlTab licenseId={license.id} />,
+              },
+            ]
+      }
+    >
+      {editing && (
         <TaxiLicenseForm
           license={license}
           onSubmit={(values) => update.mutateAsync(values)}
           submitting={update.isPending}
           onCancel={() => setEditing(false)}
-        />
-      ) : (
-        <Tabs
-          className="rm-detail-tabs"
-          more={{ trigger: ['click'] }}
-          activeKey={tab}
-          onChange={(key) => setParams(key === 'overview' ? {} : { tab: key }, { replace: true })}
-          destroyOnHidden
-          items={[
-            {
-              key: 'overview',
-              label: t('taxiLicenses.tabs.overview'),
-              children: <LicenseOverview license={license} />,
-            },
-            {
-              key: 'documents',
-              label: (
-                <Flex gap={6} align="center">
-                  {t('taxiLicenses.tabs.documents')}
-                  {license.documentCount > 0 && (
-                    <Badge count={license.documentCount} size="small" color="gray" />
-                  )}
-                </Flex>
-              ),
-              children: (
-                <EntityDocuments
-                  owner={{ taxiLicenseId: license.id }}
-                  defaultKind="TAXI_LICENSE"
-                  onChange={() =>
-                    void queryClient.invalidateQueries({ queryKey: taxiLicenseKeys.detail(id) })
-                  }
-                />
-              ),
-            },
-            {
-              key: 'pnl',
-              label: t('taxiLicenses.tabs.pnl'),
-              children: <LicensePnlTab licenseId={license.id} />,
-            },
-          ]}
         />
       )}
 
@@ -201,7 +234,7 @@ function LicenseView({ id }: { id: string }) {
           }}
         />
       )}
-    </Flex>
+    </DetailPageLayout>
   );
 }
 
@@ -260,7 +293,7 @@ function LicenseOverview({ license: l }: { license: TaxiLicenseDetail }) {
     <Flex vertical gap={16}>
       <Card variant="borderless" title={t('common.details')}>
         <Descriptions
-          column={{ xs: 1, sm: 2, lg: 3 }}
+          column={DESCRIPTION_COLUMNS}
           size="small"
           items={[
             {
@@ -349,7 +382,7 @@ function LicenseOverview({ license: l }: { license: TaxiLicenseDetail }) {
       >
         {seg ? (
           <Descriptions
-            column={{ xs: 1, sm: 2, lg: 3 }}
+            column={DESCRIPTION_COLUMNS}
             size="small"
             items={[
               {

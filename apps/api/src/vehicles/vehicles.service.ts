@@ -8,6 +8,9 @@ import {
   type Paginated,
   type VehicleCreate,
   type VehicleQuery,
+  type VehicleSummary,
+  type VehicleSummaryQuery,
+  VehicleStatus,
   type VehicleStatusChange,
   type VehicleUpdate,
 } from '@renawi/shared';
@@ -17,6 +20,7 @@ import { dbDate, dbDateOpt, isoOf, isoOrNull } from '../common/dates';
 import { AppException, ErrorKey } from '../common/errors/app-exception';
 import { CONTACT_NAME_SELECT, searchTokens } from '../common/refs';
 import { toDbMoneyOrNull } from '../prisma/prisma.decimal';
+import { zeroCounts } from '../common/status-counts';
 import { PrismaService } from '../prisma/prisma.service';
 import { checkStatusTransition, STOCK_STATUSES, vehicleAlerts } from './vehicle-rules';
 import {
@@ -67,6 +71,18 @@ export class VehiclesService {
   /* ------------------------------------------------------------------------------------ */
   /* Reads                                                                                */
   /* ------------------------------------------------------------------------------------ */
+
+  /** Count per status under the list filters, ignoring `status` (one groupBy). */
+  async summary(query: VehicleSummaryQuery): Promise<VehicleSummary> {
+    const rows = await this.prisma.vehicle.groupBy({
+      by: ['status'],
+      where: this.buildWhere({ ...query, status: undefined }),
+      _count: { _all: true },
+    });
+    const counts = zeroCounts(VehicleStatus.options);
+    for (const r of rows) counts[r.status] = r._count._all;
+    return { counts };
+  }
 
   async list(query: VehicleQuery): Promise<Paginated<VehicleListItem>> {
     const where = this.buildWhere(query);
@@ -415,7 +431,9 @@ export class VehiclesService {
     if (!found) throw AppException.notFoundField('ownerDriverId');
   }
 
-  private buildWhere(query: VehicleQuery): Prisma.VehicleWhereInput {
+  private buildWhere(
+    query: VehicleSummaryQuery & { status?: VehicleQuery['status'] },
+  ): Prisma.VehicleWhereInput {
     const and: Prisma.VehicleWhereInput[] = [];
     if (query.status?.length) and.push({ status: { in: query.status } });
     if (query.ownership?.length) and.push({ ownership: { in: query.ownership } });

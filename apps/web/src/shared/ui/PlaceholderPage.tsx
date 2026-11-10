@@ -1,7 +1,8 @@
-import { Card, Tag } from 'antd';
+import { Card } from 'antd';
 import { useTranslation } from 'react-i18next';
 import type { TKey } from '../lib/i18n';
 import { EmptyState } from './EmptyState';
+import { ToneTag } from './ToneTag';
 
 export interface PlaceholderPageProps {
   /** What the section will contain (a `placeholder.*` key). */
@@ -19,9 +20,9 @@ export function PlaceholderPage({ descriptionKey, milestone }: PlaceholderPagePr
         title={t('placeholder.title')}
         description={(t as (key: TKey) => string)(descriptionKey)}
         action={
-          <Tag color="gold" className="rm-milestone-tag">
+          <ToneTag tone="accent" className="rm-milestone-tag">
             {t('placeholder.milestone', { n: milestone })}
-          </Tag>
+          </ToneTag>
         }
       />
     </Card>

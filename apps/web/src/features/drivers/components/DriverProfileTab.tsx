@@ -13,6 +13,7 @@ import { StatusTag } from '../../../shared/ui/StatusTag';
 import { YearText } from '../../../shared/ui/YearText';
 import { contactName } from '../../contacts/lib';
 import type { DriverDetail, OwnedVehicle } from '../types';
+import { DESCRIPTION_COLUMNS } from '../../../shared/ui/descriptionColumns';
 
 const empty = <span className="rm-empty-value">—</span>;
 const text = (value: string | null | undefined): ReactNode =>
@@ -55,7 +56,7 @@ export function DriverProfileTab({ driver: d }: { driver: DriverDetail }) {
     <Flex vertical gap={16}>
       <Card variant="borderless" title={t('drivers.sections.permits')}>
         <Descriptions
-          column={{ xs: 1, sm: 2, lg: 3 }}
+          column={DESCRIPTION_COLUMNS}
           size="small"
           items={[
             {
@@ -132,7 +133,7 @@ export function DriverProfileTab({ driver: d }: { driver: DriverDetail }) {
         }
       >
         <Descriptions
-          column={{ xs: 1, sm: 2, lg: 3 }}
+          column={DESCRIPTION_COLUMNS}
           size="small"
           items={[
             {

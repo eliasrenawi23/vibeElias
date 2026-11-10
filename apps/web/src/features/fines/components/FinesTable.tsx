@@ -11,8 +11,8 @@ import { DateTimeText } from '../../../shared/ui/DateTimeText';
 import { Money } from '../../../shared/ui/Money';
 import { PlateNo } from '../../../shared/ui/PlateNo';
 import { StatusTag } from '../../../shared/ui/StatusTag';
+import { ToneTag } from '../../../shared/ui/ToneTag';
 import type { TrafficFine } from '../types';
-import { FINE_ALERT_COLORS } from './fineRules';
 
 export interface FinesTableProps {
   data: readonly TrafficFine[] | undefined;
@@ -86,7 +86,7 @@ export function FinesTable({
       render: (f) => (
         <Flex gap={4} wrap>
           <StatusTag enumName="FineStatus" value={f.status} />
-          {f.chargeEntryId && <Tag color="success">{t('fines.rebilledTag')}</Tag>}
+          {f.chargeEntryId && <ToneTag tone="success">{t('fines.rebilledTag')}</ToneTag>}
         </Flex>
       ),
     },
@@ -96,7 +96,7 @@ export function FinesTable({
       render: (f) => (
         <Flex gap={6} wrap align="center">
           <DateText value={f.reassignDeadline} />
-          <AlertTags alerts={f.alerts} group="fines.alerts" colors={FINE_ALERT_COLORS} hideEmpty />
+          <AlertTags enumName="FineAlert" alerts={f.alerts} hideEmpty />
         </Flex>
       ),
     },

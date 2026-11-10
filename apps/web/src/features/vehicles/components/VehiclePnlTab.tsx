@@ -1,13 +1,15 @@
 import { useQuery } from '@tanstack/react-query';
-import { Card, Col, Descriptions, Flex, Row, Skeleton, Tag, Tooltip, Typography } from 'antd';
+import { Card, Col, Descriptions, Flex, Row, Tooltip, Typography } from 'antd';
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useEnumLabel } from '../../../shared/lib/enums';
 import { DateText } from '../../../shared/ui/DateText';
+import { DetailSkeleton } from '../../../shared/ui/DetailSkeleton';
 import { EmptyState } from '../../../shared/ui/EmptyState';
 import { LoadError } from '../../../shared/ui/LoadError';
 import { Money } from '../../../shared/ui/Money';
 import { ProfitText } from '../../../shared/ui/ProfitText';
+import { StatusTag } from '../../../shared/ui/StatusTag';
+import { ToneTag } from '../../../shared/ui/ToneTag';
 import { fetchVehiclePnl } from '../api';
 import { vehicleKeys } from '../queryKeys';
 import type { CyclePnl, VehiclePnl } from '../types';
@@ -19,13 +21,7 @@ export function VehiclePnlTab({ vehicleId }: { vehicleId: string }) {
     queryKey: vehicleKeys.pnl(vehicleId),
     queryFn: ({ signal }) => fetchVehiclePnl(vehicleId, signal),
   });
-  if (query.isPending) {
-    return (
-      <Card variant="borderless">
-        <Skeleton active paragraph={{ rows: 6 }} />
-      </Card>
-    );
-  }
+  if (query.isPending) return <DetailSkeleton rows={6} />;
   if (query.isError) return <LoadError error={query.error} onRetry={() => void query.refetch()} />;
   return <VehiclePnlView pnl={query.data} emptyText={t('vehicles.pnl.empty')} />;
 }
@@ -80,7 +76,6 @@ function unrealisedAmount(cycle: CyclePnl): number | null {
 /** One inventory cycle: kind, dates, revenue and cost breakdowns, profit (or its estimate). */
 export function CyclePnlCard({ cycle }: { cycle: CyclePnl }) {
   const { t } = useTranslation();
-  const enumLabel = useEnumLabel();
   const consigned = cycle.kind === 'CONSIGNED';
   const estimate = unrealisedAmount(cycle);
   const unrealised = cycle.open || cycle.unrealised === true || estimate !== null;
@@ -96,16 +91,16 @@ export function CyclePnlCard({ cycle }: { cycle: CyclePnl }) {
       data-open={cycle.open}
       title={
         <Flex gap={8} align="center" wrap>
-          <Tag color={consigned ? 'purple' : 'blue'}>{enumLabel('CycleKind', cycle.kind)}</Tag>
+          <StatusTag enumName="CycleKind" value={cycle.kind} />
           <span className="rm-nowrap">
             <DateText value={cycle.startedAt} /> –{' '}
             {cycle.endedAt ? <DateText value={cycle.endedAt} /> : t('vehicles.pnl.open')}
           </span>
           {unrealised && (
             <Tooltip title={t('vehicles.pnl.unrealisedHint')}>
-              <Tag color="gold" data-testid="pnl-unrealised">
+              <ToneTag tone="info" data-testid="pnl-unrealised">
                 {t('vehicles.pnl.unrealised')}
-              </Tag>
+              </ToneTag>
             </Tooltip>
           )}
         </Flex>

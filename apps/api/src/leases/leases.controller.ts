@@ -19,7 +19,12 @@ import {
   ApiOperation,
   ApiTags,
 } from '@nestjs/swagger';
-import { LeaseActivationSchema, LeaseBillingRunSchema, type Paginated } from '@renawi/shared';
+import {
+  LeaseActivationSchema,
+  LeaseBillingRunSchema,
+  type Paginated,
+  type LeaseSummary,
+} from '@renawi/shared';
 import type { AuthenticatedUser } from '../auth/auth.types';
 import { CurrentUser } from '../auth/decorators';
 import { Audited } from '../common/audit/audit.decorator';
@@ -34,6 +39,7 @@ import {
   LeaseDepositDto,
   LeaseEndDto,
   LeaseQueryDto,
+  LeaseSummaryQueryDto,
   LeaseRenewDto,
   LeaseSegmentCreateDto,
   LeaseUpdateDto,
@@ -58,6 +64,15 @@ export class LeasesController {
   })
   list(@Query() query: LeaseQueryDto): Promise<Paginated<LeaseListItem>> {
     return this.leases.list(query);
+  }
+
+  @Get('summary')
+  @ApiOperation({
+    summary:
+      'Lease counts per status (every status present, 0 when none) under the list filters, ignoring status',
+  })
+  summary(@Query() query: LeaseSummaryQueryDto): Promise<LeaseSummary> {
+    return this.leases.summary(query);
   }
 
   @Get('billing/preview')

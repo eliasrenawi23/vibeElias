@@ -12,6 +12,7 @@ import { useEnumLabel } from '../../../shared/lib/enums';
 import { DateText } from '../../../shared/ui/DateText';
 import { EmptyState } from '../../../shared/ui/EmptyState';
 import { KmText } from '../../../shared/ui/KmText';
+import { DESCRIPTION_COLUMNS_NARROW } from '../../../shared/ui/descriptionColumns';
 
 export interface ChecklistViewProps {
   checklist: HandoverChecklist | ReturnChecklist | null | undefined;
@@ -30,7 +31,7 @@ export function ChecklistView({ checklist, kind }: ChecklistViewProps) {
     <Flex vertical gap={8} data-testid={`checklist-view-${kind}`}>
       <Descriptions
         size="small"
-        column={{ xs: 1, sm: 3 }}
+        column={DESCRIPTION_COLUMNS_NARROW}
         items={[
           {
             key: 'date',

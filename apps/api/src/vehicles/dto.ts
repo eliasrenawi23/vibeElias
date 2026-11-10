@@ -13,6 +13,7 @@ import {
   OdometerQuerySchema,
   VehicleCreateSchema,
   VehicleQuerySchema,
+  VehicleSummaryQuerySchema,
   VehicleStatusChangeSchema,
   VehicleUpdateSchema,
 } from '@renawi/shared';
@@ -21,6 +22,7 @@ import { createZodDto } from 'nestjs-zod';
 export class VehicleCreateDto extends createZodDto(VehicleCreateSchema) {}
 export class VehicleUpdateDto extends createZodDto(VehicleUpdateSchema) {}
 export class VehicleQueryDto extends createZodDto(VehicleQuerySchema) {}
+export class VehicleSummaryQueryDto extends createZodDto(VehicleSummaryQuerySchema) {}
 export class VehicleStatusChangeDto extends createZodDto(VehicleStatusChangeSchema) {}
 
 export class ExpenseCreateDto extends createZodDto(ExpenseCreateSchema) {}

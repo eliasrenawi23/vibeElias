@@ -129,6 +129,7 @@
   --rm-color-primary-hover: #f7ce3b;
   --rm-color-primary-active: #dfae0c;
   --rm-color-primary-soft: #fef3c8;
+  --rm-color-primary-border: #f8d862;
   --rm-color-primary-text: #8a6500;
   --rm-color-on-primary: #0f0f10;
   --rm-color-focus-ring: rgba(245, 197, 24, 0.45);
@@ -149,6 +150,12 @@
   --rm-color-license: #0b6e4f;
   --rm-color-license-bg: #e6f4ee;
   --rm-color-license-border: #9ed2bc;
+  --rm-color-neutral: #0f0f10;
+  --rm-color-neutral-bg: #f0f0f2;
+  --rm-color-neutral-border: #d4d4d8;
+  --rm-color-purple: #6b3fa0;
+  --rm-color-purple-bg: #f4eefb;
+  --rm-color-purple-border: #d3c2ee;
   --rm-color-chrome-bg: #0f0f10;
   --rm-color-chrome-text: #ededef;
   --rm-color-chrome-text-secondary: #a6a6ae;
@@ -179,6 +186,7 @@
   --rm-color-primary-hover: #f0cb55;
   --rm-color-primary-active: #c99f1f;
   --rm-color-primary-soft: rgba(232, 189, 48, 0.14);
+  --rm-color-primary-border: #7a6420;
   --rm-color-primary-text: #e8bd30;
   --rm-color-on-primary: #0f0f10;
   --rm-color-focus-ring: rgba(232, 189, 48, 0.32);
@@ -199,6 +207,12 @@
   --rm-color-license: #3ccb94;
   --rm-color-license-bg: rgba(60, 203, 148, 0.14);
   --rm-color-license-border: #1f6b50;
+  --rm-color-neutral: #ededef;
+  --rm-color-neutral-bg: #1f1f23;
+  --rm-color-neutral-border: #2e2e33;
+  --rm-color-purple: #b79cf2;
+  --rm-color-purple-bg: rgba(183, 156, 242, 0.14);
+  --rm-color-purple-border: #4f3f7a;
   --rm-color-chrome-bg: #0a0a0b;
   --rm-color-chrome-text: #ededef;
   --rm-color-chrome-text-secondary: #a6a6ae;
@@ -230,6 +244,7 @@
     --rm-color-primary-hover: #f0cb55;
     --rm-color-primary-active: #c99f1f;
     --rm-color-primary-soft: rgba(232, 189, 48, 0.14);
+    --rm-color-primary-border: #7a6420;
     --rm-color-primary-text: #e8bd30;
     --rm-color-on-primary: #0f0f10;
     --rm-color-focus-ring: rgba(232, 189, 48, 0.32);
@@ -250,6 +265,12 @@
     --rm-color-license: #3ccb94;
     --rm-color-license-bg: rgba(60, 203, 148, 0.14);
     --rm-color-license-border: #1f6b50;
+    --rm-color-neutral: #ededef;
+    --rm-color-neutral-bg: #1f1f23;
+    --rm-color-neutral-border: #2e2e33;
+    --rm-color-purple: #b79cf2;
+    --rm-color-purple-bg: rgba(183, 156, 242, 0.14);
+    --rm-color-purple-border: #4f3f7a;
     --rm-color-chrome-bg: #0a0a0b;
     --rm-color-chrome-text: #ededef;
     --rm-color-chrome-text-secondary: #a6a6ae;

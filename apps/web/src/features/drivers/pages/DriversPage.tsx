@@ -20,7 +20,7 @@ import { PhoneText } from '../../../shared/ui/PhoneText';
 import { PlateNo } from '../../../shared/ui/PlateNo';
 import { StatusTag } from '../../../shared/ui/StatusTag';
 import { fetchDrivers } from '../api';
-import { DRIVER_ALERT_COLORS, driverPath } from '../lib/driverRules';
+import { driverPath } from '../lib/driverRules';
 import { driverKeys } from '../queryKeys';
 import type { DriverListItem, DriverListQuery } from '../types';
 
@@ -111,7 +111,7 @@ export function DriversPage() {
       key: 'alerts',
       title: t('vehicles.fields.alerts'),
       render: (d) => (
-        <AlertTags alerts={d.alerts} group="drivers.alerts" colors={DRIVER_ALERT_COLORS} />
+        <AlertTags enumName="DriverAlert" alerts={d.alerts} />
       ),
     },
   ];

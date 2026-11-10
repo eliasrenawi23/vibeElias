@@ -22,6 +22,9 @@ import {
   type DealPaymentRequest,
   type DealPurchaseCreate,
   type DealQuery,
+  type DealSummary,
+  type DealSummaryQuery,
+  DealStatus as DealStatusSchema,
   type DealSaleCreate,
   type DealTradeInInput,
   type DealTransferRequest,
@@ -38,6 +41,7 @@ import { AppException, ErrorKey } from '../common/errors/app-exception';
 import { contactRef, searchTokens } from '../common/refs';
 import { ContactsService } from '../contacts/contacts.service';
 import { isDecimal, toDbMoney, toDbMoneyOrNull } from '../prisma/prisma.decimal';
+import { zeroCounts } from '../common/status-counts';
 import { PrismaService } from '../prisma/prisma.service';
 import {
   consignmentAmounts,
@@ -179,6 +183,18 @@ export class DealsService {
   /* ------------------------------------------------------------------------------------ */
   /* Reads                                                                                */
   /* ------------------------------------------------------------------------------------ */
+
+  /** Count per status under the list filters, ignoring `status` (one groupBy). */
+  async summary(query: DealSummaryQuery): Promise<DealSummary> {
+    const rows = await this.prisma.deal.groupBy({
+      by: ['status'],
+      where: this.buildWhere({ ...query, status: undefined }, this.clock.today()),
+      _count: { _all: true },
+    });
+    const counts = zeroCounts(DealStatusSchema.options);
+    for (const r of rows) counts[r.status] = r._count._all;
+    return { counts };
+  }
 
   async list(q: DealQuery): Promise<Paginated<DealListItem>> {
     const today = this.clock.today();
@@ -1139,7 +1155,10 @@ export class DealsService {
     };
   }
 
-  private buildWhere(q: DealQuery, today: string): Prisma.DealWhereInput {
+  private buildWhere(
+    q: DealSummaryQuery & { status?: DealQuery['status'] },
+    today: string,
+  ): Prisma.DealWhereInput {
     const and: Prisma.DealWhereInput[] = [];
     if (q.type?.length) and.push({ type: { in: q.type } });
     if (q.status?.length) and.push({ status: { in: q.status } });

@@ -1,20 +1,25 @@
 import {
+  CarOutlined,
   CheckCircleOutlined,
   DollarOutlined,
   EditOutlined,
   FileDoneOutlined,
   StopOutlined,
+  SwapOutlined,
+  UserOutlined,
 } from '@ant-design/icons';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { App, Badge, Card, Flex, Skeleton, Tabs } from 'antd';
+import { App } from 'antd';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useParams, useSearchParams } from 'react-router';
-import { ActionBar, type ActionDef } from '../../../shared/ui/ActionBar';
+import { useParams } from 'react-router';
+import type { ActionDef } from '../../../shared/ui/ActionBar';
 import { AlertTags } from '../../../shared/ui/AlertTags';
-import { LoadError } from '../../../shared/ui/LoadError';
-import { PageHeader } from '../../../shared/ui/PageHeader';
+import { DetailPageLayout } from '../../../shared/ui/DetailPageLayout';
+import { FactChips } from '../../../shared/ui/FactChips';
+import { Money } from '../../../shared/ui/Money';
 import { StatusTag } from '../../../shared/ui/StatusTag';
+import { TabLabel } from '../../../shared/ui/TabLabel';
 import { ContactLink } from '../../contacts/components/ContactLink';
 import { contactKeys } from '../../contacts/queryKeys';
 import { dashboardKeys } from '../../dashboard/queryKeys';
@@ -32,23 +37,9 @@ import {
   DealPaymentDialog,
   DisclosureDialog,
 } from '../dialogs/DealDialogs';
-import {
-  counterpartyLabelKey,
-  DEAL_ALERT_COLORS,
-  hasTransfer,
-  isOpenDeal,
-  needsDisclosure,
-} from '../lib/dealRules';
+import { counterpartyLabelKey, hasTransfer, isOpenDeal, needsDisclosure } from '../lib/dealRules';
 import { dealKeys } from '../queryKeys';
 import type { DealDetail } from '../types';
-import { DealsBackLink } from './DealNewPage';
-
-const TAB_KEYS = ['summary', 'payments', 'transfer', 'documents'] as const;
-type DealTab = (typeof TAB_KEYS)[number];
-
-function isTab(value: string | null): value is DealTab {
-  return TAB_KEYS.includes(value as DealTab);
-}
 
 type DealActionKey = 'edit' | 'disclosure' | 'complete' | 'cancel' | 'payment';
 
@@ -62,8 +53,6 @@ function DealView({ id }: { id: string }) {
   const { t } = useTranslation();
   const { message } = App.useApp();
   const queryClient = useQueryClient();
-  const [params, setParams] = useSearchParams();
-  const rawTab = params.get('tab');
   const [dialog, setDialog] = useState<DealActionKey | null>(null);
 
   const query = useQuery({
@@ -94,21 +83,17 @@ function DealView({ id }: { id: string }) {
     if (text) void message.success(text);
   };
 
-  if (query.isPending) {
+  const section = { title: t('nav.deals'), to: '/deals' };
+  if (query.isPending || query.isError) {
     return (
-      <Card variant="borderless">
-        <Skeleton active paragraph={{ rows: 8 }} />
-      </Card>
-    );
-  }
-  if (query.isError) {
-    return (
-      <LoadError
+      <DetailPageLayout
+        testId="deal"
+        breadcrumbs={[section]}
+        loading={query.isPending}
         error={query.error}
-        title={t('deals.loadError')}
+        errorTitle={t('deals.loadError')}
         notFoundTitle={t('deals.notFound')}
         onRetry={() => void query.refetch()}
-        extra={<DealsBackLink />}
       />
     );
   }
@@ -116,7 +101,6 @@ function DealView({ id }: { id: string }) {
   const deal = query.data;
   const open = isOpenDeal(deal.status);
   const transfer = hasTransfer(deal);
-  const tab: DealTab = isTab(rawTab) && (rawTab !== 'transfer' || transfer) ? rawTab : 'summary';
 
   const actions: ActionDef<DealActionKey>[] = [];
   if (open) {
@@ -156,122 +140,119 @@ function DealView({ id }: { id: string }) {
   }
 
   return (
-    <Flex vertical gap={16} data-testid="deal-detail">
-      <DealsBackLink />
-      <Flex vertical gap={8}>
-        <PageHeader
-          title={
-            <Flex gap={12} align="center" wrap component="span">
-              <span>
-                {t('deals.detailTitle')} <DealNo no={deal.dealNo} />
-              </span>
-              <DealTypeTag type={deal.type} />
-            </Flex>
-          }
-          extra={
-            <ActionBar
-              actions={actions}
-              onAction={(key) => setDialog(key)}
-              menuLabel={t('deals.actionsMenu')}
-              testIdPrefix="deal-action"
-            />
-          }
-        />
-        <Flex gap={12} wrap align="center" data-testid="deal-tags">
+    <DetailPageLayout
+      testId="deal"
+      breadcrumbs={[section, { title: <DealNo no={deal.dealNo} /> }]}
+      title={
+        <span>
+          {t('deals.detailTitle')} <DealNo no={deal.dealNo} />
+        </span>
+      }
+      tags={
+        <>
           <StatusTag enumName="DealStatus" value={deal.status} />
-          <DealVehicleCell vehicle={deal.vehicle} />
-          <span>
-            <span className="rm-muted-label">{t(counterpartyLabelKey(deal.type))}:</span>{' '}
-            <ContactLink
-              id={deal.counterparty?.id ?? deal.counterpartyId}
-              name={deal.counterparty?.name}
-            />
-          </span>
-          {transfer && (
-            <TransferCell
-              status={deal.transferStatus}
-              dueAt={deal.transferDueAt}
-              transferredAt={deal.transferredAt}
-            />
-          )}
-          <AlertTags
-            alerts={deal.alerts}
-            group="deals.alerts"
-            colors={DEAL_ALERT_COLORS}
-            hideEmpty
-          />
-        </Flex>
-      </Flex>
-
-      <Tabs
-        className="rm-detail-tabs"
-        more={{ trigger: ['click'] }}
-        activeKey={tab}
-        onChange={(key) => setParams(key === 'summary' ? {} : { tab: key }, { replace: true })}
-        destroyOnHidden
-        items={[
-          {
-            key: 'summary',
-            label: t('deals.tabs.summary'),
-            children: <DealSummaryTab deal={deal} />,
-          },
-          {
-            key: 'payments',
-            label: (
-              <Flex gap={6} align="center">
-                {t('deals.tabs.payments')}
-                {deal.payments.length > 0 && (
-                  <Badge count={deal.payments.length} size="small" color="gray" />
-                )}
-              </Flex>
-            ),
-            children: (
-              <DealPaymentsTab
-                deal={deal}
-                canAdd={deal.status !== 'CANCELLED'}
-                onAdd={() => setDialog('payment')}
-                onChanged={(updated) => {
-                  if (updated) applyDeal(updated);
-                  else {
-                    void queryClient.invalidateQueries({ queryKey: dealKeys.detail(id) });
-                    refreshOthers();
-                  }
-                }}
-              />
-            ),
-          },
-          ...(transfer
-            ? [
-                {
-                  key: 'transfer',
-                  label: t('deals.tabs.transfer'),
-                  children: <TransferChecklist deal={deal} onSaved={(d) => applyDeal(d)} />,
-                },
-              ]
-            : []),
-          {
-            key: 'documents',
-            label: (
-              <Flex gap={6} align="center">
-                {t('deals.tabs.documents')}
-                {deal.documentCount > 0 && (
-                  <Badge count={deal.documentCount} size="small" color="gray" />
-                )}
-              </Flex>
-            ),
-            children: (
-              <EntityDocuments
-                owner={{ dealId: deal.id }}
-                defaultKind={needsDisclosure(deal.type) ? 'DISCLOSURE_FORM' : 'AGREEMENT'}
-                onChange={() =>
-                  void queryClient.invalidateQueries({ queryKey: dealKeys.detail(id) })
+          <DealTypeTag type={deal.type} />
+          <AlertTags enumName="DealAlert" alerts={deal.alerts} hideEmpty />
+        </>
+      }
+      actions={{
+        actions,
+        onAction: (key) => setDialog(key),
+        menuLabel: t('deals.actionsMenu'),
+        testIdPrefix: 'deal-action',
+      }}
+      // A cancelled deal already has no actions at all.
+      readOnlyReason={deal.status === 'CANCELLED' ? t('deals.readOnlyCancelled') : undefined}
+      facts={
+        <FactChips
+          facts={[
+            {
+              key: 'vehicle',
+              icon: <CarOutlined />,
+              label: t('deals.fields.vehicle'),
+              value: <DealVehicleCell vehicle={deal.vehicle} />,
+            },
+            {
+              key: 'counterparty',
+              icon: <UserOutlined />,
+              label: t(counterpartyLabelKey(deal.type)),
+              value: (
+                <ContactLink
+                  id={deal.counterparty?.id ?? deal.counterpartyId}
+                  name={deal.counterparty?.name}
+                />
+              ),
+            },
+            {
+              key: 'price',
+              icon: <DollarOutlined />,
+              label: t('deals.fields.price'),
+              value: <Money amount={deal.price} />,
+            },
+            transfer && {
+              key: 'transfer',
+              icon: <SwapOutlined />,
+              label: t('deals.fields.transfer'),
+              value: (
+                <TransferCell
+                  status={deal.transferStatus}
+                  dueAt={deal.transferDueAt}
+                  transferredAt={deal.transferredAt}
+                />
+              ),
+            },
+          ]}
+        />
+      }
+      tabs={[
+        {
+          key: 'summary',
+          label: t('deals.tabs.summary'),
+          children: <DealSummaryTab deal={deal} />,
+        },
+        {
+          key: 'payments',
+          label: <TabLabel label={t('deals.tabs.payments')} count={deal.payments.length} />,
+          children: (
+            <DealPaymentsTab
+              deal={deal}
+              canAdd={deal.status !== 'CANCELLED'}
+              onAdd={() => setDialog('payment')}
+              onChanged={(updated) => {
+                if (updated) applyDeal(updated);
+                else {
+                  void queryClient.invalidateQueries({ queryKey: dealKeys.detail(id) });
+                  refreshOthers();
                 }
-              />
-            ),
-          },
-        ]}
-      />
-
+              }}
+            />
+          ),
+        },
+        // The transfer tab exists only for deals with an ownership transfer.
+        ...(transfer
+          ? [
+              {
+                key: 'transfer',
+                label: t('deals.tabs.transfer'),
+                children: <TransferChecklist deal={deal} onSaved={(d) => applyDeal(d)} />,
+              },
+            ]
+          : []),
+        {
+          key: 'documents',
+          label: <TabLabel label={t('deals.tabs.documents')} count={deal.documentCount} />,
+          children: (
+            <EntityDocuments
+              owner={{ dealId: deal.id }}
+              defaultKind={needsDisclosure(deal.type) ? 'DISCLOSURE_FORM' : 'AGREEMENT'}
+              onChange={() =>
+                void queryClient.invalidateQueries({ queryKey: dealKeys.detail(id) })
+              }
+            />
+          ),
+        },
+      ]}
+    >
       {dialog === 'edit' && (
         <DealEditDialog
           deal={deal}
@@ -307,6 +288,6 @@ function DealView({ id }: { id: string }) {
           onSaved={(d) => applyDeal(d, t('deals.payments.saved'))}
         />
       )}
-    </Flex>
+    </DetailPageLayout>
   );
 }

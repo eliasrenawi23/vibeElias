@@ -22,6 +22,9 @@ import {
   type LeaseDraftUpdate,
   type LeaseEndRequest,
   type LeaseQuery,
+  type LeaseSummary,
+  type LeaseSummaryQuery,
+  LeaseStatus,
   type LeaseRenew,
   type LeaseSegmentCreate,
   type LeaseType,
@@ -36,6 +39,7 @@ import { searchTokens } from '../common/refs';
 import { DocumentsService } from '../documents/documents.service';
 import { LedgerService } from '../ledger/ledger.service';
 import { toDbMoney } from '../prisma/prisma.decimal';
+import { zeroCounts } from '../common/status-counts';
 import { PrismaService } from '../prisma/prisma.service';
 import { billingEnd, depositApplyAmount, penaltyAmount, toBillingContract } from './billing-plan';
 import { LeaseBillingService } from './billing.service';
@@ -116,6 +120,18 @@ export class LeasesService {
   /* ------------------------------------------------------------------------------------ */
   /* Reads                                                                                */
   /* ------------------------------------------------------------------------------------ */
+
+  /** Count per status under the list filters, ignoring `status` (one groupBy). */
+  async summary(query: LeaseSummaryQuery): Promise<LeaseSummary> {
+    const rows = await this.prisma.leaseContract.groupBy({
+      by: ['status'],
+      where: this.buildWhere({ ...query, status: undefined }),
+      _count: { _all: true },
+    });
+    const counts = zeroCounts(LeaseStatus.options);
+    for (const r of rows) counts[r.status] = r._count._all;
+    return { counts };
+  }
 
   async list(query: LeaseQuery): Promise<Paginated<LeaseListItem>> {
     const where = this.buildWhere(query);
@@ -973,7 +989,9 @@ export class LeasesService {
     return out;
   }
 
-  private buildWhere(query: LeaseQuery): Prisma.LeaseContractWhereInput {
+  private buildWhere(
+    query: LeaseSummaryQuery & { status?: LeaseQuery['status'] },
+  ): Prisma.LeaseContractWhereInput {
     const and: Prisma.LeaseContractWhereInput[] = [];
     if (query.status?.length) and.push({ status: { in: query.status } });
     if (query.type) and.push({ type: query.type });

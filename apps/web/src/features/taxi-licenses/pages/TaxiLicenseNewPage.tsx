@@ -1,21 +1,12 @@
-import { ArrowLeftOutlined } from '@ant-design/icons';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { App, Flex } from 'antd';
 import { useTranslation } from 'react-i18next';
-import { Link, useNavigate } from 'react-router';
+import { useNavigate } from 'react-router';
+import { PageBreadcrumbs } from '../../../shared/ui/PageBreadcrumbs';
 import { createTaxiLicense } from '../api';
 import { TaxiLicenseForm } from '../forms/TaxiLicenseForm';
 import { licensePath } from '../lib/licenseRules';
 import { taxiLicenseKeys } from '../queryKeys';
-
-export function LicensesBackLink() {
-  const { t } = useTranslation();
-  return (
-    <Link to="/taxi-licenses" className="rm-back-link">
-      <ArrowLeftOutlined className="rm-flip-rtl" /> {t('common.backToList')}
-    </Link>
-  );
-}
 
 /** `/taxi-licenses/new`: create a licence, then open its page. */
 export function TaxiLicenseNewPage() {
@@ -33,7 +24,12 @@ export function TaxiLicenseNewPage() {
   });
   return (
     <Flex vertical gap={16}>
-      <LicensesBackLink />
+      <PageBreadcrumbs
+        items={[
+          { title: t('nav.taxiLicenses'), to: '/taxi-licenses' },
+          { title: t('taxiLicenses.newTitle') },
+        ]}
+      />
       <TaxiLicenseForm
         onSubmit={(values) => mutation.mutateAsync(values)}
         submitting={mutation.isPending}

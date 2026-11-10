@@ -31,21 +31,6 @@ export function newDealPath(type: DealType, vehicleId?: string | null): string {
   return `/deals/new?${params.toString()}`;
 }
 
-/** AntD preset colour per deal alert code. */
-export const DEAL_ALERT_COLORS: Readonly<Record<string, string>> = {
-  disclosureMissing: 'warning',
-  transferDue: 'processing',
-  transferOverdue: 'error',
-  unpaid: 'warning',
-};
-
-/** AntD preset colour per deal type. */
-export const DEAL_TYPE_COLORS: Readonly<Record<DealType, string>> = {
-  PURCHASE: 'blue',
-  SALE: 'green',
-  CONSIGNMENT_SALE: 'purple',
-};
-
 /** Label of the counterparty for a deal type (seller of a purchase, buyer of a sale). */
 export function counterpartyLabelKey(type: DealType): TKey {
   return type === 'PURCHASE' ? 'deals.fields.seller' : 'deals.fields.buyer';

@@ -6,12 +6,14 @@ import { useTranslation } from 'react-i18next';
 import { AutoDir } from '../../../shared/lib/bidi';
 import { useEnumLabel } from '../../../shared/lib/enums';
 import { useErrorMessage } from '../../../shared/lib/i18n';
+import { toneOf } from '../../../shared/lib/statusTones';
 import { ConfirmDialog } from '../../../shared/ui/ConfirmDialog';
 import { DataTable, type DataTableColumn } from '../../../shared/ui/DataTable';
 import { DateText } from '../../../shared/ui/DateText';
 import { EmptyState } from '../../../shared/ui/EmptyState';
 import { Money } from '../../../shared/ui/Money';
 import { StatCard } from '../../../shared/ui/StatCard';
+import { ToneTag } from '../../../shared/ui/ToneTag';
 import { ContactLink } from '../../contacts/components/ContactLink';
 import { deleteDealPayment } from '../api';
 import { isSystemPayment } from '../lib/dealRules';
@@ -59,9 +61,9 @@ export function DealPaymentsTab({ deal, canAdd, onAdd, onChanged }: DealPayments
       title: t('deals.payments.direction'),
       mobile: 'title',
       render: (p) => (
-        <Tag color={p.direction === 'IN' ? 'green' : 'volcano'} data-direction={p.direction}>
+        <ToneTag tone={toneOf('Direction', p.direction)} data-direction={p.direction}>
           {t(`deals.payments.directions.${p.direction}`)}
-        </Tag>
+        </ToneTag>
       ),
     },
     {

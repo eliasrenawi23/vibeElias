@@ -13,6 +13,7 @@ import { TransferDoneDialog } from '../dialogs/DealDialogs';
 import { transferProgress } from '../lib/dealRules';
 import type { DealDetail, DealTransferBody, TransferChecklistValue } from '../types';
 import { TransferCell } from './DealBits';
+import { DESCRIPTION_COLUMNS } from '../../../shared/ui/descriptionColumns';
 
 export interface TransferChecklistProps {
   deal: DealDetail;
@@ -70,7 +71,7 @@ export function TransferChecklist({ deal, onSaved }: TransferChecklistProps) {
       <Flex vertical gap={12}>
         <Descriptions
           size="small"
-          column={{ xs: 1, sm: 3 }}
+          column={DESCRIPTION_COLUMNS}
           items={[
             {
               key: 'status',

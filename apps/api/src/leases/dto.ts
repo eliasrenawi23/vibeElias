@@ -8,6 +8,7 @@ import {
   LeaseDraftUpdateSchema,
   LeaseEndRequestSchema,
   LeaseQuerySchema,
+  LeaseSummaryQuerySchema,
   LeaseRenewSchema,
   LeaseSegmentCreateSchema,
 } from '@renawi/shared';
@@ -16,6 +17,7 @@ import { createZodDto } from 'nestjs-zod';
 export class LeaseCreateDto extends createZodDto(LeaseDraftCreateSchema) {}
 export class LeaseUpdateDto extends createZodDto(LeaseDraftUpdateSchema) {}
 export class LeaseQueryDto extends createZodDto(LeaseQuerySchema) {}
+export class LeaseSummaryQueryDto extends createZodDto(LeaseSummaryQuerySchema) {}
 /** Body of `POST /leases/:id/activate` (optional; parsed with `parseOptionalBody`). */
 export class LeaseActivationDto extends createZodDto(LeaseActivationSchema) {}
 export class LeaseSegmentCreateDto extends createZodDto(LeaseSegmentCreateSchema) {}

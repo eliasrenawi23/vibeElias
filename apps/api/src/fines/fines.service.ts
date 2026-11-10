@@ -9,8 +9,10 @@ import {
   type FineAlert,
   type FineCreate,
   type FineQuery,
+  type FineSummary,
+  type FineSummaryQuery,
+  FineStatus,
   type FineRebill,
-  type FineStatus,
   type FineUpdate,
   type Paginated,
 } from '@renawi/shared';
@@ -20,6 +22,7 @@ import { AppException, ErrorKey } from '../common/errors/app-exception';
 import { CONTACT_NAME_SELECT, NamedRef, searchTokens } from '../common/refs';
 import { LedgerService } from '../ledger/ledger.service';
 import { toDbMoney } from '../prisma/prisma.decimal';
+import { zeroCounts } from '../common/status-counts';
 import { PrismaService } from '../prisma/prisma.service';
 
 /** Days before the reassignment deadline at which a NEW fine is flagged. */
@@ -68,6 +71,18 @@ export class FinesService {
     private readonly clock: Clock,
     private readonly ledger: LedgerService,
   ) {}
+
+  /** Count per status under the list filters, ignoring `status` (one groupBy). */
+  async summary(query: FineSummaryQuery): Promise<FineSummary> {
+    const rows = await this.prisma.trafficFine.groupBy({
+      by: ['status'],
+      where: this.buildWhere({ ...query, status: undefined }),
+      _count: { _all: true },
+    });
+    const counts = zeroCounts(FineStatus.options);
+    for (const r of rows) counts[r.status] = r._count._all;
+    return { counts };
+  }
 
   async list(query: FineQuery): Promise<Paginated<FineView>> {
     const where = this.buildWhere(query);
@@ -326,7 +341,9 @@ export class FinesService {
     if (!found) throw AppException.notFoundField('driverId');
   }
 
-  private buildWhere(query: FineQuery): Prisma.TrafficFineWhereInput {
+  private buildWhere(
+    query: FineSummaryQuery & { status?: FineQuery['status'] },
+  ): Prisma.TrafficFineWhereInput {
     const and: Prisma.TrafficFineWhereInput[] = [];
     if (query.status?.length) and.push({ status: { in: query.status } });
     if (query.vehicleId) and.push({ vehicleId: query.vehicleId });

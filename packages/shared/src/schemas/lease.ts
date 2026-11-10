@@ -439,3 +439,13 @@ export const LeaseBillingPreviewQuerySchema = z.object({
   period: yearMonth.optional(),
 });
 export type LeaseBillingPreviewQuery = z.infer<typeof LeaseBillingPreviewQuerySchema>;
+
+/** `GET /leases/summary`: the list filters minus status and paging. */
+export const LeaseSummaryQuerySchema = LeaseQuerySchema.omit({
+  status: true,
+  page: true,
+  pageSize: true,
+  sort: true,
+  order: true,
+});
+export type LeaseSummaryQuery = z.infer<typeof LeaseSummaryQuerySchema>;

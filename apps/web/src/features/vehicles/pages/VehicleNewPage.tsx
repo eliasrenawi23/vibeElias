@@ -2,10 +2,10 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { App, Flex } from 'antd';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router';
+import { PageBreadcrumbs } from '../../../shared/ui/PageBreadcrumbs';
 import { createVehicle } from '../api';
 import { VehicleForm } from '../forms/VehicleForm';
 import { vehicleKeys } from '../queryKeys';
-import { VehiclesBackLink } from '../components/VehiclesBackLink';
 
 /** `/vehicles/new`: create a vehicle, then open its page. */
 export function VehicleNewPage() {
@@ -23,7 +23,9 @@ export function VehicleNewPage() {
   });
   return (
     <Flex vertical gap={16}>
-      <VehiclesBackLink />
+      <PageBreadcrumbs
+        items={[{ title: t('nav.vehicles'), to: '/vehicles' }, { title: t('vehicles.newTitle') }]}
+      />
       <VehicleForm
         onSubmit={(values) => mutation.mutateAsync(values)}
         submitting={mutation.isPending}

@@ -24,3 +24,4 @@ export * from './schemas/document.js';
 export * from './schemas/reminder.js';
 export * from './schemas/report.js';
 export * from './schemas/dashboard.js';
+export * from './schemas/status-summary.js';

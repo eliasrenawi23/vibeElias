@@ -1,13 +1,5 @@
 import { addDays, addMonths, type DepositKind, type LedgerPaymentMethod } from '@renawi/shared';
 
-/** AntD preset colour per lease alert code. */
-export const LEASE_ALERT_COLORS: Readonly<Record<string, string>> = {
-  endingSoon: 'warning',
-  ended: 'default',
-  overdue: 'error',
-  draft: 'processing',
-};
-
 /** `/leases/:id` link. */
 export function leasePath(id: string): string {
   return `/leases/${encodeURIComponent(id)}`;

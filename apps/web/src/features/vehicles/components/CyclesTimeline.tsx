@@ -3,9 +3,12 @@ import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Ltr } from '../../../shared/lib/bidi';
 import { useEnumLabel } from '../../../shared/lib/enums';
+import { TONE_DOT_COLORS } from '../../../shared/lib/statusTones';
 import { DateText } from '../../../shared/ui/DateText';
 import { EmptyState } from '../../../shared/ui/EmptyState';
 import { Money } from '../../../shared/ui/Money';
+import { StatusTag } from '../../../shared/ui/StatusTag';
+import { ToneTag } from '../../../shared/ui/ToneTag';
 import { ContactLink } from '../../contacts/components/ContactLink';
 import type { InventoryCycle } from '../types';
 
@@ -44,15 +47,13 @@ export function CyclesTimeline({ cycles }: { cycles: readonly InventoryCycle[] }
         const open = !c.endedAt;
         return {
           key: c.id,
-          color: open ? 'green' : 'gray',
+          color: TONE_DOT_COLORS[open ? 'success' : 'neutral'],
           content: (
             <Flex vertical gap={4} data-testid="cycle-item">
               <Flex gap={6} wrap align="center">
-                <Tag color={c.kind === 'CONSIGNED' ? 'magenta' : 'blue'}>
-                  {enumLabel('CycleKind', c.kind)}
-                </Tag>
+                <StatusTag enumName="CycleKind" value={c.kind} />
                 {open ? (
-                  <Tag color="success">{t('vehicles.cycles.open')}</Tag>
+                  <ToneTag tone="success">{t('vehicles.cycles.open')}</ToneTag>
                 ) : (
                   c.endReason && <Tag>{enumLabel('CycleEndReason', c.endReason)}</Tag>
                 )}

@@ -1,13 +1,15 @@
 import { PlusOutlined } from '@ant-design/icons';
 import { DepositKind, LeaseType } from '@renawi/shared';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { Alert, Card, Col, Descriptions, Flex, Form, Radio, Row, Tag, Typography } from 'antd';
+import { Alert, Card, Col, Descriptions, Flex, Form, Radio, Row, Typography } from 'antd';
 import { useEffect, useId, useMemo, useRef, type ReactNode } from 'react';
 import { useController, useWatch, type UseFormReturn } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
 import { AutoDir, isolateLtr } from '../../../shared/lib/bidi';
 import { useEnumLabel, useEnumOptions } from '../../../shared/lib/enums';
+import { toneOf } from '../../../shared/lib/statusTones';
+import { AlertTags } from '../../../shared/ui/AlertTags';
 import { BalanceText } from '../../../shared/ui/BalanceText';
 import { DateText } from '../../../shared/ui/DateText';
 import { EmptyState } from '../../../shared/ui/EmptyState';
@@ -24,6 +26,7 @@ import { LicenseTag } from '../../../shared/ui/LicenseTag';
 import { Money } from '../../../shared/ui/Money';
 import { PlateNo } from '../../../shared/ui/PlateNo';
 import { SelectableList, type SelectableItem } from '../../../shared/ui/SelectableList';
+import { ToneTag } from '../../../shared/ui/ToneTag';
 import { YearText } from '../../../shared/ui/YearText';
 import { DriverPicker } from '../../drivers/components/DriverPicker';
 import type { DriverListItem } from '../../drivers/types';
@@ -32,13 +35,13 @@ import { availableLicenses, lastRent } from '../../taxi-licenses/lib/licenseRule
 import { taxiLicenseKeys } from '../../taxi-licenses/queryKeys';
 import type { TaxiLicenseListItem } from '../../taxi-licenses/types';
 import { fetchVehicles } from '../../vehicles/api';
-import { AlertBadges } from '../../vehicles/components/AlertBadges';
 import { vehicleKeys } from '../../vehicles/queryKeys';
 import type { VehicleListItem } from '../../vehicles/types';
 import { ChecklistFields } from '../components/ChecklistFields';
 import { ResponsibilitiesField } from '../components/ResponsibilitiesField';
 import { defaultEndDate } from '../lib/leaseRules';
 import type { LeaseWizardInput, LeaseWizardOutput } from './leaseWizardSchema';
+import { DESCRIPTION_COLUMNS } from '../../../shared/ui/descriptionColumns';
 
 export type WizardForm = UseFormReturn<LeaseWizardInput, unknown, LeaseWizardOutput>;
 
@@ -100,7 +103,7 @@ export function DriverStep({ form, picks, onPick }: StepProps) {
         <Card size="small" variant="outlined" data-testid="wizard-driver-summary">
           <Descriptions
             size="small"
-            column={{ xs: 1, sm: 3 }}
+            column={DESCRIPTION_COLUMNS}
             items={[
               {
                 key: 'name',
@@ -182,7 +185,7 @@ export function LicenseStep({ form, onPick }: StepProps) {
       t('taxiLicenses.noRegisteredVehicle')
     ),
     extra: l.alerts?.includes('idle') ? (
-      <Tag color="green">{t('taxiLicenses.alerts.idle')}</Tag>
+      <ToneTag tone="success">{t('taxiLicenses.alerts.idle')}</ToneTag>
     ) : undefined,
   }));
 
@@ -229,7 +232,11 @@ function carItem(v: VehicleListItem, extraTag: ReactNode, kmLabel: string): Sele
     extra: (
       <>
         {extraTag}
-        <AlertBadges alerts={v.alerts?.filter((a) => CAR_ALERTS.includes(a))} hideEmpty />
+        <AlertTags
+          enumName="VehicleAlert"
+          alerts={v.alerts?.filter((a) => CAR_ALERTS.includes(a))}
+          hideEmpty
+        />
       </>
     ),
     disabled: v.alerts?.includes('taxiAgeBlocked') ?? false,
@@ -274,7 +281,7 @@ export function VehicleStep({ form, picks, onPick }: StepProps) {
     carItem(
       v,
       v.id === registeredId ? (
-        <Tag color="green">{t('leases.wizard.registeredOnLicense')}</Tag>
+        <ToneTag tone="success">{t('leases.wizard.registeredOnLicense')}</ToneTag>
       ) : null,
       t('vehicles.fields.currentKm'),
     ),
@@ -504,7 +511,7 @@ export function ReviewStep({ form, picks }: StepProps) {
     <Descriptions
       bordered
       size="small"
-      column={{ xs: 1, md: 2 }}
+      column={DESCRIPTION_COLUMNS}
       data-testid="wizard-review"
       items={[
         {
@@ -577,9 +584,9 @@ export function ReviewStep({ form, picks }: StepProps) {
           children: resp ? (
             <Flex gap={8} wrap>
               {(['insurance', 'test', 'repairs', 'fines'] as const).map((k) => (
-                <Tag key={k}>
+                <ToneTag key={k} tone={toneOf('ResponsibleParty', resp[k] ?? 'DRIVER')}>
                   {t(`responsibility.${k}`)}: {enumLabel('ResponsibleParty', resp[k] ?? 'DRIVER')}
-                </Tag>
+                </ToneTag>
               ))}
             </Flex>
           ) : (

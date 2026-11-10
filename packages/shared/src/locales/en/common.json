@@ -684,7 +684,8 @@
     "deals": {
       "title": "Deals",
       "empty": "No deals with this contact"
-    }
+    },
+    "actionsMenu": "Contact actions"
   },
   "vehicles": {
     "tabs": {
@@ -987,7 +988,8 @@
       "otherIncome": "Other income",
       "total": "Total",
       "empty": "No income recorded yet"
-    }
+    },
+    "actionsMenu": "Licence actions"
   },
   "drivers": {
     "new": "New driver",
@@ -1050,7 +1052,8 @@
     "picker": {
       "placeholder": "Search drivers",
       "noResults": "No drivers found"
-    }
+    },
+    "actionsMenu": "Driver actions"
   },
   "leases": {
     "new": "New lease",
@@ -1202,7 +1205,8 @@
     "edit": {
       "title": "Edit contract",
       "activeHint": "An active contract can only change its end date, payment day, terms, responsibilities and notes."
-    }
+    },
+    "readOnlyClosed": "This contract is closed: its terms can no longer be edited. Payments and the deposit can still be recorded."
   },
   "ledger": {
     "title": "Ledger",
@@ -1502,6 +1506,23 @@
       "markTitle": "Ownership transfer done",
       "transferred": "Ownership transfer recorded",
       "doneNotice": "Ownership has been transferred to the buyer."
-    }
+    },
+    "readOnlyCancelled": "This deal was cancelled and can no longer be changed."
+  },
+  "charts": {
+    "showChart": "Show as chart",
+    "showTable": "Show as table",
+    "noData": "No data for this period"
+  },
+  "breadcrumbs": {
+    "label": "Breadcrumb",
+    "home": "Home"
+  },
+  "unsaved": {
+    "title": "Discard unsaved changes?",
+    "leave": "You have unsaved changes. If you leave this page they will be lost.",
+    "close": "The changes you made in this form will be lost.",
+    "discard": "Discard changes",
+    "stay": "Keep editing"
   }
 }

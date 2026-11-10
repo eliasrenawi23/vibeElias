@@ -23,6 +23,7 @@ import {
   DealCompleteRequestSchema,
   DealCreateRequestSchema,
   type Paginated,
+  type DealSummary,
 } from '@renawi/shared';
 import type { AuthenticatedUser } from '../auth/auth.types';
 import { CurrentUser } from '../auth/decorators';
@@ -37,6 +38,7 @@ import {
   DealDisclosureDto,
   DealPaymentDto,
   DealQueryDto,
+  DealSummaryQueryDto,
   DealTransferDto,
   DealUpdateDto,
 } from './dto';
@@ -57,6 +59,15 @@ export class DealsController {
   })
   list(@Query() query: DealQueryDto): Promise<Paginated<DealListItem>> {
     return this.deals.list(query);
+  }
+
+  @Get('deals/summary')
+  @ApiOperation({
+    summary:
+      'Deal counts per status (every status present, 0 when none) under the list filters, ignoring status',
+  })
+  summary(@Query() query: DealSummaryQueryDto): Promise<DealSummary> {
+    return this.deals.summary(query);
   }
 
   @Post('deals')

@@ -395,3 +395,13 @@ export const DealTransferRequestSchema = z.object({
 });
 export type DealTransferRequest = z.infer<typeof DealTransferRequestSchema>;
 export type DealTransferRequestInput = z.input<typeof DealTransferRequestSchema>;
+
+/** `GET /deals/summary`: the list filters minus status and paging. */
+export const DealSummaryQuerySchema = DealQuerySchema.omit({
+  status: true,
+  page: true,
+  pageSize: true,
+  sort: true,
+  order: true,
+});
+export type DealSummaryQuery = z.infer<typeof DealSummaryQuerySchema>;

@@ -15,6 +15,7 @@ import { Money } from '../../../shared/ui/Money';
 import { DriverPicker } from '../../drivers/components/DriverPicker';
 import { rebillExpense, type ExpenseRebillBody } from '../api';
 import type { VehicleExpense } from '../types';
+import { DESCRIPTION_COLUMNS_NARROW } from '../../../shared/ui/descriptionColumns';
 
 const RebillSchema = z.object({ driverId: idString.nullish() });
 
@@ -61,7 +62,7 @@ export function RebillExpenseDialog({ expense, onClose, onSaved }: RebillExpense
       <Typography.Paragraph>{t('vehicles.expenses.rebillConfirm')}</Typography.Paragraph>
       <Descriptions
         size="small"
-        column={{ xs: 1, sm: 3 }}
+        column={DESCRIPTION_COLUMNS_NARROW}
         items={[
           {
             key: 'date',

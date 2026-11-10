@@ -16,12 +16,18 @@ import {
   ApiOperation,
   ApiTags,
 } from '@nestjs/swagger';
-import { FineRebillSchema, type Paginated } from '@renawi/shared';
+import { FineRebillSchema, type Paginated, type FineSummary } from '@renawi/shared';
 import type { AuthenticatedUser } from '../auth/auth.types';
 import { CurrentUser } from '../auth/decorators';
 import { Audited } from '../common/audit/audit.decorator';
 import { parseOptionalBody } from '../common/zod-body';
-import { FineCreateDto, FineQueryDto, FineRebillDto, FineUpdateDto } from './dto';
+import {
+  FineCreateDto,
+  FineQueryDto,
+  FineSummaryQueryDto,
+  FineRebillDto,
+  FineUpdateDto,
+} from './dto';
 import { FinesService, FineView } from './fines.service';
 
 @ApiTags('fines')
@@ -38,6 +44,15 @@ export class FinesController {
   })
   list(@Query() query: FineQueryDto): Promise<Paginated<FineView>> {
     return this.fines.list(query);
+  }
+
+  @Get('summary')
+  @ApiOperation({
+    summary:
+      'Fine counts per status (every status present, 0 when none) under the list filters, ignoring status',
+  })
+  summary(@Query() query: FineSummaryQueryDto): Promise<FineSummary> {
+    return this.fines.summary(query);
   }
 
   @Post()

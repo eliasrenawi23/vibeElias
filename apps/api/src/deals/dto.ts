@@ -5,12 +5,14 @@ import {
   DealDisclosureSchema,
   DealPaymentRequestSchema,
   DealQuerySchema,
+  DealSummaryQuerySchema,
   DealTransferRequestSchema,
   DealUpdateRequestSchema,
 } from '@renawi/shared';
 import { createZodDto } from 'nestjs-zod';
 
 export class DealQueryDto extends createZodDto(DealQuerySchema) {}
+export class DealSummaryQueryDto extends createZodDto(DealSummaryQuerySchema) {}
 /**
  * `POST /deals` body (discriminated union by `type`). A union cannot back a DTO class, so the
  * controller parses it with `parseBody`; this DTO only documents the body in Swagger.

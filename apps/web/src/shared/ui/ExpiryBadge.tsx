@@ -1,7 +1,9 @@
-import { Tag, Tooltip } from 'antd';
+import { Tooltip } from 'antd';
 import { useTranslation } from 'react-i18next';
-import { daysUntil, EXPIRY_COLORS, expiryState } from '../lib/expiry';
+import { daysUntil, expiryState } from '../lib/expiry';
+import { toneOf } from '../lib/statusTones';
 import { DateText } from './DateText';
+import { ToneTag } from './ToneTag';
 
 export interface ExpiryBadgeProps {
   /** Expiry date `YYYY-MM-DD`. */
@@ -23,7 +25,7 @@ export function ExpiryBadge({ value, showDate = true, showValid = false }: Expir
   const tooltip = state === 'soon' ? t('expiry.daysLeft', { days: daysUntil(value) }) : undefined;
   return (
     <Tooltip title={tooltip}>
-      <Tag color={EXPIRY_COLORS[state]} className="rm-expiry-badge" data-expiry={state}>
+      <ToneTag tone={toneOf('ExpiryState', state)} className="rm-expiry-badge" data-expiry={state}>
         {label}
         {showDate && (
           <>
@@ -31,7 +33,7 @@ export function ExpiryBadge({ value, showDate = true, showValid = false }: Expir
             <DateText value={value} />
           </>
         )}
-      </Tag>
+      </ToneTag>
     </Tooltip>
   );
 }

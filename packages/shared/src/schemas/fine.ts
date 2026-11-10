@@ -65,3 +65,13 @@ export const FineRebillSchema = z.object({
   description: optionalText(500),
 });
 export type FineRebill = z.infer<typeof FineRebillSchema>;
+
+/** `GET /fines/summary`: the list filters minus status and paging. */
+export const FineSummaryQuerySchema = FineQuerySchema.omit({
+  status: true,
+  page: true,
+  pageSize: true,
+  sort: true,
+  order: true,
+});
+export type FineSummaryQuery = z.infer<typeof FineSummaryQuerySchema>;

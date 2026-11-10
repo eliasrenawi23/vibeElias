@@ -1,31 +1,37 @@
 import {
+  CarOutlined,
   CheckCircleOutlined,
   DeleteOutlined,
   DollarOutlined,
   EditOutlined,
   ReloadOutlined,
+  SafetyCertificateOutlined,
   StopOutlined,
   SwapOutlined,
+  UserOutlined,
   WalletOutlined,
 } from '@ant-design/icons';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { App, Badge, Card, Flex, Skeleton, Tabs, Tag } from 'antd';
+import { App } from 'antd';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Link, useNavigate, useParams, useSearchParams } from 'react-router';
+import { Link, useNavigate, useParams } from 'react-router';
 import { AutoDir } from '../../../shared/lib/bidi';
-import { useEnumLabel } from '../../../shared/lib/enums';
 import { useErrorMessage } from '../../../shared/lib/i18n';
-import { ActionBar, type ActionDef } from '../../../shared/ui/ActionBar';
+import type { ActionDef } from '../../../shared/ui/ActionBar';
 import { AlertTags } from '../../../shared/ui/AlertTags';
+import { BalanceText } from '../../../shared/ui/BalanceText';
 import { ConfirmDialog } from '../../../shared/ui/ConfirmDialog';
+import { DetailPageLayout } from '../../../shared/ui/DetailPageLayout';
+import { FactChips } from '../../../shared/ui/FactChips';
 import { LicenseTag } from '../../../shared/ui/LicenseTag';
-import { LoadError } from '../../../shared/ui/LoadError';
-import { PageHeader } from '../../../shared/ui/PageHeader';
+import { Money } from '../../../shared/ui/Money';
 import { PlateNo } from '../../../shared/ui/PlateNo';
 import { StatusTag } from '../../../shared/ui/StatusTag';
+import { TabLabel } from '../../../shared/ui/TabLabel';
 import { dashboardKeys } from '../../dashboard/queryKeys';
 import { EntityDocuments } from '../../documents/components/EntityDocuments';
+import { driverPath } from '../../drivers/lib/driverRules';
 import { driverKeys } from '../../drivers/queryKeys';
 import { fetchLedger } from '../../ledger/api';
 import { LedgerStatement } from '../../ledger/components/LedgerStatement';
@@ -44,17 +50,9 @@ import { EndLeaseDialog } from '../dialogs/EndLeaseDialog';
 import { LeaseEditDialog } from '../dialogs/LeaseEditDialog';
 import { RenewDialog } from '../dialogs/RenewDialog';
 import { SegmentDialog } from '../dialogs/SegmentDialog';
-import { LEASE_ALERT_COLORS, leasePath } from '../lib/leaseRules';
+import { leasePath } from '../lib/leaseRules';
 import { leaseKeys } from '../queryKeys';
 import type { LeaseDetail } from '../types';
-import { LeasesBackLink } from './LeaseNewPage';
-
-const TAB_KEYS = ['overview', 'ledger', 'documents'] as const;
-type LeaseTab = (typeof TAB_KEYS)[number];
-
-function isTab(value: string | null): value is LeaseTab {
-  return TAB_KEYS.includes(value as LeaseTab);
-}
 
 type LeaseActionKey =
   'edit' | 'activate' | 'delete' | 'payment' | 'segment' | 'deposit' | 'renew' | 'end';
@@ -73,10 +71,6 @@ function LeaseView({ id }: { id: string }) {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const errorMessage = useErrorMessage();
-  const enumLabel = useEnumLabel();
-  const [params, setParams] = useSearchParams();
-  const rawTab = params.get('tab');
-  const tab: LeaseTab = isTab(rawTab) ? rawTab : 'overview';
   const [dialog, setDialog] = useState<Dialog>(null);
 
   const query = useQuery({
@@ -119,27 +113,24 @@ function LeaseView({ id }: { id: string }) {
     onError: (error) => void message.error(errorMessage(error)),
   });
 
-  if (query.isPending) {
+  const section = { title: t('nav.leases'), to: '/leases' };
+  if (query.isPending || query.isError) {
     return (
-      <Card variant="borderless">
-        <Skeleton active paragraph={{ rows: 8 }} />
-      </Card>
-    );
-  }
-  if (query.isError) {
-    return (
-      <LoadError
+      <DetailPageLayout
+        testId="lease"
+        breadcrumbs={[section]}
+        loading={query.isPending}
         error={query.error}
-        title={t('leases.loadError')}
+        errorTitle={t('leases.loadError')}
         notFoundTitle={t('leases.notFound')}
         onRetry={() => void query.refetch()}
-        extra={<LeasesBackLink />}
       />
     );
   }
 
   const lease = query.data;
   const seg = lease.currentSegment;
+  const closed = lease.status === 'ENDED' || lease.status === 'TERMINATED';
   const actions: ActionDef<LeaseActionKey>[] = [];
   if (lease.status === 'DRAFT') {
     actions.push(
@@ -179,117 +170,124 @@ function LeaseView({ id }: { id: string }) {
   }
 
   return (
-    <Flex vertical gap={16} data-testid="lease-detail">
-      <LeasesBackLink />
-      <Flex vertical gap={8}>
-        <PageHeader
-          title={
-            <Flex gap={12} align="center" wrap component="span">
-              <span>
-                {t('leases.contract')} <ContractNo no={lease.contractNo} />
-              </span>
-              <Link
-                to={`/drivers/${encodeURIComponent(lease.driver.id)}`}
-                className="rm-lease-driver"
-              >
-                <AutoDir>{lease.driver.name}</AutoDir>
-              </Link>
-            </Flex>
-          }
-          extra={
-            <ActionBar
-              actions={actions}
-              onAction={(key) => setDialog(key)}
-              menuLabel={t('leases.actionsMenu')}
-              testIdPrefix="lease-action"
-            />
-          }
-        />
-        <Flex gap={6} wrap align="center" data-testid="lease-tags">
+    <DetailPageLayout
+      testId="lease"
+      breadcrumbs={[section, { title: <ContractNo no={lease.contractNo} /> }]}
+      title={
+        <span>
+          {t('leases.contract')} <ContractNo no={lease.contractNo} />
+        </span>
+      }
+      tags={
+        <>
           <StatusTag enumName="LeaseStatus" value={lease.status} />
-          <Tag>{enumLabel('LeaseType', lease.type)}</Tag>
-          {seg && <LicenseTag licenseNo={seg.taxiLicense.licenseNo} id={seg.taxiLicense.id} />}
-          {seg?.vehicle && (
-            <Link
-              to={`/vehicles/${encodeURIComponent(seg.vehicle.id)}`}
-              aria-label={seg.vehicle.plateNo}
-            >
-              <PlateNo value={seg.vehicle.plateNo} />
-            </Link>
-          )}
-          <AlertTags
-            alerts={lease.alerts}
-            group="leases.alerts"
-            colors={LEASE_ALERT_COLORS}
-            hideEmpty
-          />
-        </Flex>
-      </Flex>
-
-      <Tabs
-        className="rm-detail-tabs"
-        more={{ trigger: ['click'] }}
-        activeKey={tab}
-        onChange={(key) => setParams(key === 'overview' ? {} : { tab: key }, { replace: true })}
-        destroyOnHidden
-        items={[
-          {
-            key: 'overview',
-            label: t('leases.tabs.overview'),
-            children: (
-              <LeaseOverviewTab
-                lease={lease}
-                onEditChecklist={(kind) => setDialog(`checklist-${kind}`)}
-              />
-            ),
-          },
-          {
-            key: 'ledger',
-            label: t('leases.tabs.ledger'),
-            children: (
-              <LedgerStatement
-                driverId={lease.driverId}
-                contractId={lease.id}
-                queryKey={(filters) => leaseKeys.ledger(lease.id, filters)}
-                load={(filters, signal) =>
-                  fetchLedger({ ...filters, contractId: lease.id }, signal)
-                }
-                hidePayment
-                summary={
-                  <LedgerSummary
-                    balance={lease.balance?.balance}
-                    depositHeld={lease.balance?.depositHeld}
-                    charged={lease.balance?.charged}
-                    paid={lease.balance?.paid}
-                  />
-                }
-                onChanged={refreshAll}
-              />
-            ),
-          },
-          {
-            key: 'documents',
-            label: (
-              <Flex gap={6} align="center">
-                {t('leases.tabs.documents')}
-                {lease.documentCount > 0 && (
-                  <Badge count={lease.documentCount} size="small" color="gray" />
-                )}
-              </Flex>
-            ),
-            children: (
-              <EntityDocuments
-                owner={{ contractId: lease.id }}
-                defaultKind="CONTRACT"
-                onChange={() =>
-                  void queryClient.invalidateQueries({ queryKey: leaseKeys.detail(id) })
-                }
-              />
-            ),
-          },
-        ]}
-      />
-
+          <StatusTag enumName="LeaseType" value={lease.type} />
+          <AlertTags enumName="LeaseAlert" alerts={lease.alerts} hideEmpty />
+        </>
+      }
+      actions={{
+        actions,
+        onAction: (key) => setDialog(key),
+        menuLabel: t('leases.actionsMenu'),
+        testIdPrefix: 'lease-action',
+      }}
+      // Ended / terminated contracts already offer only "record payment" and "deposit".
+      readOnlyReason={closed ? t('leases.readOnlyClosed') : undefined}
+      facts={
+        <FactChips
+          facts={[
+            {
+              key: 'driver',
+              icon: <UserOutlined />,
+              label: t('leases.fields.driver'),
+              value: (
+                <Link to={driverPath(lease.driver.id)} className="rm-lease-driver">
+                  <AutoDir>{lease.driver.name}</AutoDir>
+                </Link>
+              ),
+            },
+            seg && {
+              key: 'license',
+              icon: <SafetyCertificateOutlined />,
+              label: t('leases.fields.license'),
+              value: <LicenseTag licenseNo={seg.taxiLicense.licenseNo} id={seg.taxiLicense.id} />,
+            },
+            seg?.vehicle && {
+              key: 'vehicle',
+              icon: <CarOutlined />,
+              label: t('leases.fields.vehicle'),
+              value: (
+                <Link
+                  to={`/vehicles/${encodeURIComponent(seg.vehicle.id)}`}
+                  aria-label={seg.vehicle.plateNo}
+                >
+                  <PlateNo value={seg.vehicle.plateNo} />
+                </Link>
+              ),
+            },
+            seg && {
+              key: 'rent',
+              icon: <DollarOutlined />,
+              label: t('leases.fields.monthlyRent'),
+              value: <Money amount={seg.monthlyRent} />,
+            },
+            {
+              key: 'balance',
+              icon: <WalletOutlined />,
+              label: t('ledger.fields.balance'),
+              value: <BalanceText amount={lease.balance?.balance ?? 0} />,
+            },
+          ]}
+        />
+      }
+      tabs={[
+        {
+          key: 'overview',
+          label: t('leases.tabs.overview'),
+          children: (
+            <LeaseOverviewTab
+              lease={lease}
+              onEditChecklist={(kind) => setDialog(`checklist-${kind}`)}
+            />
+          ),
+        },
+        {
+          key: 'ledger',
+          label: t('leases.tabs.ledger'),
+          children: (
+            <LedgerStatement
+              driverId={lease.driverId}
+              contractId={lease.id}
+              queryKey={(filters) => leaseKeys.ledger(lease.id, filters)}
+              load={(filters, signal) => fetchLedger({ ...filters, contractId: lease.id }, signal)}
+              hidePayment
+              summary={
+                <LedgerSummary
+                  balance={lease.balance?.balance}
+                  depositHeld={lease.balance?.depositHeld}
+                  charged={lease.balance?.charged}
+                  paid={lease.balance?.paid}
+                />
+              }
+              onChanged={refreshAll}
+            />
+          ),
+        },
+        {
+          key: 'documents',
+          label: <TabLabel label={t('leases.tabs.documents')} count={lease.documentCount} />,
+          children: (
+            <EntityDocuments
+              owner={{ contractId: lease.id }}
+              defaultKind="CONTRACT"
+              onChange={() =>
+                void queryClient.invalidateQueries({ queryKey: leaseKeys.detail(id) })
+              }
+            />
+          ),
+        },
+      ]}
+    >
       {dialog === 'activate' && (
         <ActivateDialog
           lease={lease}
@@ -366,6 +364,6 @@ function LeaseView({ id }: { id: string }) {
         onConfirm={() => remove.mutate()}
         onCancel={() => setDialog(null)}
       />
-    </Flex>
+    </DetailPageLayout>
   );
 }

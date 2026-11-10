@@ -1,5 +1,4 @@
 import { StopOutlined } from '@ant-design/icons';
-import type { ChargeKind, LedgerType } from '@renawi/shared';
 import { Button, Flex, Tag, Tooltip, Typography } from 'antd';
 import { useMemo, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -11,30 +10,10 @@ import { DateText } from '../../../shared/ui/DateText';
 import { EmptyState } from '../../../shared/ui/EmptyState';
 import { Money } from '../../../shared/ui/Money';
 import { MonthText } from '../../../shared/ui/MonthText';
+import { StatusTag } from '../../../shared/ui/StatusTag';
+import { ToneTag } from '../../../shared/ui/ToneTag';
 import { isDeposit, openAmount, withRunningBalance, type StatementRow } from '../lib/ledger';
 import type { LedgerEntry } from '../types';
-
-/** AntD preset colour per charge kind. */
-export const CHARGE_KIND_COLORS: Readonly<Record<ChargeKind, string>> = {
-  RENT: 'blue',
-  FINE: 'red',
-  DAMAGE: 'volcano',
-  INSURANCE: 'green',
-  TEST: 'geekblue',
-  REPAIR: 'orange',
-  PENALTY: 'magenta',
-  OTHER: 'default',
-};
-
-/** AntD preset colour per entry type (charges use their kind's colour). */
-export const LEDGER_TYPE_COLORS: Readonly<Record<LedgerType, string>> = {
-  CHARGE: 'blue',
-  PAYMENT: 'success',
-  CREDIT: 'cyan',
-  DEPOSIT_IN: 'purple',
-  DEPOSIT_OUT: 'purple',
-  DEPOSIT_APPLIED: 'purple',
-};
 
 export interface LedgerTableProps {
   /** Rows oldest to newest (as the statements return them). */
@@ -49,21 +28,14 @@ export interface LedgerTableProps {
   'data-testid'?: string;
 }
 
-/** Type tag: the charge kind for charges, the entry type otherwise. */
+/** Type tag: the charge kind for charges, the entry type otherwise (tones from the registry). */
 export function LedgerTypeTag({ entry }: { entry: Pick<LedgerEntry, 'type' | 'chargeKind'> }) {
-  const enumLabel = useEnumLabel();
   if (entry.type === 'CHARGE' && entry.chargeKind) {
     return (
-      <Tag color={CHARGE_KIND_COLORS[entry.chargeKind]} data-kind={entry.chargeKind}>
-        {enumLabel('ChargeKind', entry.chargeKind)}
-      </Tag>
+      <StatusTag enumName="ChargeKind" value={entry.chargeKind} data-kind={entry.chargeKind} />
     );
   }
-  return (
-    <Tag color={LEDGER_TYPE_COLORS[entry.type]} data-kind={entry.type}>
-      {enumLabel('LedgerType', entry.type)}
-    </Tag>
-  );
+  return <StatusTag enumName="LedgerType" value={entry.type} data-kind={entry.type} />;
 }
 
 /**
@@ -169,7 +141,7 @@ export function LedgerTable({
       render: (e) => {
         const open = openAmount(e);
         if (open === null) return dash;
-        if (open <= 0) return <Tag color="success">{t('ledger.paidUp')}</Tag>;
+        if (open <= 0) return <ToneTag tone="success">{t('ledger.paidUp')}</ToneTag>;
         return (
           <Flex vertical align="flex-end" gap={0}>
             <span className="rm-text-error" data-testid="ledger-remaining">

@@ -216,6 +216,108 @@ body {
   margin: 0 0 4px;
 }
 
+/* Detail pages (shared/ui/DetailPageLayout.tsx). */
+.rm-breadcrumbs.ant-breadcrumb {
+  font-size: var(--rm-text-small-size);
+}
+
+.rm-breadcrumbs .rm-breadcrumb-home {
+  display: inline-flex;
+  align-items: center;
+}
+
+/* A long record name (contact, driver) never pushes the trail off a phone screen. */
+.rm-breadcrumbs .rm-breadcrumb-current {
+  display: inline-block;
+  max-width: min(60vw, 420px);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  vertical-align: bottom;
+  color: var(--rm-color-text);
+}
+
+.rm-detail-heading {
+  min-width: 0;
+}
+
+.rm-detail-title-row {
+  min-width: 0;
+}
+
+.rm-detail-header .rm-detail-title.ant-typography {
+  margin: 0;
+}
+
+/* Key facts under the title (shared/ui/FactChips.tsx). */
+.rm-fact-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 12px;
+  margin: 0;
+}
+
+.rm-fact-chip {
+  display: grid;
+  grid-template-columns: 32px minmax(0, 1fr);
+  grid-template-areas:
+    'icon label'
+    'icon value';
+  column-gap: 10px;
+  align-items: center;
+  min-width: 0;
+  padding: 8px 14px 8px 10px;
+  border: 1px solid var(--rm-color-divider);
+  border-radius: var(--rm-radius-lg);
+  background: var(--rm-color-bg-container);
+}
+
+.rm-fact-term {
+  display: contents;
+}
+
+.rm-fact-icon {
+  grid-area: icon;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--rm-radius-md);
+  background: var(--rm-color-primary-soft);
+  color: var(--rm-color-primary-text);
+  font-size: 16px;
+}
+
+.rm-fact-label {
+  grid-area: label;
+  color: var(--rm-color-text-secondary);
+  font-size: var(--rm-text-small-size);
+  line-height: var(--rm-text-small-line-height);
+}
+
+.rm-fact-value {
+  grid-area: value;
+  min-width: 0;
+  margin: 0;
+  font-weight: var(--rm-font-weight-medium);
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 767px) {
+  .rm-fact-chips {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* Count next to a tab title: neutral, not the alarm red of a notification badge. */
+.rm-count-badge .ant-badge-count {
+  background: var(--rm-color-neutral-bg);
+  box-shadow: 0 0 0 1px var(--rm-color-neutral-border);
+  color: var(--rm-color-text-secondary);
+}
+
 .rm-empty-state .rm-empty-state-title.ant-typography {
   margin-bottom: 4px;
 }
@@ -357,15 +459,69 @@ body {
   padding: 0;
 }
 
-/* Taxi-licence entities use the green accent. */
-.rm-license-tag.ant-tag,
+/* Taxi-licence entities use the green accent (the tag itself is `.rm-tone-license`). */
 .rm-license-link {
   color: var(--rm-color-license);
 }
 
-.rm-license-tag.ant-tag {
-  border-color: var(--rm-color-license-border);
-  background: var(--rm-color-license-bg);
+/* ---- Tones ---------------------------------------------------------------------------------- */
+
+/*
+ * One colour family per tone (shared/lib/statusTones.ts decides which enum value gets which).
+ * Each class only sets three variables, so the same tone can paint a tag, a card edge or a dot.
+ */
+.rm-tone-success {
+  --rm-tone-text: var(--rm-color-success);
+  --rm-tone-bg: var(--rm-color-success-bg);
+  --rm-tone-border: var(--rm-color-success-border);
+}
+
+.rm-tone-info {
+  --rm-tone-text: var(--rm-color-info);
+  --rm-tone-bg: var(--rm-color-info-bg);
+  --rm-tone-border: var(--rm-color-info-border);
+}
+
+.rm-tone-warning {
+  --rm-tone-text: var(--rm-color-warning);
+  --rm-tone-bg: var(--rm-color-warning-bg);
+  --rm-tone-border: var(--rm-color-warning-border);
+}
+
+.rm-tone-error {
+  --rm-tone-text: var(--rm-color-error);
+  --rm-tone-bg: var(--rm-color-error-bg);
+  --rm-tone-border: var(--rm-color-error-border);
+}
+
+.rm-tone-neutral {
+  --rm-tone-text: var(--rm-color-neutral);
+  --rm-tone-bg: var(--rm-color-neutral-bg);
+  --rm-tone-border: var(--rm-color-neutral-border);
+}
+
+.rm-tone-accent {
+  --rm-tone-text: var(--rm-color-primary-text);
+  --rm-tone-bg: var(--rm-color-primary-soft);
+  --rm-tone-border: var(--rm-color-primary-border);
+}
+
+.rm-tone-license {
+  --rm-tone-text: var(--rm-color-license);
+  --rm-tone-bg: var(--rm-color-license-bg);
+  --rm-tone-border: var(--rm-color-license-border);
+}
+
+.rm-tone-purple {
+  --rm-tone-text: var(--rm-color-purple);
+  --rm-tone-bg: var(--rm-color-purple-bg);
+  --rm-tone-border: var(--rm-color-purple-border);
+}
+
+.rm-tone.ant-tag {
+  border-color: var(--rm-tone-border);
+  background: var(--rm-tone-bg);
+  color: var(--rm-tone-text);
 }
 
 /* ---- Lists, tables and filters -------------------------------------------------------------- */
