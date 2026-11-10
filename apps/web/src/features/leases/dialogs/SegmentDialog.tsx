@@ -110,6 +110,7 @@ export function SegmentDialog({ lease, onClose, onSaved }: SegmentDialogProps) {
   return (
     <FormDialog
       open
+      dirty={form.formState.isDirty}
       title={t('leases.segment.title')}
       onSubmit={submit}
       onCancel={onClose}

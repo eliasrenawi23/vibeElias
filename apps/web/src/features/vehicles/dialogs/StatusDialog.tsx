@@ -55,6 +55,7 @@ export function StatusDialog({ vehicleId, status, onClose, onSaved }: StatusDial
   return (
     <FormDialog
       open
+      dirty={form.formState.isDirty}
       title={t('vehicles.status.dialogTitle')}
       onSubmit={submit}
       onCancel={onClose}

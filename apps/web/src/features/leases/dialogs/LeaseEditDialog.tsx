@@ -111,6 +111,7 @@ export function LeaseEditDialog({ lease, onClose, onSaved }: LeaseEditDialogProp
   return (
     <FormDialog
       open
+      dirty={form.formState.isDirty}
       title={t('leases.edit.title')}
       onSubmit={submit}
       onCancel={onClose}

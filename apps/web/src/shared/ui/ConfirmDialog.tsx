@@ -8,6 +8,7 @@ export interface ConfirmDialogProps {
   /** Body text; defaults to the generic "are you sure" message. */
   content?: ReactNode;
   confirmText?: ReactNode;
+  cancelText?: ReactNode;
   /** Red confirm button for destructive actions. */
   danger?: boolean;
   loading?: boolean;
@@ -21,6 +22,7 @@ export function ConfirmDialog({
   title,
   content,
   confirmText,
+  cancelText,
   danger = false,
   loading = false,
   onConfirm,
@@ -32,7 +34,7 @@ export function ConfirmDialog({
       open={open}
       title={title}
       okText={confirmText ?? t('actions.confirm')}
-      cancelText={t('actions.cancel')}
+      cancelText={cancelText ?? t('actions.cancel')}
       okButtonProps={{ danger, loading }}
       onOk={onConfirm}
       onCancel={onCancel}

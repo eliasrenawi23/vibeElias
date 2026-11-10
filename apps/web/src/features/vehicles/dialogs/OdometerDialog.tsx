@@ -51,6 +51,7 @@ export function OdometerDialog({ vehicleId, currentKm, onClose, onSaved }: Odome
   return (
     <FormDialog
       open
+      dirty={form.formState.isDirty}
       title={t('vehicles.odometer.dialogTitle')}
       onSubmit={submit}
       onCancel={onClose}

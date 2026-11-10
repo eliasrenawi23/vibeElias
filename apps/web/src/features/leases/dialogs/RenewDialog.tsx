@@ -62,6 +62,7 @@ export function RenewDialog({ lease, onClose, onSaved }: RenewDialogProps) {
   return (
     <FormDialog
       open
+      dirty={form.formState.isDirty}
       title={t('leases.renew.title')}
       onSubmit={submit}
       onCancel={onClose}

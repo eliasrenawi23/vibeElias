@@ -78,6 +78,7 @@ export function ContactQuickCreateDialog({
   return (
     <FormDialog
       open
+      dirty={form.formState.isDirty}
       title={t('contacts.picker.quickCreateTitle')}
       okText={t('actions.create')}
       onSubmit={submit}

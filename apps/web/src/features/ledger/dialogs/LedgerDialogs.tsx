@@ -104,6 +104,7 @@ export function PaymentDialog({
   return (
     <FormDialog
       open
+      dirty={form.formState.isDirty}
       title={t('ledger.payment.title')}
       onSubmit={submit}
       onCancel={onClose}
@@ -207,6 +208,7 @@ export function ChargeDialog({
   return (
     <FormDialog
       open
+      dirty={form.formState.isDirty}
       title={t('ledger.charge.title')}
       onSubmit={submit}
       onCancel={onClose}
@@ -304,6 +306,7 @@ export function CreditDialog({
   return (
     <FormDialog
       open
+      dirty={form.formState.isDirty}
       title={t('ledger.credit.title')}
       onSubmit={submit}
       onCancel={onClose}
@@ -374,6 +377,7 @@ export function VoidDialog({
   return (
     <FormDialog
       open
+      dirty={form.formState.isDirty}
       title={t('ledger.void.title')}
       onSubmit={submit}
       onCancel={onClose}

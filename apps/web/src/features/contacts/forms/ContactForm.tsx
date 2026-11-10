@@ -6,6 +6,7 @@ import { useTranslation } from 'react-i18next';
 import { useController, useFormState, type Control } from 'react-hook-form';
 import { useFormErrors } from '../../../shared/form/useFormErrors';
 import { useZodForm } from '../../../shared/form/useZodForm';
+import { useUnsavedChangesGuard } from '../../../shared/form/useUnsavedChangesGuard';
 import { ltrInputProps, numericInputProps, phoneInputProps } from '../../../shared/lib/bidi';
 import { useEnumOptions } from '../../../shared/lib/enums';
 import { useDynamicT } from '../../../shared/lib/i18n';
@@ -47,13 +48,14 @@ export function ContactForm({ contact, onSubmit, submitting, onCancel, submitLab
   const { control } = form;
   const { formError, handleError, clearFormError } = useFormErrors(form.setError);
 
+  const guard = useUnsavedChangesGuard(form.formState.isDirty);
   const submit = form.handleSubmit(async (values: ContactFormOutput) => {
     clearFormError();
     // A company has no person name; the hidden fields must not keep stale text.
     const body: ContactCreate =
       kind === 'company' ? { ...values, firstName: null, lastName: null } : values;
     try {
-      await onSubmit(body);
+      await guard.submit(() => onSubmit(body));
     } catch (error) {
       handleError(error);
     }
@@ -198,7 +200,7 @@ export function ContactForm({ contact, onSubmit, submitting, onCancel, submitLab
 
         <Flex gap={8} justify="flex-end" className="rm-form-actions">
           {onCancel && (
-            <Button onClick={onCancel} disabled={submitting}>
+            <Button onClick={() => guard.confirmDiscard(onCancel)} disabled={submitting}>
               {t('actions.cancel')}
             </Button>
           )}
@@ -207,6 +209,7 @@ export function ContactForm({ contact, onSubmit, submitting, onCancel, submitLab
           </Button>
         </Flex>
       </Flex>
+      {guard.prompt}
     </FormLayout>
   );
 }

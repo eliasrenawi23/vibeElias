@@ -37,6 +37,7 @@ export function DriverEditDialog({ driver, onClose, onSaved }: DriverEditDialogP
   return (
     <FormDialog
       open
+      dirty={form.formState.isDirty}
       title={t('drivers.editTitle')}
       onSubmit={submit}
       onCancel={onClose}

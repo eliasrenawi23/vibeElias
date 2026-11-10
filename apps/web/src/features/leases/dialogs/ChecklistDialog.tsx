@@ -54,6 +54,7 @@ export function ChecklistDialog({ lease, kind, onClose, onSaved }: ChecklistDial
   return (
     <FormDialog
       open
+      dirty={form.formState.isDirty}
       title={kind === 'handover' ? t('checklist.handoverTitle') : t('checklist.returnTitle')}
       onSubmit={submit}
       onCancel={onClose}

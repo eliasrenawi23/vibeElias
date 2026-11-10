@@ -67,6 +67,7 @@ export function DocumentMetaDialog({
   return (
     <FormDialog
       open
+      dirty={form.formState.isDirty}
       title={mode === 'upload' ? t('documents.uploadTitle') : t('documents.editTitle')}
       okText={mode === 'upload' ? t('actions.upload') : t('actions.save')}
       onSubmit={submit}

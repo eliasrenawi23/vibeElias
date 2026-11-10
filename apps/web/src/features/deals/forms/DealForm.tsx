@@ -5,6 +5,7 @@ import { useEffect, useMemo } from 'react';
 import { useController, useForm, useWatch, type Control } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { useFormErrors } from '../../../shared/form/useFormErrors';
+import { useUnsavedChangesGuard } from '../../../shared/form/useUnsavedChangesGuard';
 import { isolateLtr } from '../../../shared/lib/bidi';
 import { formatCount } from '../../../shared/lib/money';
 import { DateText } from '../../../shared/ui/DateText';
@@ -92,10 +93,11 @@ export function DealForm({ type, initialVehicleId, onCreated, onCancel }: DealFo
     if (forcedFull) form.setValue('vatMode', 'FULL');
   }, [forcedFull, form]);
 
+  const guard = useUnsavedChangesGuard(form.formState.isDirty);
   const submit = form.handleSubmit(async (body) => {
     clearFormError();
     try {
-      await mutation.mutateAsync(body);
+      await guard.submit(() => mutation.mutateAsync(body));
     } catch (error) {
       handleError(error);
     }
@@ -254,7 +256,7 @@ export function DealForm({ type, initialVehicleId, onCreated, onCancel }: DealFo
         </Card>
 
         <Flex gap={8} justify="flex-end" wrap className="rm-form-actions">
-          <Button onClick={onCancel} disabled={mutation.isPending}>
+          <Button onClick={() => guard.confirmDiscard(onCancel)} disabled={mutation.isPending}>
             {t('actions.cancel')}
           </Button>
           <Button
@@ -267,6 +269,7 @@ export function DealForm({ type, initialVehicleId, onCreated, onCancel }: DealFo
           </Button>
         </Flex>
       </Flex>
+      {guard.prompt}
     </FormLayout>
   );
 }

@@ -9,6 +9,7 @@ import { Alert, Button, Card, Col, Flex, Row } from 'antd';
 import { useTranslation } from 'react-i18next';
 import { useFormErrors } from '../../../shared/form/useFormErrors';
 import { useZodForm } from '../../../shared/form/useZodForm';
+import { useUnsavedChangesGuard } from '../../../shared/form/useUnsavedChangesGuard';
 import { useEnumOptions } from '../../../shared/lib/enums';
 import { FormDateField } from '../../../shared/ui/FormDateField';
 import { FormLayout } from '../../../shared/ui/FormLayout';
@@ -60,10 +61,11 @@ export function TaxiLicenseForm({
   const status = form.watch('status');
   const { formError, handleError, clearFormError } = useFormErrors(form.setError);
 
+  const guard = useUnsavedChangesGuard(form.formState.isDirty);
   const submit = form.handleSubmit(async (values) => {
     clearFormError();
     try {
-      await onSubmit(values);
+      await guard.submit(() => onSubmit(values));
     } catch (error) {
       handleError(error);
     }
@@ -168,7 +170,7 @@ export function TaxiLicenseForm({
         </Card>
         <Flex gap={8} justify="flex-end" className="rm-form-actions">
           {onCancel && (
-            <Button onClick={onCancel} disabled={submitting}>
+            <Button onClick={() => guard.confirmDiscard(onCancel)} disabled={submitting}>
               {t('actions.cancel')}
             </Button>
           )}
@@ -177,6 +179,7 @@ export function TaxiLicenseForm({
           </Button>
         </Flex>
       </Flex>
+      {guard.prompt}
     </FormLayout>
   );
 }

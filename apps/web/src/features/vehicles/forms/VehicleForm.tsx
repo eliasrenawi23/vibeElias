@@ -4,6 +4,7 @@ import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useWatch } from 'react-hook-form';
 import { useFormErrors } from '../../../shared/form/useFormErrors';
+import { useUnsavedChangesGuard } from '../../../shared/form/useUnsavedChangesGuard';
 import { useZodForm } from '../../../shared/form/useZodForm';
 import { ltrInputProps } from '../../../shared/lib/bidi';
 import { useEnumOptions } from '../../../shared/lib/enums';
@@ -74,11 +75,12 @@ export function VehicleForm({
   if (ownership !== 'THIRD_PARTY' && noProfile) setNoProfile(false);
   const blocked = ownership === 'THIRD_PARTY' && noProfile;
 
+  const guard = useUnsavedChangesGuard(form.formState.isDirty);
   const submit = form.handleSubmit(async (values) => {
     if (blocked) return;
     clearFormError();
     try {
-      await onSubmit(toVehicleCreateBody(values));
+      await guard.submit(() => onSubmit(toVehicleCreateBody(values)));
     } catch (error) {
       handleError(error);
     }
@@ -351,7 +353,7 @@ export function VehicleForm({
             <Typography.Text type="warning">{t('vehicles.form.saveBlocked')}</Typography.Text>
           )}
           {onCancel && (
-            <Button onClick={onCancel} disabled={submitting}>
+            <Button onClick={() => guard.confirmDiscard(onCancel)} disabled={submitting}>
               {t('actions.cancel')}
             </Button>
           )}
@@ -366,6 +368,7 @@ export function VehicleForm({
           </Button>
         </Flex>
       </Flex>
+      {guard.prompt}
     </FormLayout>
   );
 }

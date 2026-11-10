@@ -41,6 +41,7 @@ export function ReturnCycleDialog({ cycleId, onClose, onSaved }: ReturnCycleDial
   return (
     <FormDialog
       open
+      dirty={form.formState.isDirty}
       title={t('vehicles.cycles.returnTitle')}
       okText={t('vehicles.actions.returnToConsignor')}
       onSubmit={submit}

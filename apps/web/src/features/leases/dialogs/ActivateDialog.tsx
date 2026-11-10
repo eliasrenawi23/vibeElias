@@ -93,6 +93,7 @@ export function ActivateDialog({ lease, onClose, onSaved }: ActivateDialogProps)
   return (
     <FormDialog
       open
+      dirty={form.formState.isDirty}
       title={t('leases.activate.title')}
       onSubmit={submit}
       onCancel={onClose}

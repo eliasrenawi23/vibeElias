@@ -52,6 +52,7 @@ export function RebillExpenseDialog({ expense, onClose, onSaved }: RebillExpense
   return (
     <FormDialog
       open
+      dirty={form.formState.isDirty}
       title={t('vehicles.expenses.rebillTitle')}
       onSubmit={submit}
       onCancel={onClose}

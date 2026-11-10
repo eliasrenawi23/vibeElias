@@ -5,6 +5,7 @@ import type { FieldPath } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { useFormErrors } from '../../../shared/form/useFormErrors';
 import { useZodForm } from '../../../shared/form/useZodForm';
+import { useUnsavedChangesGuard } from '../../../shared/form/useUnsavedChangesGuard';
 import { FormLayout } from '../../../shared/ui/FormLayout';
 import { createLease, updateChecklists, type LeaseCreateBody } from '../api';
 import type { LeaseDetail } from '../types';
@@ -108,11 +109,12 @@ export function LeaseWizard({ initialDriverId, onCreated, onCancel }: LeaseWizar
     setIndex(target);
   };
 
+  const guard = useUnsavedChangesGuard(form.formState.isDirty);
   const submit = form.handleSubmit(
     async (values) => {
       clearFormError();
       try {
-        await mutation.mutateAsync(toLeaseCreateBody(values));
+        await guard.submit(() => mutation.mutateAsync(toLeaseCreateBody(values)));
       } catch (error) {
         handleError(error);
         // Jump to the step showing the first field error, if any.
@@ -157,9 +159,10 @@ export function LeaseWizard({ initialDriverId, onCreated, onCancel }: LeaseWizar
           {/* Enter in an input moves to the next step. */}
           <button type="submit" tabIndex={-1} aria-hidden className="rm-visually-hidden" />
         </FormLayout>
+        {guard.prompt}
       </Card>
       <Flex gap={8} justify="space-between" className="rm-form-actions">
-        <Button onClick={onCancel} disabled={mutation.isPending}>
+        <Button onClick={() => guard.confirmDiscard(onCancel)} disabled={mutation.isPending}>
           {t('actions.cancel')}
         </Button>
         <Flex gap={8}>

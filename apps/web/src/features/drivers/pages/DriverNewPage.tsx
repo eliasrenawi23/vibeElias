@@ -5,6 +5,7 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useNavigate, useSearchParams } from 'react-router';
 import { useFormErrors } from '../../../shared/form/useFormErrors';
+import { useUnsavedChangesGuard } from '../../../shared/form/useUnsavedChangesGuard';
 import { useZodForm } from '../../../shared/form/useZodForm';
 import { ltrInputProps, numericInputProps, phoneInputProps } from '../../../shared/lib/bidi';
 import { FormLayout } from '../../../shared/ui/FormLayout';
@@ -84,10 +85,11 @@ export function DriverNewPage() {
     },
   });
 
+  const guard = useUnsavedChangesGuard(form.formState.isDirty);
   const submit = form.handleSubmit(async (values) => {
     clearFormError();
     try {
-      await mutation.mutateAsync(toDriverCreateBody(values));
+      await guard.submit(() => mutation.mutateAsync(toDriverCreateBody(values)));
     } catch (error) {
       handleError(error);
     }
@@ -200,7 +202,10 @@ export function DriverNewPage() {
             <DriverFields control={form.control} />
           </Card>
           <Flex gap={8} justify="flex-end" className="rm-form-actions">
-            <Button onClick={() => navigate('/drivers')} disabled={mutation.isPending}>
+            <Button
+              onClick={() => guard.confirmDiscard(() => navigate('/drivers'))}
+              disabled={mutation.isPending}
+            >
               {t('actions.cancel')}
             </Button>
             <Button
@@ -213,6 +218,7 @@ export function DriverNewPage() {
             </Button>
           </Flex>
         </Flex>
+        {guard.prompt}
       </FormLayout>
     </Flex>
   );

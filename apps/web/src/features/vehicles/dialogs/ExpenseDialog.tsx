@@ -81,6 +81,7 @@ export function ExpenseDialog({ vehicleId, expense, onClose, onSaved }: ExpenseD
   return (
     <FormDialog
       open
+      dirty={form.formState.isDirty}
       title={expense ? t('vehicles.expenses.editTitle') : t('vehicles.expenses.addTitle')}
       onSubmit={submit}
       onCancel={onClose}

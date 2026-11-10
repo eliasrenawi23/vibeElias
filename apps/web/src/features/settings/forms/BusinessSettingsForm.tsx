@@ -2,6 +2,7 @@ import type { SettingsResponse } from '@renawi/shared';
 import { Button, Card, Col, Flex, Row } from 'antd';
 import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useUnsavedChangesGuard } from '../../../shared/form/useUnsavedChangesGuard';
 import { applyApiErrors, useZodForm } from '../../../shared/form/useZodForm';
 import { ltrInputProps, numericInputProps, phoneInputProps } from '../../../shared/lib/bidi';
 import { FormLayout } from '../../../shared/ui/FormLayout';
@@ -32,9 +33,11 @@ export function BusinessSettingsForm({ settings, onSave, saving }: BusinessSetti
     reset(toBusinessFormValues(settings));
   }, [settings, reset]);
 
+  const guard = useUnsavedChangesGuard(formState.isDirty);
+
   const submit = form.handleSubmit(async (values) => {
     try {
-      await onSave(values);
+      await guard.submit(() => onSave(values));
     } catch (error) {
       applyApiErrors(setError, error);
     }
@@ -155,6 +158,7 @@ export function BusinessSettingsForm({ settings, onSave, saving }: BusinessSetti
           </Button>
         </Flex>
       </Flex>
+      {guard.prompt}
     </FormLayout>
   );
 }

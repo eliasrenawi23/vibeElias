@@ -94,6 +94,7 @@ export function DepositDialog({ lease, onClose, onSaved }: DepositDialogProps) {
   return (
     <FormDialog
       open
+      dirty={form.formState.isDirty}
       title={t('leases.deposit.title')}
       onSubmit={submit}
       onCancel={onClose}

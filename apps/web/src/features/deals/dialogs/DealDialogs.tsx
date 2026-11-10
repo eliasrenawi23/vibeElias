@@ -131,6 +131,7 @@ export function DealEditDialog({ deal, onClose, onSaved }: DealDialogProps) {
   return (
     <FormDialog
       open
+      dirty={form.formState.isDirty}
       title={t('deals.edit.title')}
       onSubmit={submit}
       onCancel={onClose}
@@ -269,6 +270,7 @@ export function DisclosureDialog({ deal, onClose, onSaved }: DealDialogProps) {
   return (
     <FormDialog
       open
+      dirty={form.formState.isDirty}
       title={t('deals.disclosure.title')}
       onSubmit={submit}
       onCancel={onClose}
@@ -329,6 +331,7 @@ export function CompleteDialog({ deal, onClose, onSaved }: DealDialogProps) {
   return (
     <FormDialog
       open
+      dirty={form.formState.isDirty}
       title={t('deals.complete.title')}
       onSubmit={submit}
       onCancel={onClose}
@@ -391,6 +394,7 @@ export function CancelDealDialog({ deal, onClose, onSaved }: DealDialogProps) {
   return (
     <FormDialog
       open
+      dirty={form.formState.isDirty}
       title={t('deals.cancel.title')}
       onSubmit={submit}
       onCancel={onClose}
@@ -470,6 +474,7 @@ export function DealPaymentDialog({ deal, onClose, onSaved }: DealDialogProps) {
   return (
     <FormDialog
       open
+      dirty={form.formState.isDirty}
       title={t('deals.payments.addTitle')}
       onSubmit={submit}
       onCancel={onClose}
@@ -578,6 +583,7 @@ export function TransferDoneDialog({ deal, onClose, onSaved }: DealDialogProps) 
   return (
     <FormDialog
       open
+      dirty={form.formState.isDirty}
       title={t('deals.transfer.markTitle')}
       onSubmit={submit}
       onCancel={onClose}

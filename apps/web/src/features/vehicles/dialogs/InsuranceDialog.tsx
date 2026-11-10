@@ -95,6 +95,7 @@ export function InsuranceDialog({
   return (
     <FormDialog
       open
+      dirty={form.formState.isDirty}
       title={policy ? t('vehicles.insurance.editTitle') : t('vehicles.insurance.addTitle')}
       onSubmit={submit}
       onCancel={onClose}

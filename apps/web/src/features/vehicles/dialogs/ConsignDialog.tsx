@@ -62,6 +62,7 @@ export function ConsignDialog({ vehicleId, listingPrice, onClose, onSaved }: Con
   return (
     <FormDialog
       open
+      dirty={form.formState.isDirty}
       title={t('vehicles.cycles.consignTitle')}
       onSubmit={submit}
       onCancel={onClose}

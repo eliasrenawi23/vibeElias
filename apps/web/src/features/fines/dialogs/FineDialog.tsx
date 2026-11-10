@@ -82,6 +82,7 @@ export function FineDialog({ vehicleId, onClose, onSaved }: FineDialogProps) {
   return (
     <FormDialog
       open
+      dirty={form.formState.isDirty}
       title={t('fines.addTitle')}
       onSubmit={submit}
       onCancel={onClose}

@@ -1,6 +1,7 @@
 import { Alert, Modal } from 'antd';
-import type { BaseSyntheticEvent, ReactNode } from 'react';
+import { useState, type BaseSyntheticEvent, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
+import { ConfirmDialog } from './ConfirmDialog';
 import { FormLayout } from './FormLayout';
 
 export interface FormDialogProps {
@@ -17,6 +18,8 @@ export interface FormDialogProps {
   /** Form-level error (API message that is not tied to a field). */
   error?: ReactNode;
   width?: number;
+  /** The form has unsaved input (`form.formState.isDirty`): closing asks to discard it. */
+  dirty?: boolean;
   children: ReactNode;
 }
 
@@ -32,14 +35,20 @@ export function FormDialog({
   okDisabled = false,
   error,
   width = 560,
+  dirty = false,
   children,
 }: FormDialogProps) {
   const { t } = useTranslation();
+  const [confirmClose, setConfirmClose] = useState(false);
+  const close = () => {
+    if (dirty && !submitting) setConfirmClose(true);
+    else onCancel();
+  };
   return (
     <Modal
       open={open}
       title={title}
-      onCancel={onCancel}
+      onCancel={close}
       onOk={() => {
         if (!okDisabled) void onSubmit();
       }}
@@ -55,6 +64,19 @@ export function FormDialog({
         {/* Lets Enter in any input submit the form. */}
         <button type="submit" tabIndex={-1} aria-hidden className="rm-visually-hidden" />
       </FormLayout>
+      <ConfirmDialog
+        open={confirmClose}
+        title={t('unsaved.title')}
+        content={t('unsaved.close')}
+        confirmText={t('unsaved.discard')}
+        cancelText={t('unsaved.stay')}
+        danger
+        onConfirm={() => {
+          setConfirmClose(false);
+          onCancel();
+        }}
+        onCancel={() => setConfirmClose(false)}
+      />
     </Modal>
   );
 }
