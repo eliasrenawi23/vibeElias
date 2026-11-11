@@ -69,8 +69,19 @@ export const SWAGGER_TAGS: readonly { name: string; description: string }[] = [
       'Uploads (pdf / jpeg / png / webp, sniffed), thumbnails and authenticated file streaming',
   },
   {
+    name: 'reminders',
+    description:
+      'Reminders feed (expiries, deadlines, follow-ups with lead days) and manual reminders',
+  },
+  {
+    name: 'reports',
+    description:
+      'Reports (profit, inventory ageing, receivables, expenses, lease income, trade book, ' +
+      'fines) as JSON, CSV or XLSX',
+  },
+  {
     name: 'dashboard',
-    description: 'Dashboard KPIs: stock, active leases, receivables, month profit, open deals',
+    description: 'Dashboard KPIs, recent activity and charts',
   },
   { name: 'health', description: 'Liveness / readiness' },
 ];

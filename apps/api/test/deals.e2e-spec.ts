@@ -1,4 +1,11 @@
-import { addDays, addWorkingDays, periodOf, sumMoney, vatOnMargin } from '@renawi/shared';
+import {
+  addDays,
+  addWorkingDays,
+  DashboardKpisSchema,
+  periodOf,
+  sumMoney,
+  vatOnMargin,
+} from '@renawi/shared';
 import request from 'supertest';
 import { Factory, LeaseBody, LedgerEntryBody, Ref } from './factories';
 import { daysFromToday, expectError, Session, startSession, today } from './helpers';
@@ -1439,7 +1446,7 @@ describe('Deals (e2e)', () => {
         }
       }
       expect(profits.length).toBeGreaterThan(0);
-      expect(kpis).toEqual({
+      expect(kpis).toMatchObject({
         vehiclesInStock: await total('/api/vehicles?status=IN_STOCK&pageSize=1'),
         activeLeases: await total('/api/leases?status=ACTIVE&pageSize=1'),
         receivables: sumMoney(balances.items.filter((b) => b.balance > 0).map((b) => b.balance)),
@@ -1448,6 +1455,8 @@ describe('Deals (e2e)', () => {
         transfersOverdue: await total('/api/deals?transferOverdue=true&pageSize=1'),
       });
       expect(kpis.transfersOverdue).toBeGreaterThan(0);
+      // Milestone 5 additions (shared DashboardKpisSchema).
+      expect(DashboardKpisSchema.safeParse(kpis).success).toBe(true);
     });
   });
 });

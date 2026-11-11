@@ -55,7 +55,7 @@ const CYCLE_PNL_INCLUDE = {
 type CycleRow = Prisma.InventoryCycleGetPayload<{ include: typeof CYCLE_PNL_INCLUDE }>;
 
 /** Cycles that count for P&L: everything but CANCELLED (a cancelled purchase never happened). */
-const NOT_CANCELLED: Prisma.InventoryCycleWhereInput = {
+export const NOT_CANCELLED: Prisma.InventoryCycleWhereInput = {
   OR: [{ endReason: null }, { endReason: { not: 'CANCELLED' } }],
 };
 
@@ -93,11 +93,16 @@ export class PnlService {
 
   /** Profit of the (non-cancelled) cycles that ended within `[from, to]` (dashboard KPI). */
   async profitOfCyclesClosedBetween(from: string, to: string): Promise<number> {
-    const cycles = await this.cyclesPnl(
-      { endedAt: { gte: dbDate(from), lte: dbDate(to) }, ...NOT_CANCELLED },
-      [{ endedAt: 'asc' }],
-    );
+    const cycles = await this.cyclesClosedBetween(from, to);
     return sumMoney(cycles.map((c) => c.profit));
+  }
+
+  /** P&L of the (non-cancelled) cycles that ended within `[from, to]`, oldest end first. */
+  cyclesClosedBetween(from: string, to: string): Promise<CyclePnlView[]> {
+    return this.cyclesPnl({ endedAt: { gte: dbDate(from), lte: dbDate(to) }, ...NOT_CANCELLED }, [
+      { endedAt: 'asc' },
+      { startedAt: 'asc' },
+    ]);
   }
 
   /**
@@ -141,8 +146,8 @@ export class PnlService {
     };
   }
 
-  /** P&L rows of the matching cycles. */
-  private async cyclesPnl(
+  /** P&L rows of the matching cycles (also used by the reports). */
+  async cyclesPnl(
     where: Prisma.InventoryCycleWhereInput,
     orderBy: Prisma.InventoryCycleOrderByWithRelationInput[],
   ): Promise<CyclePnlView[]> {

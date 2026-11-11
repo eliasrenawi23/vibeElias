@@ -13,6 +13,29 @@ import { isoDate, queryList } from '../primitives.js';
 export const ReportFormat = z.enum(['json', 'csv', 'xlsx']);
 export type ReportFormat = z.infer<typeof ReportFormat>;
 
+/** Report codes = the URL segment of `GET /reports/<name>` (and `ReportResult.report`). */
+export const ReportName = z.enum([
+  'profit',
+  'inventory-ageing',
+  'receivables',
+  'expenses',
+  'lease-income',
+  'trade-book',
+  'fines',
+]);
+export type ReportName = z.infer<typeof ReportName>;
+
+/** i18n key of each report's title (`reports.names.<camelCase>`); also the XLSX data sheet name. */
+export const REPORT_TITLE_KEYS: Readonly<Record<ReportName, string>> = Object.freeze({
+  profit: 'reports.names.profit',
+  'inventory-ageing': 'reports.names.inventoryAgeing',
+  receivables: 'reports.names.receivables',
+  expenses: 'reports.names.expenses',
+  'lease-income': 'reports.names.leaseIncome',
+  'trade-book': 'reports.names.tradeBook',
+  fines: 'reports.names.fines',
+});
+
 /** Period grouping of the profit report. */
 export const ReportPeriodGroupBy = z.enum(['month', 'quarter', 'year']);
 export type ReportPeriodGroupBy = z.infer<typeof ReportPeriodGroupBy>;
@@ -73,8 +96,22 @@ export const FinesReportQuerySchema = range.extend({
 });
 export type FinesReportQuery = z.infer<typeof FinesReportQuerySchema>;
 
-/** Cell type of a report column (drives CSV / XLSX formatting and web rendering). */
-export const ReportColumnType = z.enum(['text', 'money', 'int', 'date', 'bool', 'enum']);
+/**
+ * Cell type of a report column (drives CSV / XLSX formatting and web rendering):
+ * `money` number (ILS, 2 dp), `int` whole number, `date` `YYYY-MM-DD`, `datetime` ISO instant,
+ * `bool` true/false, `enum` raw value of `ReportColumn.enum`, `plate` canonical plate digits,
+ * `text` anything else. `null` cells are missing values ("n/a"), never 0.
+ */
+export const ReportColumnType = z.enum([
+  'text',
+  'money',
+  'int',
+  'date',
+  'bool',
+  'enum',
+  'plate',
+  'datetime',
+]);
 export type ReportColumnType = z.infer<typeof ReportColumnType>;
 
 export const ReportColumnSchema = z.object({

@@ -24,6 +24,8 @@ import { JobsModule } from './jobs/jobs.module';
 import { LeasesModule } from './leases/leases.module';
 import { LedgerModule } from './ledger/ledger.module';
 import { PrismaModule } from './prisma/prisma.module';
+import { RemindersModule } from './reminders/reminders.module';
+import { ReportsModule } from './reports/reports.module';
 import { SettingsModule } from './settings/settings.module';
 import { TaxiLicensesModule } from './taxi-licenses/taxi-licenses.module';
 import { UsersModule } from './users/users.module';
@@ -63,6 +65,8 @@ import { VehiclesModule } from './vehicles/vehicles.module';
     LeasesModule,
     FinesModule,
     DealsModule,
+    RemindersModule,
+    ReportsModule,
     DashboardModule,
     DocumentsModule,
     HealthModule,
