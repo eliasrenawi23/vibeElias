@@ -654,9 +654,10 @@ test('sale with trade-in, disclosure, completion, transfer, payment, P&L, purcha
   await expect(page.getByRole('heading', { level: 1 })).toHaveText('Deal');
   await expect(page.getByRole('heading', { level: 2 })).toContainText('#42');
   const tags = page.getByTestId('deal-tags');
+  const facts = page.getByTestId('deal-facts');
   await expect(tags).toContainText('Draft');
-  await expect(tags).toContainText('Nadia Buyer');
-  await expect(tags.locator('bdi.rm-plate')).toHaveText('123-45-678');
+  await expect(facts).toContainText('Nadia Buyer');
+  await expect(facts.locator('bdi.rm-plate')).toHaveText('123-45-678');
   await expect(tags.locator('[data-alert="disclosureMissing"]')).toHaveText(
     'Disclosure not signed',
   );
@@ -686,7 +687,7 @@ test('sale with trade-in, disclosure, completion, transfer, payment, P&L, purcha
   await expect(page.getByText('Deal completed')).toBeVisible();
   expect(lastBody('POST', '/api/deals/deal_new/complete')).toEqual({ date: TODAY });
   await expect(tags).toContainText('Completed');
-  await expect(tags.getByTestId('transfer-cell')).toContainText('Not started');
+  await expect(facts.getByTestId('transfer-cell')).toContainText('Not started');
 
   /* ---- Transfer checklist ---- */
   await page.getByRole('tab', { name: 'Transfer' }).click();
@@ -785,7 +786,7 @@ test('sale with trade-in, disclosure, completion, transfer, payment, P&L, purcha
     notes: 'Bought at auction',
     sellerIsVatBusiness: true,
   });
-  await expect(page.getByTestId('deal-tags')).toContainText('Sami Seller');
+  await expect(page.getByTestId('deal-facts')).toContainText('Sami Seller');
   await expect(page.getByTestId('deal-action-disclosure')).toHaveCount(0);
 
   /* ---- Arabic: amounts keep Latin digits and the shekel sign ---- */

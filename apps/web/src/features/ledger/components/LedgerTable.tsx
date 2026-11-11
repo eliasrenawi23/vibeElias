@@ -1,5 +1,5 @@
 import { StopOutlined } from '@ant-design/icons';
-import { Button, Flex, Tag, Tooltip, Typography } from 'antd';
+import { Button, Flex, Tooltip, Typography } from 'antd';
 import { useMemo, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { AutoDir, Ltr } from '../../../shared/lib/bidi';
@@ -71,7 +71,7 @@ export function LedgerTable({
       render: (e) => (
         <Flex gap={4} wrap>
           <LedgerTypeTag entry={e} />
-          {e.voidedAt && <Tag data-testid="ledger-voided-tag">{t('ledger.voided')}</Tag>}
+          {e.voidedAt && <ToneTag tone="neutral" data-testid="ledger-voided-tag">{t('ledger.voided')}</ToneTag>}
         </Flex>
       ),
     },

@@ -1,7 +1,7 @@
 import { PlusOutlined } from '@ant-design/icons';
 import { ContactTag, todayInBusinessTz } from '@renawi/shared';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
-import { Button, Flex, Tag, Typography } from 'antd';
+import { Button, Flex, Typography } from 'antd';
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useNavigate } from 'react-router';
@@ -64,7 +64,7 @@ export function ContactsPage() {
               <Link to={`/contacts/${encodeURIComponent(c.id)}`} className="rm-strong-link">
                 <AutoDir>{contactName(c) || '—'}</AutoDir>
               </Link>
-              {c.archivedAt && <Tag>{t('contacts.archived')}</Tag>}
+              {c.archivedAt && <ToneTag tone="neutral">{t('contacts.archived')}</ToneTag>}
             </Flex>
             {person && c.companyName && (
               <Typography.Text type="secondary">

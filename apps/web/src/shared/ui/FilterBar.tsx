@@ -14,7 +14,7 @@ import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSearchParams } from 'react-router';
 import { freeTextInputProps } from '../lib/bidi';
-import { dayjsToIso, DISPLAY_DATE_FORMAT, isoToDayjs } from '../lib/dates';
+import { DATE_INPUT_FORMATS, dayjsToIso, isoToDayjs } from '../lib/dates';
 import { readListParam, setOrDelete } from '../lib/listParams';
 
 export interface FilterOption {
@@ -67,6 +67,9 @@ export interface FilterBarProps {
   /** Debounce of the search box in ms. */
   debounceMs?: number;
 }
+
+/** Date range: shown as the first format, accepted typed or pasted in any of them. */
+const DATE_FORMATS = [...DATE_INPUT_FORMATS];
 
 /** Every URL param a filter definition owns. */
 function filterKeys(filters: FilterDef[]): string[] {
@@ -228,7 +231,7 @@ export function FilterBar({
           <DatePicker.RangePicker
             key={fromKey}
             aria-label={f.label}
-            format={DISPLAY_DATE_FORMAT}
+            format={DATE_FORMATS}
             allowEmpty={[true, true]}
             className="rm-tabular"
             value={[isoToDayjs(params.get(fromKey)), isoToDayjs(params.get(toKey))]}

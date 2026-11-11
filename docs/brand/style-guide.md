@@ -276,10 +276,32 @@ float.
   - Heights 28 / 36 / 44 px; use 44 px for the main action on phone screens.
   - Do **not** use AntD `color="primary"` with the `outlined`, `dashed`, `text` or `link`
     variants in the light theme: they would paint yellow text on white.
-- **Tags**: soft background, coloured text, 1 px border, 6 px corners, always a word. Status
-  set: success (paid, active), warning (expiring, partial), error (overdue), info (draft),
-  neutral grey (consigned, archived). Licence tags use licence green with a small square dot
-  and the licence number in an LTR isolate.
+- **Tags and tones**: soft background, coloured text, 1 px border, 6 px corners, always a word
+  (alerts add a warning icon). The colour comes from a **tone**, never from the feature code:
+  `apps/web/src/shared/lib/statusTones.ts` maps every value of every coloured enum to one of
+  eight tones (a missing value is a type error), painted by the `.rm-tone-<tone>` classes.
+  Enum values use `StatusTag` (`enumName` + value, so `CANCELLED` can differ per enum), other
+  labels `ToneTag`, alert codes `AlertTags`. Plain AntD `Tag` colours (`color="green"`) and hex
+  values are not used in feature code.
+
+  | Tone      | Tokens (text / bg / border)                        | Meaning                                 |
+  | --------- | -------------------------------------------------- | --------------------------------------- |
+  | `success` | `success` / `-bg` / `-border`                      | Done, active, paid                      |
+  | `info`    | `info` / `-bg` / `-border`                         | In progress, informational              |
+  | `warning` | `warning` / `-bg` / `-border`                      | Needs attention soon, partial           |
+  | `error`   | `error` / `-bg` / `-border`                        | Overdue, blocked, terminated            |
+  | `neutral` | `neutral` / `-bg` / `-border` (grey tag)           | Ended, sold, cancelled, archived, other |
+  | `accent`  | `primary-text` / `primary-soft` / `primary-border` | Ours: leased cars, owned cycles         |
+  | `license` | `license` / `-bg` / `-border`                      | Taxi-licence entities only              |
+  | `purple`  | `purple` / `-bg` / `-border`                       | Consignment, returned cars, paid by us  |
+
+  Purple is `#6B3FA0` on `#F4EEFB` (6.49:1) in light and `#B79CF2` on its 14 % tint (6.05:1)
+  in dark; never for money. Status mapping (owner-confirmed): vehicles IN_STOCK info,
+  RESERVED warning, LEASED accent, RETURNED purple, SOLD / SCRAPPED / EXTERNAL neutral; leases
+  and deals DRAFT neutral, ACTIVE / COMPLETED success, PENDING warning, TERMINATED error,
+  ENDED / CANCELLED neutral; fines NEW warning, REASSIGN_SUBMITTED info, REASSIGNED success,
+  PAID_BY_US purple; cycles OWNED accent, CONSIGNED purple; payments IN success, OUT warning.
+
 - **Tables**: header on `bg-sunken`, `text-secondary` at weight 500, no vertical split lines;
   hairline row dividers; hover `grey-50`; selected row `yellow-50` (hover `yellow-100`).
   Numbers end-aligned and tabular; plates and amounts in LTR isolates; actions at the end of the
@@ -296,6 +318,29 @@ float.
 - **Radius**: 4 (xs), 6 (tags, small controls), **8 (default)**, 12 (cards, modals), 16, pill.
 - **Spacing**: 4 px grid (`--rm-space-1` = 4 px … `--rm-space-16` = 64 px). Card padding 20 to
   24 px; gaps between cards 16 px.
+- **Detail pages** (`DetailPageLayout`): breadcrumbs, then the title row (record name as
+  `<h2>`, status / type / alert tags at its end, header actions on the trailing side), an
+  optional read-only banner, the lifecycle stepper, the key facts, then tabs synced with
+  `?tab=` (hidden tabs unmount). Loading shows the one `DetailSkeleton`; errors show
+  `LoadError`; both keep the breadcrumbs so the way back is always there.
+- **Breadcrumbs** (`PageBreadcrumbs`): Home icon (with a hidden label), section list, record or
+  "New …"; the current page is plain text with `aria-current="page"`. They replace every "back
+  to the list" link, also on `/new` pages.
+- **Header actions** (`ActionBar`): buttons from `md` up, one "More" menu on phones; at most one
+  primary action (the thing to do next), destructive ones red.
+- **Key facts** (`FactChips`): a definition list under the title, each fact an icon tile on
+  `primary-soft`, a `text-secondary` label and the value; two per row on phones.
+- **Label / value grids** (AntD `Descriptions`): columns from `descriptionColumns.ts` only:
+  `DESCRIPTION_COLUMNS` (1 / 2 / 3 at xs / sm / lg), `_NARROW` (1 / 2, half-width cards and
+  dialogs), `_SINGLE` (money breakdowns and drawers).
+- **Unsaved changes**: full-page forms use `useUnsavedChangesGuard` (in-app navigation, tab
+  close or reload, and the form's own Cancel ask "Discard unsaved changes?"); dialogs pass
+  `dirty` to `FormDialog`, which asks before closing. The prompt is `ConfirmDialog` with a red
+  "Discard" and a default "Keep editing". A successful save never asks.
+- **Dates**: pickers show `DD/MM/YYYY` (date-time `DD/MM/YYYY HH:mm`, 24 h) and accept typed or
+  pasted `D/M/YYYY`, `DD.MM.YYYY`, `D.M.YYYY`, `DD-MM-YYYY`, `DDMMYYYY` and `YYYY-MM-DD`
+  (`DATE_INPUT_FORMATS` in `shared/lib/dates.ts`). Digits stay Latin in every language.
+- **Theme switch**: one control, the sun / moon button in the top bar.
 - **Words**: short and concrete ("Record payment", "Driver balance"), numbers first, the same
   term for the same thing in all three languages.
 

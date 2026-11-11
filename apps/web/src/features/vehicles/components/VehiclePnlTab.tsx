@@ -10,6 +10,7 @@ import { Money } from '../../../shared/ui/Money';
 import { ProfitText } from '../../../shared/ui/ProfitText';
 import { StatusTag } from '../../../shared/ui/StatusTag';
 import { ToneTag } from '../../../shared/ui/ToneTag';
+import { DESCRIPTION_COLUMNS_SINGLE } from '../../../shared/ui/descriptionColumns';
 import { fetchVehiclePnl } from '../api';
 import { vehicleKeys } from '../queryKeys';
 import type { CyclePnl, VehiclePnl } from '../types';
@@ -112,7 +113,7 @@ export function CyclePnlCard({ cycle }: { cycle: CyclePnl }) {
           <Typography.Text strong>{t('vehicles.pnl.revenue')}</Typography.Text>
           <Descriptions
             size="small"
-            column={1}
+            column={DESCRIPTION_COLUMNS_SINGLE}
             data-testid="pnl-revenue"
             items={[
               ...line('sale', t('vehicles.pnl.sale'), cycle.revenue.sale, consigned),
@@ -140,7 +141,7 @@ export function CyclePnlCard({ cycle }: { cycle: CyclePnl }) {
           <Typography.Text strong>{t('vehicles.pnl.costs')}</Typography.Text>
           <Descriptions
             size="small"
-            column={1}
+            column={DESCRIPTION_COLUMNS_SINGLE}
             data-testid="pnl-costs"
             items={[
               ...line('purchase', t('vehicles.pnl.purchase'), cycle.costs.purchase, consigned),

@@ -1,8 +1,11 @@
 import { DatePicker } from 'antd';
 import { useId, type ReactNode } from 'react';
 import { useController, type Control, type FieldPath, type FieldValues } from 'react-hook-form';
-import { dayjsToIso, DISPLAY_DATE_FORMAT, isoToDayjs } from '../lib/dates';
+import { DATE_INPUT_FORMATS, dayjsToIso, isoToDayjs } from '../lib/dates';
 import { FieldShell } from './FieldShell';
+
+/** Shown as the first, accepted typed or pasted in any of them. */
+const FORMATS = [...DATE_INPUT_FORMATS];
 
 export interface FormDateFieldProps<T extends FieldValues, TOut = T> {
   control: Control<T, unknown, TOut>;
@@ -35,7 +38,7 @@ export function FormDateField<T extends FieldValues, TOut = T>({
         onBlur={field.onBlur}
         disabled={field.disabled}
         status={fieldState.error ? 'error' : undefined}
-        format={DISPLAY_DATE_FORMAT}
+        format={FORMATS}
         allowClear={allowClear}
         className="rm-tabular rm-date-input"
       />

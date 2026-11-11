@@ -8,6 +8,71 @@ with trade-ins, consignment and VAT on the margin, documents with expiry reminde
 leads, and reports — in Hebrew, Arabic and English with right-to-left support and light/dark
 themes.
 
+## How the project is built
+
+A TypeScript monorepo (npm workspaces) with one backend, one frontend, one database and two shared packages.
+
+| Part              | What it is                                                                                       | Where                          |
+| ----------------- | ------------------------------------------------------------------------------------------------ | ------------------------------ |
+| **Backend (BE)**  | REST API in **NestJS 11** on Node.js, TypeScript                                                 | `apps/api`                     |
+| **Frontend (FE)** | Single-page web app in **React 19** + **Vite 8** with **Ant Design 6**, installable as a PWA     | `apps/web`                     |
+| **Database (DB)** | **PostgreSQL 17** (Docker), accessed through the **Prisma 6** ORM with SQL migrations            | `apps/api/prisma`              |
+| **Shared code**   | Validation schemas, enums, money/date/plate helpers and the translations, used by both BE and FE | `packages/shared`              |
+| **Brand**         | Logo files, icons, colour and type tokens, style guide                                           | `packages/brand`, `docs/brand` |
+
+### Backend (`apps/api`)
+
+- **Framework**: NestJS 11, one module per business area: auth, users, settings, contacts, vehicles, documents,
+  taxi-licenses, drivers, leases, ledger, fines, deals, dashboard, reminders, reports.
+- **API style**: REST under `/api`, JSON. Interactive docs (Swagger) at `/api/docs`.
+- **Validation**: zod schemas from `packages/shared` (via `nestjs-zod`), so the FE and BE check the same rules.
+- **Auth**: email + password hashed with argon2; short-lived JWT access token and rotating refresh token, both in
+  httpOnly cookies; role field on users (single admin today).
+- **Money**: `Decimal(12,2)` in the database, `decimal.js` for arithmetic, shekels only.
+- **Files**: uploads stored on disk under `UPLOAD_DIR`, type checked by file signature, image thumbnails with `sharp`.
+- **Scheduled jobs**: nightly rent billing (`@nestjs/schedule`, Asia/Jerusalem time).
+- **Exports**: Excel and CSV reports with `exceljs`.
+- **Audit log**: every create, update and delete on core records is recorded.
+- **Tests**: Jest unit tests and Jest + supertest end-to-end tests against a separate test database.
+
+### Frontend (`apps/web`)
+
+- **Framework**: React 19 with React Router 7, built and served by Vite 8.
+- **UI library**: Ant Design 6, themed from the brand tokens; light and dark mode.
+- **Languages**: Hebrew (default), Arabic and English with `react-i18next`; the layout flips between right-to-left
+  and left-to-right at runtime.
+- **Data**: TanStack Query for server data; the app talks to the API through `/api` with cookies.
+- **Forms**: `react-hook-form` with the shared zod schemas.
+- **Charts**: Recharts. **Dates**: dayjs.
+- **PWA**: `vite-plugin-pwa`, so it can be installed on a phone home screen.
+- **Tests**: Vitest + Testing Library for components, Playwright for browser flows.
+
+### Database
+
+- PostgreSQL 17 running in Docker (`docker-compose.yml`), data kept in a Docker volume.
+- Schema and migrations in `apps/api/prisma` (Prisma 6). Two SQL views give driver balances and overdue ageing.
+- Demo data comes from `npm run db:seed`.
+- Main tables: users, contacts, drivers, vehicles, inventory cycles, vehicle expenses, insurance policies,
+  odometer logs, taxi licences, lease contracts and segments, ledger entries and payment allocations, traffic
+  fines, deals and deal payments, documents, reminders, settings, audit log.
+
+### Shared packages
+
+- `packages/shared`: zod schemas and enums that mirror the database, helpers (`formatMoney`, VAT on margin, rent
+  proration, working days, plate formatting, right-to-left text isolation) and the three translation files in
+  `src/locales/{he,ar,en}`.
+- `packages/brand`: logo (taxi roof-sign mark) in Hebrew, Arabic and English lockups, app icons, `tokens.css` /
+  `tokens.ts` generated from one source.
+
+### Tooling and hosting
+
+- **Language**: TypeScript everywhere; ESLint + Prettier.
+- **Local development**: Docker for PostgreSQL, `npm run dev` starts API (port 3000) and web (port 5173); the web
+  dev server proxies `/api` to the API.
+- **Planned production setup**: one small Linux server running Docker Compose (PostgreSQL, API, nginx serving
+  the built web app, Caddy for HTTPS) with nightly database and file backups. Not deployed yet.
+- **Planned**: PDF generation of contracts and forms with headless Chromium (Playwright) on the server.
+
 ## Prerequisites
 
 - Node.js 22 or newer (developed on Node 25) and npm 10+ (npm workspaces; no pnpm/yarn needed)
@@ -65,3 +130,5 @@ Root scripts load `.env` (via `dotenv-cli`) before calling Prisma or starting th
 
 See [`docs/`](docs/) — Israeli market & regulation research, brand style guide, deployment and
 restore procedures, and user guides.
+
+- [`docs/plans/`](docs/plans/) — design and implementation plans

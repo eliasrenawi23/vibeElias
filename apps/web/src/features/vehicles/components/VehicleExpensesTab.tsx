@@ -1,7 +1,7 @@
 import { DeleteOutlined, EditOutlined, PlusOutlined, UserSwitchOutlined } from '@ant-design/icons';
 import { ExpenseCategory, PaidBy } from '@renawi/shared';
 import { keepPreviousData, useMutation, useQuery } from '@tanstack/react-query';
-import { App, Button, Card, Flex, Statistic, Tag, Tooltip, Typography } from 'antd';
+import { App, Button, Card, Flex, Statistic, Tooltip, Typography } from 'antd';
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSearchParams } from 'react-router';
@@ -126,7 +126,7 @@ export function VehicleExpensesTab({
       render: (e) =>
         e.vatIncluded || e.vatReclaimable ? (
           <Flex gap={4} wrap>
-            {e.vatIncluded && <Tag>{t('vehicles.expenses.vatIncludedShort')}</Tag>}
+            {e.vatIncluded && <ToneTag tone="neutral">{t('vehicles.expenses.vatIncludedShort')}</ToneTag>}
             {e.vatReclaimable && (
               <ToneTag tone="success">{t('vehicles.expenses.vatReclaimableShort')}</ToneTag>
             )}

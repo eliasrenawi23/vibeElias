@@ -158,22 +158,26 @@ export function DataTable<T extends object>({
             pageSize={pageSize}
             total={total}
             simple
-            onChange={(p, ps) => onChange?.({ page: ps !== pageSize ? 1 : p, pageSize: ps, sort, order })}
+            onChange={(p, ps) =>
+              onChange?.({ page: ps !== pageSize ? 1 : p, pageSize: ps, sort, order })
+            }
           />
         )}
       </div>
     );
   }
 
+  // Sorting is server-side: a plain table (no `onChange`) shows no sort controls.
+  const sortable = (c: DataTableColumn<T>) => Boolean(onChange && c.sortKey);
   const antdColumns: TableProps<T>['columns'] = columns.map((c) => ({
     key: c.key,
     title: c.title,
     width: c.width,
     align: c.align,
     ellipsis: c.ellipsis,
-    sorter: c.sortKey ? true : undefined,
-    sortOrder: c.sortKey ? toAntdOrder(c as DataTableColumn<unknown>, sort, order) : undefined,
-    sortDirections: c.sortKey ? ['ascend', 'descend', 'ascend'] : undefined,
+    sorter: sortable(c) ? true : undefined,
+    sortOrder: sortable(c) ? toAntdOrder(c as DataTableColumn<unknown>, sort, order) : undefined,
+    sortDirections: sortable(c) ? ['ascend', 'descend', 'ascend'] : undefined,
     render: (_: unknown, row: T) => c.render(row),
   }));
 
@@ -192,9 +196,7 @@ export function DataTable<T extends object>({
       locale={{ emptyText: loading ? ' ' : emptyNode }}
       summary={summary}
       rowClassName={(row) =>
-        [onRowClick ? 'rm-row-clickable' : undefined, rowClassName?.(row)]
-          .filter(Boolean)
-          .join(' ')
+        [onRowClick ? 'rm-row-clickable' : undefined, rowClassName?.(row)].filter(Boolean).join(' ')
       }
       onRow={
         onRowClick

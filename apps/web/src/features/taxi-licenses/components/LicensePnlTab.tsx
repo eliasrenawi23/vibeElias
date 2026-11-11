@@ -1,7 +1,9 @@
 import { sumMoney } from '@renawi/shared';
 import { useQuery } from '@tanstack/react-query';
-import { Card, Col, Flex, Row, Skeleton, Table, Typography } from 'antd';
+import { Card, Col, Flex, Row, Typography } from 'antd';
 import { useTranslation } from 'react-i18next';
+import { DataTable } from '../../../shared/ui/DataTable';
+import { DetailSkeleton } from '../../../shared/ui/DetailSkeleton';
 import { EmptyState } from '../../../shared/ui/EmptyState';
 import { LoadError } from '../../../shared/ui/LoadError';
 import { Money } from '../../../shared/ui/Money';
@@ -22,11 +24,7 @@ export function LicensePnlTab({ licenseId }: { licenseId: string }) {
     queryFn: ({ signal }) => fetchTaxiLicensePnl(licenseId, signal),
   });
   if (query.isPending) {
-    return (
-      <Card variant="borderless">
-        <Skeleton active paragraph={{ rows: 5 }} />
-      </Card>
-    );
+    return <DetailSkeleton rows={5} />;
   }
   if (query.isError) return <LoadError error={query.error} onRetry={() => void query.refetch()} />;
   const pnl = query.data;
@@ -73,36 +71,36 @@ export function LicensePnlTab({ licenseId }: { licenseId: string }) {
         {years.length === 0 ? (
           <EmptyState compact description={t('taxiLicenses.pnl.empty')} />
         ) : (
-          <Table<YearRow>
+          <DataTable<YearRow>
             size="small"
+            label={t('taxiLicenses.pnl.byYear')}
             rowKey={(r) => String(r.year)}
-            pagination={false}
-            dataSource={years}
+            data={years}
             data-testid="license-pnl-years"
-            scroll={{ x: 'max-content' }}
             columns={[
               {
                 key: 'year',
                 title: t('taxiLicenses.pnl.year'),
-                render: (_: unknown, r: YearRow) => <YearText value={r.year} />,
+                mobile: 'title',
+                render: (r) => <YearText value={r.year} />,
               },
               {
                 key: 'rent',
                 title: t('taxiLicenses.pnl.rentIncome'),
                 align: 'end',
-                render: (_: unknown, r: YearRow) => <Money amount={r.rentIncome} />,
+                render: (r) => <Money amount={r.rentIncome} />,
               },
               {
                 key: 'other',
                 title: t('taxiLicenses.pnl.otherIncome'),
                 align: 'end',
-                render: (_: unknown, r: YearRow) => <Money amount={r.otherIncome} />,
+                render: (r) => <Money amount={r.otherIncome} />,
               },
               {
                 key: 'total',
                 title: t('taxiLicenses.pnl.total'),
                 align: 'end',
-                render: (_: unknown, r: YearRow) => (
+                render: (r) => (
                   <Typography.Text strong>
                     <Money amount={sumMoney([r.rentIncome, r.otherIncome])} />
                   </Typography.Text>

@@ -11,7 +11,6 @@ import {
   Flex,
   Form,
   Select,
-  Tag,
   Typography,
 } from 'antd';
 import { useState } from 'react';
@@ -28,6 +27,7 @@ import { Money } from '../../../shared/ui/Money';
 import { PlateNo } from '../../../shared/ui/PlateNo';
 import { StatusTag } from '../../../shared/ui/StatusTag';
 import { ToneTag } from '../../../shared/ui/ToneTag';
+import { DESCRIPTION_COLUMNS_SINGLE } from '../../../shared/ui/descriptionColumns';
 import { DriverPicker } from '../../drivers/components/DriverPicker';
 import { rebillFine, updateFine, type FineUpdateBody } from '../api';
 import type { TrafficFine } from '../types';
@@ -92,7 +92,7 @@ export function FineDrawer({ fine, onClose, onSaved }: FineDrawerProps) {
         {error && <Alert type="error" showIcon title={errorMessage(error)} />}
         <Descriptions
           size="small"
-          column={1}
+          column={DESCRIPTION_COLUMNS_SINGLE}
           bordered
           items={[
             {
@@ -174,7 +174,11 @@ export function FineDrawer({ fine, onClose, onSaved }: FineDrawerProps) {
             {
               key: 'rebilled',
               label: t('fines.fields.rebilled'),
-              children: rebilled ? <ToneTag tone="success">{t('fines.rebilledTag')}</ToneTag> : empty,
+              children: rebilled ? (
+                <ToneTag tone="success">{t('fines.rebilledTag')}</ToneTag>
+              ) : (
+                empty
+              ),
             },
             {
               key: 'notes',

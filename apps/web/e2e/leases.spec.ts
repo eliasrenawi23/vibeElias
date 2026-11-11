@@ -847,10 +847,10 @@ test('lease lifecycle: payment, wizard, activation, end, fine, Arabic', async ({
   await expect(page).toHaveURL(/\/leases\/lc_new$/);
   await expect(page.getByRole('heading', { level: 1 })).toHaveText('Lease contract');
   await expect(page.getByRole('heading', { level: 2 })).toContainText('#1002');
-  const tags = page.getByTestId('lease-tags');
-  await expect(tags).toContainText('Active');
-  await expect(tags.getByTestId('license-tag')).toHaveText('2002-77');
-  await expect(tags.locator('bdi.rm-plate')).toHaveText('234-56-726');
+  const facts = page.getByTestId('lease-facts');
+  await expect(page.getByTestId('lease-tags')).toContainText('Active');
+  await expect(facts.getByTestId('license-tag')).toHaveText('2002-77');
+  await expect(facts.locator('bdi.rm-plate')).toHaveText('234-56-726');
   await expect(page.getByTestId('lease-responsibilities')).toContainText('Us');
   await expect(page.getByTestId('checklist-view-handover')).toContainText('120,500');
   await expect(page.getByTestId('lease-action-activate')).toHaveCount(0);

@@ -83,10 +83,14 @@ export function FinesPage() {
         <FinesTable
           data={list.data?.items}
           loading={list.isFetching}
-          total={list.data?.total ?? 0}
-          page={page}
-          pageSize={pageSize}
-          onChange={setTableParams}
+          paging={{
+            total: list.data?.total ?? 0,
+            page,
+            pageSize,
+            sort,
+            order,
+            onChange: setTableParams,
+          }}
           onOpen={(f) => setOpenId(f.id)}
           empty={
             query.status ? (

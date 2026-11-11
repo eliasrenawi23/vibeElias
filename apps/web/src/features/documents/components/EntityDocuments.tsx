@@ -10,7 +10,7 @@ import {
 } from '@ant-design/icons';
 import { DEFAULT_MAX_UPLOAD_MB, type DocKind } from '@renawi/shared';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { App, Button, Card, Col, Flex, Grid, Image, Row, Skeleton, Tag, Tooltip, Typography, Upload } from 'antd';
+import { App, Button, Card, Col, Flex, Grid, Image, Row, Skeleton, Tooltip, Typography, Upload } from 'antd';
 import { useMemo, useRef, useState, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { AutoDir, isolateAuto } from '../../../shared/lib/bidi';
@@ -20,6 +20,7 @@ import { ConfirmDialog } from '../../../shared/ui/ConfirmDialog';
 import { EmptyState } from '../../../shared/ui/EmptyState';
 import { ExpiryBadge } from '../../../shared/ui/ExpiryBadge';
 import { LoadError } from '../../../shared/ui/LoadError';
+import { ToneTag } from '../../../shared/ui/ToneTag';
 import {
   checkUpload,
   deleteDocument,
@@ -233,7 +234,7 @@ export function EntityDocuments({ owner, defaultKind, kinds, title, onChange }: 
       >
         <Flex vertical gap={4}>
           <Flex gap={4} wrap align="center">
-            <Tag className="rm-doc-kind">{enumLabel('DocKind', doc.kind)}</Tag>
+            <ToneTag tone="neutral" className="rm-doc-kind">{enumLabel('DocKind', doc.kind)}</ToneTag>
             {doc.expiresAt && <ExpiryBadge value={doc.expiresAt} showValid />}
           </Flex>
           <Typography.Text className="rm-doc-name" ellipsis={{ tooltip: name }}>

@@ -44,7 +44,7 @@ export function VehicleFinesTab({ vehicleId }: { vehicleId: string }) {
           data={query.data?.items}
           loading={query.isFetching}
           onOpen={(f) => setOpenId(f.id)}
-          hideVehicle
+          hide={['vehicle']}
           empty={<EmptyState compact description={t('vehicles.noFines')} />}
         />
       )}

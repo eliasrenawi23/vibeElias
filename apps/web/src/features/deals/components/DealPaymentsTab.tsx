@@ -1,6 +1,6 @@
 import { DeleteOutlined, LockOutlined, PlusOutlined } from '@ant-design/icons';
 import { useMutation } from '@tanstack/react-query';
-import { App, Button, Col, Flex, Row, Tag, Tooltip, Typography } from 'antd';
+import { App, Button, Col, Flex, Row, Tooltip, Typography } from 'antd';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { AutoDir } from '../../../shared/lib/bidi';
@@ -80,9 +80,9 @@ export function DealPaymentsTab({ deal, canAdd, onAdd, onChanged }: DealPayments
           {enumLabel('PaymentMethod', p.method)}
           {isSystemPayment(p) && (
             <Tooltip title={t('deals.payments.systemHint')}>
-              <Tag icon={<LockOutlined />} data-testid="payment-system">
+              <ToneTag tone="neutral" icon={<LockOutlined />} data-testid="payment-system">
                 {t('deals.payments.system')}
-              </Tag>
+              </ToneTag>
             </Tooltip>
           )}
         </Flex>

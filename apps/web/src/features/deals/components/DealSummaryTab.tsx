@@ -1,4 +1,4 @@
-import { Card, Col, Descriptions, Flex, Row, Tag, Typography } from 'antd';
+import { Card, Col, Descriptions, Flex, Row, Typography } from 'antd';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
 import { isolateLtr } from '../../../shared/lib/bidi';
@@ -8,6 +8,8 @@ import { formatCount } from '../../../shared/lib/money';
 import { DateText } from '../../../shared/ui/DateText';
 import { Money } from '../../../shared/ui/Money';
 import { StatusTag } from '../../../shared/ui/StatusTag';
+import { DESCRIPTION_COLUMNS_SINGLE } from '../../../shared/ui/descriptionColumns';
+import { ToneTag } from '../../../shared/ui/ToneTag';
 import { ContactLink } from '../../contacts/components/ContactLink';
 import { cashDue, commissionPreview, dealPath } from '../lib/dealRules';
 import type { DealDetail } from '../types';
@@ -36,7 +38,7 @@ export function DealSummaryTab({ deal }: { deal: DealDetail }) {
         <Card variant="borderless" title={t('deals.summary.price')} data-testid="deal-price-card">
           <Descriptions
             size="small"
-            column={1}
+            column={DESCRIPTION_COLUMNS_SINGLE}
             items={[
               {
                 key: 'price',
@@ -97,12 +99,12 @@ export function DealSummaryTab({ deal }: { deal: DealDetail }) {
         <Card variant="borderless" title={t('deals.summary.vat')} data-testid="deal-vat-card">
           <Descriptions
             size="small"
-            column={1}
+            column={DESCRIPTION_COLUMNS_SINGLE}
             items={[
               {
                 key: 'mode',
                 label: t('deals.fields.vatMode'),
-                children: <Tag>{enumLabel('VatMode', vat?.mode ?? deal.vatMode)}</Tag>,
+                children: <ToneTag tone="neutral">{enumLabel('VatMode', vat?.mode ?? deal.vatMode)}</ToneTag>,
               },
               {
                 key: 'rate',
@@ -144,7 +146,7 @@ export function DealSummaryTab({ deal }: { deal: DealDetail }) {
           >
             <Descriptions
               size="small"
-              column={1}
+              column={DESCRIPTION_COLUMNS_SINGLE}
               items={[
                 {
                   key: 'deal',
@@ -200,7 +202,7 @@ export function DealSummaryTab({ deal }: { deal: DealDetail }) {
           >
             <Descriptions
               size="small"
-              column={1}
+              column={DESCRIPTION_COLUMNS_SINGLE}
               items={[
                 {
                   key: 'consignor',
@@ -256,7 +258,7 @@ export function DealSummaryTab({ deal }: { deal: DealDetail }) {
         <Card variant="borderless" title={t('deals.summary.dates')} data-testid="deal-dates-card">
           <Descriptions
             size="small"
-            column={1}
+            column={DESCRIPTION_COLUMNS_SINGLE}
             items={[
               {
                 key: 'date',

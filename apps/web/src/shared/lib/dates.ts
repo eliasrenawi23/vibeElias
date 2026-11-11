@@ -10,11 +10,14 @@ import {
 import dayjs, { type Dayjs } from 'dayjs';
 import 'dayjs/locale/ar';
 import 'dayjs/locale/he';
+import customParseFormat from 'dayjs/plugin/customParseFormat';
 import timezone from 'dayjs/plugin/timezone';
 import utc from 'dayjs/plugin/utc';
 
 dayjs.extend(utc);
 dayjs.extend(timezone);
+// The AntD pickers extend it too; `parseDateInput` needs it on its own (unit tests).
+dayjs.extend(customParseFormat);
 
 /**
  * Calendar dates travel as `YYYY-MM-DD` strings; the UI converts to dayjs only for pickers.
@@ -26,6 +29,21 @@ export const ISO_DATE_FORMAT = 'YYYY-MM-DD';
 
 /** Display format for date pickers (Israeli day-first order). */
 export const DISPLAY_DATE_FORMAT = 'DD/MM/YYYY';
+
+/**
+ * What a date picker accepts when a date is typed or pasted: day-first with `/`, `.` or `-`,
+ * with or without leading zeros, eight digits in a row, or ISO. The first entry is the display
+ * format (AntD pickers show `format[0]` and try each entry, strictly, on typed text).
+ */
+export const DATE_INPUT_FORMATS = [
+  DISPLAY_DATE_FORMAT,
+  'D/M/YYYY',
+  'DD.MM.YYYY',
+  'D.M.YYYY',
+  'DD-MM-YYYY',
+  'DDMMYYYY',
+  ISO_DATE_FORMAT,
+] as const satisfies readonly string[];
 
 const DAYJS_LOCALES: Readonly<Record<Locale, string>> = { he: 'he', ar: 'ar', en: 'en' };
 
@@ -97,7 +115,26 @@ export function formatInstant(iso: string, language: string | undefined): string
 }
 
 /** Display format for date-time pickers. */
-export const DISPLAY_DATE_TIME_FORMAT = 'DD/MM/YYYY HH:mm';
+export const DISPLAY_DATE_TIME_FORMAT = `${DISPLAY_DATE_FORMAT} HH:mm`;
+
+/** `DATE_INPUT_FORMATS` with a 24-hour time (the date-time picker; first one is the display). */
+export const DATE_TIME_INPUT_FORMATS: readonly string[] = DATE_INPUT_FORMATS.map(
+  (format) => `${format} HH:mm`,
+);
+
+/**
+ * Typed or pasted text to `YYYY-MM-DD` the way the pickers read it: each format of
+ * `DATE_INPUT_FORMATS` in turn, strictly (so `31/02/2026` is no date). Null when none fits.
+ */
+export function parseDateInput(text: string): string | null {
+  const value = text.trim();
+  if (!value) return null;
+  for (const format of DATE_INPUT_FORMATS) {
+    const parsed = dayjs(value, format, true);
+    if (parsed.isValid()) return parsed.format(ISO_DATE_FORMAT);
+  }
+  return null;
+}
 
 /**
  * A date-time picked in the UI (wall-clock time in the business time zone) to an ISO instant

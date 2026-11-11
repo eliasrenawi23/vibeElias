@@ -3,10 +3,13 @@ import { useId, type ReactNode } from 'react';
 import { useController, type Control, type FieldPath, type FieldValues } from 'react-hook-form';
 import {
   businessWallTimeToIso,
-  DISPLAY_DATE_TIME_FORMAT,
+  DATE_TIME_INPUT_FORMATS,
   isoToBusinessWallTime,
 } from '../lib/dates';
 import { FieldShell } from './FieldShell';
+
+/** Shown as the first, accepted typed or pasted in any of them. */
+const FORMATS = [...DATE_TIME_INPUT_FORMATS];
 
 export interface FormDateTimeFieldProps<T extends FieldValues, TOut = T> {
   control: Control<T, unknown, TOut>;
@@ -44,7 +47,7 @@ export function FormDateTimeField<T extends FieldValues, TOut = T>({
         onBlur={field.onBlur}
         disabled={field.disabled}
         status={fieldState.error ? 'error' : undefined}
-        format={DISPLAY_DATE_TIME_FORMAT}
+        format={FORMATS}
         allowClear={allowClear}
         className="rm-tabular rm-date-input"
       />

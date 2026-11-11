@@ -396,7 +396,7 @@ test('vehicle file: expense, odometer, documents, new vehicle, Arabic plate', as
   ).toBe(true);
 
   // New vehicle: plate formatted while typing, taxi hint, POST with canonical digits.
-  await page.getByRole('link', { name: 'Back to the list' }).click();
+  await page.getByTestId('breadcrumbs').getByRole('link', { name: 'Vehicles' }).click();
   await page.getByRole('button', { name: 'New vehicle' }).click();
   await expect(page).toHaveURL(/\/vehicles\/new$/);
   await expect(page.getByRole('heading', { level: 1 })).toHaveText('New vehicle');
@@ -416,6 +416,8 @@ test('vehicle file: expense, odometer, documents, new vehicle, Arabic plate', as
   await page.getByTestId('vehicle-save').click();
   await expect(page).toHaveURL(/\/vehicles\/veh_new$/);
   await expect(page.getByText('Vehicle created')).toBeVisible();
+  // The vehicle page is lazy-loaded: let it replace the form before using the top bar.
+  await expect(page.getByTestId('vehicle-detail')).toBeVisible();
   expect(lastBody('POST', '/api/vehicles')).toMatchObject({
     plateNo: '12345625',
     make: 'Hyundai',
@@ -431,10 +433,13 @@ test('vehicle file: expense, odometer, documents, new vehicle, Arabic plate', as
   });
 
   // Arabic: right-to-left list, plate digits still in reading order (not mirrored).
-  await page.getByTestId('lang-menu').click();
-  await page.getByRole('menuitem', { name: 'العربية' }).click();
-  await expect(page.locator('html')).toHaveAttribute('dir', 'rtl');
-  await page.getByRole('link', { name: 'العودة إلى القائمة' }).click();
+  // Retried as a whole: a click during the dropdown's opening animation can miss the item.
+  await expect(async () => {
+    await page.getByTestId('lang-menu').click();
+    await page.getByRole('menuitem', { name: 'العربية' }).click({ timeout: 2000 });
+    await expect(page.locator('html')).toHaveAttribute('dir', 'rtl', { timeout: 1000 });
+  }).toPass({ timeout: 15_000 });
+  await page.getByTestId('breadcrumbs').getByRole('link', { name: 'المركبات' }).click();
   await expect(page).toHaveURL(/\/vehicles$/);
   const plates = page.getByTestId('vehicles-table').locator('bdi.rm-plate');
   await expect(plates).toHaveText(['123-45-678', '123-45-625']);
