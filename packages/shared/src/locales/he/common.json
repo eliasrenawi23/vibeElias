@@ -195,7 +195,8 @@
     "dealNotCancellable": "לא ניתן עוד לבטל את העסקה",
     "dealHasPayments": "יש למחוק את תשלומי העסקה לפני ביטולה",
     "systemPayment": "תשלומי טרייד-אין נוצרים על ידי המערכת ולא ניתן למחוק אותם",
-    "noDriverMatched": "אף נהג לא החזיק ברכב בתאריך זה; בחרו נהג"
+    "noDriverMatched": "אף נהג לא החזיק ברכב בתאריך זה; בחרו נהג",
+    "pdfNotApplicable": "לא ניתן להפיק מסמך זה עבור רשומה זו"
   },
   "language": {
     "label": "שפה",
@@ -1916,5 +1917,29 @@
       "reassignDeadline": "להסב עד",
       "rebilled": "חויב לנהג"
     }
+  },
+  "pdf": {
+    "templates": {
+      "leaseContract": "חוזה שכירות",
+      "handover": "פרוטוקול מסירה",
+      "return": "פרוטוקול החזרה",
+      "depositReceipt": "אישור פיקדון",
+      "paymentConfirmation": "אישור תשלום",
+      "saleAgreement": "הסכם מכירה",
+      "purchaseAgreement": "הסכם רכישה",
+      "consignmentAgreement": "הסכם מכירה בתיווך",
+      "disclosureForm": "טופס גילוי נאות"
+    },
+    "generate": "הפקת PDF",
+    "generateNamed": "הפקת {{name}} (PDF)",
+    "dialogTitle": "הפקת מסמך",
+    "template": "מסמך",
+    "language": "שפה",
+    "languageAuto": "שפת הלקוח",
+    "languageHelp": "שפת הלקוח היא השפה שנשמרה בכרטיס איש הקשר שלו (אחרת השפה שלך).",
+    "create": "הפקה",
+    "generated": "המסמך הופק ונשמר במסמכים",
+    "popupBlocked": "הדפדפן חסם את הלשונית החדשה: אפשר לפתוח את המסמך מלשונית המסמכים.",
+    "openDocument": "פתיחת המסמך"
   }
 }

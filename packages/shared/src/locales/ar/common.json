@@ -195,7 +195,8 @@
     "dealNotCancellable": "لم يعد بالإمكان إلغاء هذه الصفقة",
     "dealHasPayments": "احذف دفعات الصفقة قبل إلغائها",
     "systemPayment": "دفعات الاستبدال يُنشئها النظام ولا يمكن حذفها",
-    "noDriverMatched": "لم تكن السيارة مع أي سائق في ذلك التاريخ؛ اختر سائقًا"
+    "noDriverMatched": "لم تكن السيارة مع أي سائق في ذلك التاريخ؛ اختر سائقًا",
+    "pdfNotApplicable": "لا يمكن إصدار هذا المستند لهذا السجل"
   },
   "language": {
     "label": "اللغة",
@@ -1916,5 +1917,29 @@
       "reassignDeadline": "التحويل حتى",
       "rebilled": "حُمّلت على السائق"
     }
+  },
+  "pdf": {
+    "templates": {
+      "leaseContract": "عقد إيجار",
+      "handover": "محضر تسليم",
+      "return": "محضر إرجاع",
+      "depositReceipt": "تأكيد وديعة",
+      "paymentConfirmation": "تأكيد دفع",
+      "saleAgreement": "اتفاقية بيع",
+      "purchaseAgreement": "اتفاقية شراء",
+      "consignmentAgreement": "اتفاقية بيع بالوساطة",
+      "disclosureForm": "نموذج الإفصاح"
+    },
+    "generate": "إصدار PDF",
+    "generateNamed": "إصدار {{name}} (PDF)",
+    "dialogTitle": "إصدار مستند",
+    "template": "المستند",
+    "language": "اللغة",
+    "languageAuto": "لغة العميل",
+    "languageHelp": "لغة العميل هي اللغة المحفوظة في بطاقة جهة الاتصال الخاصة به (وإلا لغتك).",
+    "create": "إصدار",
+    "generated": "تم إصدار المستند وحفظه في المستندات",
+    "popupBlocked": "منع المتصفح فتح علامة تبويب جديدة: افتح المستند من تبويب المستندات.",
+    "openDocument": "فتح المستند"
   }
 }

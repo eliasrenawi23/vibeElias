@@ -195,7 +195,8 @@
     "dealNotCancellable": "This deal can no longer be cancelled",
     "dealHasPayments": "Delete the deal's payments before cancelling it",
     "systemPayment": "Trade-in payments are created by the system and cannot be deleted",
-    "noDriverMatched": "No driver had this car on that date; choose the driver"
+    "noDriverMatched": "No driver had this car on that date; choose the driver",
+    "pdfNotApplicable": "This document cannot be generated for this record"
   },
   "language": {
     "label": "Language",
@@ -1916,5 +1917,29 @@
       "reassignDeadline": "Reassign by",
       "rebilled": "Charged to driver"
     }
+  },
+  "pdf": {
+    "templates": {
+      "leaseContract": "Lease agreement",
+      "handover": "Handover report",
+      "return": "Return report",
+      "depositReceipt": "Deposit confirmation",
+      "paymentConfirmation": "Payment confirmation",
+      "saleAgreement": "Sale agreement",
+      "purchaseAgreement": "Purchase agreement",
+      "consignmentAgreement": "Consignment agreement",
+      "disclosureForm": "Disclosure form"
+    },
+    "generate": "Generate PDF",
+    "generateNamed": "Generate {{name}} (PDF)",
+    "dialogTitle": "Generate a document",
+    "template": "Document",
+    "language": "Language",
+    "languageAuto": "Customer's language",
+    "languageHelp": "The customer's language is the one saved on their contact card (else yours).",
+    "create": "Generate",
+    "generated": "Document generated and saved under Documents",
+    "popupBlocked": "The browser blocked the new tab: open the document from the Documents tab.",
+    "openDocument": "Open the document"
   }
 }
