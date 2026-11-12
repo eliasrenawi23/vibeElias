@@ -61,10 +61,30 @@ function faces(): FontFace[] {
     logger.warn('Rubik font not found (packages/brand/fonts); PDFs fall back to system fonts');
   }
   for (const weight of ['400', '700']) {
-    const he = fontsourceFile('@fontsource/noto-sans-hebrew', `noto-sans-hebrew-hebrew-${weight}-normal.woff2`);
-    if (he) out.push({ family: 'Noto Sans Hebrew', path: he, format: 'woff2', weight, unicodeRange: HEBREW_RANGE });
-    const ar = fontsourceFile('@fontsource/noto-sans-arabic', `noto-sans-arabic-arabic-${weight}-normal.woff2`);
-    if (ar) out.push({ family: 'Noto Sans Arabic', path: ar, format: 'woff2', weight, unicodeRange: ARABIC_RANGE });
+    const he = fontsourceFile(
+      '@fontsource/noto-sans-hebrew',
+      `noto-sans-hebrew-hebrew-${weight}-normal.woff2`,
+    );
+    if (he)
+      out.push({
+        family: 'Noto Sans Hebrew',
+        path: he,
+        format: 'woff2',
+        weight,
+        unicodeRange: HEBREW_RANGE,
+      });
+    const ar = fontsourceFile(
+      '@fontsource/noto-sans-arabic',
+      `noto-sans-arabic-arabic-${weight}-normal.woff2`,
+    );
+    if (ar)
+      out.push({
+        family: 'Noto Sans Arabic',
+        path: ar,
+        format: 'woff2',
+        weight,
+        unicodeRange: ARABIC_RANGE,
+      });
   }
   return out;
 }

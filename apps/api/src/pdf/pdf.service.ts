@@ -204,16 +204,25 @@ export class PdfService {
       case 'deposit-receipt': {
         const entry = await this.ledgerEntry(id);
         if (!entry) throw AppException.notFound();
-        return { build: (ctx) => buildDepositReceipt(entry.input, ctx), counterpartyLang: entry.lang };
+        return {
+          build: (ctx) => buildDepositReceipt(entry.input, ctx),
+          counterpartyLang: entry.lang,
+        };
       }
       case 'payment-confirmation': {
         const entry = await this.ledgerEntry(id);
         if (entry) {
-          return { build: (ctx) => buildLedgerPayment(entry.input, ctx), counterpartyLang: entry.lang };
+          return {
+            build: (ctx) => buildLedgerPayment(entry.input, ctx),
+            counterpartyLang: entry.lang,
+          };
         }
         const payment = await this.dealPayment(id);
         if (!payment) throw AppException.notFound();
-        return { build: (ctx) => buildDealPayment(payment.input, ctx), counterpartyLang: payment.lang };
+        return {
+          build: (ctx) => buildDealPayment(payment.input, ctx),
+          counterpartyLang: payment.lang,
+        };
       }
       case 'sale-agreement':
       case 'purchase-agreement':
@@ -279,7 +288,9 @@ export class PdfService {
         },
         segments: c.segments.map((s) => ({
           licenseNo: s.taxiLicense.licenseNo,
-          vehicle: s.vehicle ? { ...vehicleOf(s.vehicle), ours: s.vehicle.ownership === 'OWNED' } : null,
+          vehicle: s.vehicle
+            ? { ...vehicleOf(s.vehicle), ours: s.vehicle.ownership === 'OWNED' }
+            : null,
           monthlyRent: Number(s.monthlyRent),
           startDate: isoOf(s.startDate),
           endDate: isoOrNull(s.endDate),
@@ -299,7 +310,10 @@ export class PdfService {
         taxiLicense: { select: { licenseNo: true } },
         vehicle: { select: { plateNo: true } },
         segment: {
-          select: { taxiLicense: { select: { licenseNo: true } }, vehicle: { select: { plateNo: true } } },
+          select: {
+            taxiLicense: { select: { licenseNo: true } },
+            vehicle: { select: { plateNo: true } },
+          },
         },
       },
     });
@@ -400,7 +414,10 @@ export class PdfService {
         sellerIsVatBusiness: d.sellerIsVatBusiness,
         isTradeIn: d.isTradeIn,
         counterparty: personOf(d.counterparty),
-        vehicle: { ...vehicleOf(d.vehicle), dealerRegisteredAt: isoOrNull(d.vehicle.dealerRegisteredAt) },
+        vehicle: {
+          ...vehicleOf(d.vehicle),
+          dealerRegisteredAt: isoOrNull(d.vehicle.dealerRegisteredAt),
+        },
         payments: d.payments.map((p) => ({
           date: isoOf(p.date),
           direction: p.direction,

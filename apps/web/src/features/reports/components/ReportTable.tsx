@@ -114,7 +114,7 @@ export function ReportTable({ result, label, loading = false }: ReportTableProps
         summary={
           hasTotals && rows.length > 0
             ? () => (
-                <Table.Summary fixed="bottom">
+                <Table.Summary>
                   <Table.Summary.Row className="rm-report-totals" data-testid="report-totals">
                     {result.columns.map((column, i) => (
                       <Table.Summary.Cell

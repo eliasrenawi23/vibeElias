@@ -18,7 +18,9 @@ export function pdfLocales(): Readonly<Record<Locale, LocaleTree>> {
   if (!cache) {
     const out = {} as Record<Locale, LocaleTree>;
     for (const lang of LOCALES) {
-      out[lang] = JSON.parse(readFileSync(join(PDF_LOCALES_DIR, `${lang}.json`), 'utf8')) as LocaleTree;
+      out[lang] = JSON.parse(
+        readFileSync(join(PDF_LOCALES_DIR, `${lang}.json`), 'utf8'),
+      ) as LocaleTree;
     }
     cache = Object.freeze(out);
   }
@@ -56,7 +58,11 @@ export function fillPlaceholders(text: string, params: Readonly<Record<string, s
 }
 
 /** Plain-text translation with placeholders (document titles, file metadata). */
-export function pdfT(lang: Locale, key: string, params: Record<string, string | number> = {}): string {
+export function pdfT(
+  lang: Locale,
+  key: string,
+  params: Record<string, string | number> = {},
+): string {
   return fillPlaceholders(
     pdfText(lang, key),
     Object.fromEntries(Object.entries(params).map(([k, v]) => [k, String(v)])),

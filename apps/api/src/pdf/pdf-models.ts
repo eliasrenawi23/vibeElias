@@ -124,12 +124,7 @@ export interface PdfModel<T = unknown> extends PdfBase {
   owner: { key: DocumentOwnerKey; id: string };
 }
 
-function base(
-  template: PdfTemplate,
-  ctx: PdfContext,
-  title: string,
-  number: string,
-): PdfBase {
+function base(template: PdfTemplate, ctx: PdfContext, title: string, number: string): PdfBase {
   return {
     template,
     lang: ctx.lang,
@@ -204,7 +199,10 @@ function currentSegment(segments: readonly LeaseSegmentInput[]): LeaseSegmentInp
   return segments.find((s) => s.endDate === null) ?? segments[segments.length - 1];
 }
 
-export function buildLeaseContract(input: LeaseInput, ctx: PdfContext): PdfModel<LeaseContractData> {
+export function buildLeaseContract(
+  input: LeaseInput,
+  ctx: PdfContext,
+): PdfModel<LeaseContractData> {
   const segment = currentSegment(input.segments);
   if (!segment) notApplicable('lease has no segment');
   const carAndNumber = input.type === 'CAR_AND_NUMBER';
@@ -233,7 +231,9 @@ export function buildLeaseContract(input: LeaseInput, ctx: PdfContext): PdfModel
       vatRate: ctx.vatRate,
       paymentDay: input.paymentDay,
       deposit:
-        input.depositAmount > 0 ? { amount: round2(input.depositAmount), kind: input.depositKind } : null,
+        input.depositAmount > 0
+          ? { amount: round2(input.depositAmount), kind: input.depositKind }
+          : null,
       responsibilities: RESPONSIBILITY_KEYS.map((key) => ({
         key,
         party: input.responsibilities[key] ?? 'DRIVER',
@@ -287,7 +287,12 @@ export function buildChecklist(
   const template = variant === 'handover' ? 'handover' : 'return';
   const title = pdfT(ctx.lang, `titles.${template}`);
   return {
-    ...base(template, ctx, title, pdfDocumentNumber(variant === 'handover' ? 'HO' : 'RT', { no: input.contractNo })),
+    ...base(
+      template,
+      ctx,
+      title,
+      pdfDocumentNumber(variant === 'handover' ? 'HO' : 'RT', { no: input.contractNo }),
+    ),
     owner: { key: 'contractId', id: input.id },
     data: {
       variant,
@@ -342,7 +347,8 @@ export interface DealPaymentInput {
   vehicle: { plateNo: string; make: string; model: string; year: number };
 }
 
-export type ReceiptKind = 'depositIn' | 'depositOut' | 'payment' | 'dealPaymentIn' | 'dealPaymentOut';
+export type ReceiptKind =
+  'depositIn' | 'depositOut' | 'payment' | 'dealPaymentIn' | 'dealPaymentOut';
 
 export interface ReceiptData {
   kind: ReceiptKind;
@@ -361,24 +367,43 @@ export interface ReceiptData {
   vehicle: DealPaymentInput['vehicle'] | null;
 }
 
-export function buildDepositReceipt(input: LedgerReceiptInput, ctx: PdfContext): PdfModel<ReceiptData> {
+export function buildDepositReceipt(
+  input: LedgerReceiptInput,
+  ctx: PdfContext,
+): PdfModel<ReceiptData> {
   if (input.voided) notApplicable('voided entry');
   if (input.type !== 'DEPOSIT_IN' && input.type !== 'DEPOSIT_OUT') notApplicable('not a deposit');
   const kind: ReceiptKind = input.type === 'DEPOSIT_IN' ? 'depositIn' : 'depositOut';
-  const title = pdfT(ctx.lang, kind === 'depositIn' ? 'titles.deposit-receipt' : 'titles.deposit-return');
+  const title = pdfT(
+    ctx.lang,
+    kind === 'depositIn' ? 'titles.deposit-receipt' : 'titles.deposit-return',
+  );
   return {
-    ...base('deposit-receipt', ctx, title, pdfDocumentNumber('DR', { date: input.date, id: input.id })),
+    ...base(
+      'deposit-receipt',
+      ctx,
+      title,
+      pdfDocumentNumber('DR', { date: input.date, id: input.id }),
+    ),
     owner: { key: 'ledgerEntryId', id: input.id },
     data: ledgerReceiptData(kind, input),
   };
 }
 
-export function buildLedgerPayment(input: LedgerReceiptInput, ctx: PdfContext): PdfModel<ReceiptData> {
+export function buildLedgerPayment(
+  input: LedgerReceiptInput,
+  ctx: PdfContext,
+): PdfModel<ReceiptData> {
   if (input.voided) notApplicable('voided entry');
   if (input.type !== 'PAYMENT') notApplicable('not a payment');
   const title = pdfT(ctx.lang, 'titles.payment-confirmation');
   return {
-    ...base('payment-confirmation', ctx, title, pdfDocumentNumber('PC', { date: input.date, id: input.id })),
+    ...base(
+      'payment-confirmation',
+      ctx,
+      title,
+      pdfDocumentNumber('PC', { date: input.date, id: input.id }),
+    ),
     owner: { key: 'ledgerEntryId', id: input.id },
     data: ledgerReceiptData('payment', input),
   };
@@ -412,7 +437,12 @@ export function buildDealPayment(input: DealPaymentInput, ctx: PdfContext): PdfM
   const kind: ReceiptKind = input.direction === 'IN' ? 'dealPaymentIn' : 'dealPaymentOut';
   const title = pdfT(ctx.lang, 'titles.payment-confirmation');
   return {
-    ...base('payment-confirmation', ctx, title, pdfDocumentNumber('PC', { date: input.date, id: input.id })),
+    ...base(
+      'payment-confirmation',
+      ctx,
+      title,
+      pdfDocumentNumber('PC', { date: input.date, id: input.id }),
+    ),
     owner: { key: 'dealId', id: input.dealId },
     data: {
       kind,
@@ -604,7 +634,12 @@ export interface DisclosureData {
   vehicle: PdfVehicle;
   hands: number | null;
   /** Known prior uses; null = unknown (left for the dealer to tick). */
-  history: { taxi: boolean | null; leasing: boolean | null; rental: boolean | null; school: boolean | null };
+  history: {
+    taxi: boolean | null;
+    leasing: boolean | null;
+    rental: boolean | null;
+    school: boolean | null;
+  };
   km: number | null;
   price: number;
   signedOn: string | null;
@@ -623,7 +658,8 @@ export function buildDisclosure(input: DealInput, ctx: PdfContext): PdfModel<Dis
   };
   let registeredOwner: PdfPerson & { isDealer: boolean };
   if (consignment && input.consignor) registeredOwner = { ...input.consignor, isDealer: false };
-  else if (input.vehicle.dealerRegisteredAt || !input.previousOwner) registeredOwner = { ...dealer, isDealer: true };
+  else if (input.vehicle.dealerRegisteredAt || !input.previousOwner)
+    registeredOwner = { ...dealer, isDealer: true };
   else registeredOwner = { ...input.previousOwner, isDealer: false };
   const title = pdfT(ctx.lang, 'titles.disclosure-form');
   return {
@@ -638,7 +674,12 @@ export function buildDisclosure(input: DealInput, ctx: PdfContext): PdfModel<Dis
       previousOwner: consignment ? null : input.previousOwner,
       vehicle: input.vehicle,
       hands: input.vehicle.hand,
-      history: { taxi: input.vehicle.isTaxi ? true : null, leasing: null, rental: null, school: null },
+      history: {
+        taxi: input.vehicle.isTaxi ? true : null,
+        leasing: null,
+        rental: null,
+        school: null,
+      },
       km: input.vehicle.km,
       price: round2(input.price),
       signedOn: input.disclosureSignedAt ? input.disclosureSignedAt.slice(0, 10) : null,
@@ -676,12 +717,20 @@ export interface ConsignmentData {
   commissionValue: number | null;
 }
 
-export function buildConsignment(input: ConsignmentInput, ctx: PdfContext): PdfModel<ConsignmentData> {
+export function buildConsignment(
+  input: ConsignmentInput,
+  ctx: PdfContext,
+): PdfModel<ConsignmentData> {
   if (input.kind !== 'CONSIGNED') notApplicable('not a consignment cycle');
   if (!input.owner) notApplicable('consignment without an owner');
   const title = pdfT(ctx.lang, 'titles.consignment-agreement');
   return {
-    ...base('consignment-agreement', ctx, title, pdfDocumentNumber('CA', { date: input.startedAt, id: input.id })),
+    ...base(
+      'consignment-agreement',
+      ctx,
+      title,
+      pdfDocumentNumber('CA', { date: input.startedAt, id: input.id }),
+    ),
     owner: { key: 'vehicleId', id: input.vehicleId },
     data: {
       owner: input.owner,

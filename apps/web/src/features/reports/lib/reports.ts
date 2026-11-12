@@ -2,7 +2,7 @@ import {
   ExpenseReportGroupBy,
   LeaseIncomeGroupBy,
   REPORT_TITLE_KEYS,
-  ReportName,
+  type ReportName,
   ReportPeriodGroupBy,
   toLocale,
   type ReportFormat,

@@ -111,7 +111,10 @@ export function pdfDocumentNumber(
   ref: { no: number } | { date: string; id: string },
 ): string {
   if ('no' in ref) return `${prefix}-${String(ref.no).padStart(6, '0')}`;
-  const tail = ref.id.replace(/[^A-Za-z0-9]/g, '').slice(-6).toUpperCase();
+  const tail = ref.id
+    .replace(/[^A-Za-z0-9]/g, '')
+    .slice(-6)
+    .toUpperCase();
   return `${prefix}-${ref.date.replace(/-/g, '')}-${tail}`;
 }
 

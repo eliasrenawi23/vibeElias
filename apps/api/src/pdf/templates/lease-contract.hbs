@@ -36,7 +36,7 @@
   <li>
     <h3>{{t "lease.rentTitle"}}</h3>
     <ol class="sub">
-      <li>{{t "lease.rent" rent=(money monthlyRent) vat=(t (concat "lease." (pick rentIncludesVat "rentInclVat" "rentPlusVat")) rate=(ltr vatRate))}}</li>
+      <li>{{t "lease.rent" rent=(money monthlyRent) vat=(t (concat "lease." (pick rentIncludesVat "rentInclVat" "rentPlusVat")) rate=(ltr (concat vatRate "%")))}}</li>
       <li>{{t "lease.rentPayment" day=(ltr paymentDay)}}</li>
       <li>{{t "lease.rentLate"}}</li>
     </ol>

@@ -18,11 +18,9 @@ import { RemindersPage } from '../features/reminders/pages/RemindersPage';
 import { ReportPage } from '../features/reports/pages/ReportPage';
 import { ReportsPage } from '../features/reports/pages/ReportsPage';
 import { BusinessSettingsPage } from '../features/settings/pages/BusinessSettingsPage';
-import {
-  BackupSettingsPage,
-  ContractSettingsPage,
-  ReminderSettingsPage,
-} from '../features/settings/pages/SettingsPlaceholderPages';
+import { BackupSettingsPage } from '../features/settings/pages/BackupSettingsPage';
+import { ContractSettingsPage } from '../features/settings/pages/ContractSettingsPage';
+import { ReminderSettingsPage } from '../features/settings/pages/ReminderSettingsPage';
 import { TaxiLicenseDetailPage } from '../features/taxi-licenses/pages/TaxiLicenseDetailPage';
 import { TaxiLicenseNewPage } from '../features/taxi-licenses/pages/TaxiLicenseNewPage';
 import { TaxiLicensesPage } from '../features/taxi-licenses/pages/TaxiLicensesPage';

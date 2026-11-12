@@ -54,7 +54,9 @@ export class PdfController {
       'Returns the Document (download at `url`).',
   })
   @ApiNotFoundResponse({ description: 'errors.notFound (unknown template or entity)' })
-  @ApiConflictResponse({ description: 'errors.pdfNotApplicable (template does not fit the entity)' })
+  @ApiConflictResponse({
+    description: 'errors.pdfNotApplicable (template does not fit the entity)',
+  })
   generate(
     @Param('template') template: string,
     @Param('id') id: string,

@@ -23,7 +23,7 @@
         {{> payments rows=payments paid=paid balance=balance tradeIn=tradeInValue}}
       </li>
       <li>{{t "sale.balanceTerms"}}</li>
-      {{#if depositCap.applies}}<li>{{t "sale.depositCap" threshold=(money depositCap.threshold) percent=(ltr depositCap.percent) max=(money depositCap.maxAmount)}}</li>{{/if}}
+      {{#if depositCap.applies}}<li>{{t "sale.depositCap" threshold=(money depositCap.threshold) percent=(ltr (concat depositCap.percent "%")) max=(money depositCap.maxAmount)}}</li>{{/if}}
     </ol>
   </li>
 

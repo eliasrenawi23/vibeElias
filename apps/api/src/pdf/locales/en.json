@@ -103,7 +103,7 @@
     "rentTitle": "Rent",
     "rent": "The Lessee shall pay the Lessor a monthly rent of {{rent}} {{vat}}.",
     "rentInclVat": "(VAT included)",
-    "rentPlusVat": "plus VAT as required by law ({{rate}}%)",
+    "rentPlusVat": "plus VAT as required by law ({{rate}})",
     "rentPayment": "Rent is payable in advance by day {{day}} of each calendar month. For the first and last months of the lease term, rent is prorated by the actual number of lease days in that month.",
     "rentLate": "A delay of more than 14 days in paying rent constitutes a material breach of this agreement. Any amount not paid on time bears linkage differentials and interest as provided by law until actually paid.",
     "depositTitle": "Deposit",
@@ -212,7 +212,7 @@
     "price": "The price of the vehicle is {{price}}. The price includes VAT insofar as it applies to the transaction.",
     "paymentsIntro": "Payments made up to the signing of this agreement:",
     "balanceTerms": "The balance of the price shall be paid by the delivery of the vehicle, unless otherwise agreed in writing. Ownership of the vehicle will not be transferred to the Buyer before the full price is paid.",
-    "depositCap": "The price of the vehicle exceeds {{threshold}}; accordingly, no amount exceeding {{percent}}% of the price ({{max}}) will be collected from the Buyer before delivery of the vehicle except against a bank guarantee, in accordance with section 81 of the Vehicle Sector Services and Professions Licensing Law, 5776-2016.",
+    "depositCap": "The price of the vehicle exceeds {{threshold}}; accordingly, no amount exceeding {{percent}} of the price ({{max}}) will be collected from the Buyer before delivery of the vehicle except against a bank guarantee, in accordance with section 81 of the Vehicle Sector Services and Professions Licensing Law, 5776-2016.",
     "tradeInTitle": "Trade-in vehicle",
     "tradeIn": "The Buyer delivers to the Dealer the vehicle described below, and its agreed value, {{value}}, is credited towards the price of the vehicle sold. The Buyer declares that he is the registered owner of the trade-in vehicle, that it is free of any lien, attachment or third-party right, and that he has given the Dealer all information known to him about its condition, including accidents and damage.",
     "deliveryTitle": "Delivery of the vehicle",
@@ -271,7 +271,7 @@
     "minNet": "Minimum net amount the Owner will receive from the sale: {{amount}}. A sale yielding the Owner less than this amount requires the Owner's prior consent.",
     "commission": {
       "FIXED": "Dealer's commission: a fixed amount of {{value}}.",
-      "PERCENT": "Dealer's commission: {{value}}% of the actual sale price.",
+      "PERCENT": "Dealer's commission: {{value}} of the actual sale price.",
       "SURPLUS": "Dealer's commission: the entire amount above the Owner's minimum net amount.",
       "NONE": "The Dealer's commission will be agreed in writing."
     },
