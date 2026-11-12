@@ -10,9 +10,10 @@ import { useListParams } from '../../../shared/lib/listParams';
 import { EmptyState } from '../../../shared/ui/EmptyState';
 import { FilterBar } from '../../../shared/ui/FilterBar';
 import { LoadError } from '../../../shared/ui/LoadError';
+import { StatusSummaryCards } from '../../../shared/ui/StatusSummaryCards';
 import { driverKeys } from '../../drivers/queryKeys';
 import { ledgerKeys } from '../../ledger/queryKeys';
-import { fetchFines } from '../api';
+import { fetchFineSummary, fetchFines } from '../api';
 import { FineDrawer } from '../components/FineDrawer';
 import { FinesTable } from '../components/FinesTable';
 import { FineDialog } from '../dialogs/FineDialog';
@@ -63,6 +64,12 @@ export function FinesPage() {
 
   return (
     <Flex vertical gap={16}>
+      <StatusSummaryCards
+        enumName="FineStatus"
+        statuses={FineStatus.options}
+        queryKey={fineKeys.summary({})}
+        load={(signal) => fetchFineSummary({}, signal)}
+      />
       <FilterBar
         searchKey={null}
         filters={[

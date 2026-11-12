@@ -5,6 +5,7 @@ import { Outlet } from 'react-router';
 import { useUi } from '../providers/UiProvider';
 import { SideNav } from './SideNav';
 import { TopBar } from './TopBar';
+import { useListMemoryTracker } from './useListMemoryTracker';
 
 /**
  * Authenticated layout. From `md` up: a collapsible side navigation on the leading side (right
@@ -19,6 +20,7 @@ export function AppShell() {
   const isMobile = screens.md === false;
   const [collapsed, setCollapsed] = useState(false);
   const [drawerOpen, setDrawerOpen] = useState(false);
+  useListMemoryTracker();
 
   return (
     <Layout hasSider className="rm-shell">

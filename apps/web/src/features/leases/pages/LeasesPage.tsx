@@ -18,9 +18,10 @@ import { LicenseTag } from '../../../shared/ui/LicenseTag';
 import { LoadError } from '../../../shared/ui/LoadError';
 import { Money } from '../../../shared/ui/Money';
 import { PlateNo } from '../../../shared/ui/PlateNo';
+import { StatusSummaryCards } from '../../../shared/ui/StatusSummaryCards';
 import { StatusTag } from '../../../shared/ui/StatusTag';
 import { DriverPicker } from '../../drivers/components/DriverPicker';
-import { fetchLeases } from '../api';
+import { fetchLeaseSummary, fetchLeases, type LeaseSummaryQuery } from '../api';
 import { ContractNo } from '../components/ContractNo';
 import { leasePath } from '../lib/leaseRules';
 import { leaseKeys } from '../queryKeys';
@@ -47,6 +48,11 @@ export function LeasesPage() {
     [searchParams, page, pageSize, sort, order],
   );
   const filtered = Boolean(query.q || query.status || query.driverId);
+  // The summary cards count under every filter except the status itself.
+  const summaryQuery = useMemo<LeaseSummaryQuery>(
+    () => ({ q: query.q, driverId: query.driverId }),
+    [query.q, query.driverId],
+  );
 
   const list = useQuery({
     queryKey: leaseKeys.list(query),
@@ -134,6 +140,12 @@ export function LeasesPage() {
 
   return (
     <Flex vertical gap={16}>
+      <StatusSummaryCards
+        enumName="LeaseStatus"
+        statuses={LeaseStatus.options}
+        queryKey={leaseKeys.summary(summaryQuery)}
+        load={(signal) => fetchLeaseSummary(summaryQuery, signal)}
+      />
       <FilterBar
         searchPlaceholder={t('leases.searchPlaceholder')}
         filters={[

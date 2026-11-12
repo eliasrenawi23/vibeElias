@@ -195,9 +195,9 @@ async function mockApi(page: Page) {
       return json(route, 200, { user });
     }
     if (path === '/api/vehicles' && method === 'GET') {
-      const status = url.searchParams.get('status');
+      const statuses = (url.searchParams.get('status') ?? '').split(',').filter(Boolean);
       const items = [...vehicles.values()]
-        .filter((v) => !status || v.status === status)
+        .filter((v) => statuses.length === 0 || statuses.includes(String(v.status)))
         .map(listItem);
       const pageSize = Number(url.searchParams.get('pageSize') ?? 25);
       return json(route, 200, {
@@ -206,6 +206,18 @@ async function mockApi(page: Page) {
         page: 1,
         pageSize,
       });
+    }
+    // Status summary: every status counted, under the list filters except status.
+    if (path === '/api/vehicles/summary' && method === 'GET') {
+      const counts: Record<string, number> = Object.fromEntries(
+        ['IN_STOCK', 'RESERVED', 'LEASED', 'SOLD', 'RETURNED', 'SCRAPPED', 'EXTERNAL'].map((s) => [
+          s,
+          0,
+        ]),
+      );
+      for (const v of vehicles.values()) counts[String(v.status)] = (counts[String(v.status)] ?? 0) + 1;
+      counts.SOLD = (counts.SOLD ?? 0) + 3;
+      return json(route, 200, { counts });
     }
     if (path === '/api/vehicles' && method === 'POST') {
       const created = baseVehicle({ ...(body as Json), id: 'veh_new' });
@@ -467,6 +479,72 @@ test('vehicle file: expense, odometer, documents, new vehicle, Arabic plate', as
   expect(layout.firstLeft).toBeLessThan(layout.lastLeft);
   const tableText = await page.getByTestId('vehicles-table').innerText();
   expect(tableText).not.toMatch(/[٠-٩]/);
+
+  expect(problems).toEqual([]);
+});
+
+test('status cards filter the list; breadcrumb and side nav come back to the filter', async ({
+  page,
+}) => {
+  const api = await mockApi(page);
+  const problems = watchConsole(page);
+  const summaryCalls = () => api.calls.filter((c) => c.path === '/api/vehicles/summary');
+
+  await page.goto('/vehicles');
+  const cards = page.getByTestId('status-summary');
+  const inStock = cards.getByTestId('summary-card-IN_STOCK');
+  await expect(inStock).toContainText('1');
+  await expect(inStock).toContainText('In stock');
+  await expect(cards.getByTestId('summary-card-SOLD')).toContainText('3');
+  await expect(inStock).toHaveAttribute('aria-pressed', 'false');
+  // No filter yet: "Clear filters" is not offered.
+  await expect(page.getByTestId('filter-clear')).toHaveCount(0);
+
+  // A card toggles the multi-select status filter in the URL.
+  await inStock.click();
+  await expect(page).toHaveURL(/\/vehicles\?status=IN_STOCK$/);
+  await expect(inStock).toHaveAttribute('aria-pressed', 'true');
+  await expect(page.getByTestId('filter-clear')).toBeVisible();
+  await expect
+    .poll(() =>
+      api.calls.some(
+        (c) =>
+          c.path === '/api/vehicles' && new URLSearchParams(c.search).get('status') === 'IN_STOCK',
+      ),
+    )
+    .toBe(true);
+  // The summary itself is never filtered by status.
+  expect(summaryCalls().length).toBeGreaterThan(0);
+  expect(summaryCalls().every((c) => !new URLSearchParams(c.search).has('status'))).toBe(true);
+
+  // Into the vehicle, back through the breadcrumb: the filter is restored.
+  await page.getByTestId('vehicles-table').getByText('Toyota Corolla').click();
+  await expect(page).toHaveURL(/\/vehicles\/veh_1$/);
+  await page.getByTestId('breadcrumbs').getByRole('link', { name: 'Vehicles' }).click();
+  await expect(page).toHaveURL(/\/vehicles\?status=IN_STOCK$/);
+  await expect(page.getByTestId('summary-card-IN_STOCK')).toHaveAttribute('aria-pressed', 'true');
+
+  // The side navigation item restores it too.
+  await page.getByTestId('vehicles-table').getByText('Toyota Corolla').click();
+  await expect(page).toHaveURL(/\/vehicles\/veh_1$/);
+  await page.getByTestId('side-nav').getByRole('menuitem', { name: 'Vehicles' }).click();
+  await expect(page).toHaveURL(/\/vehicles\?status=IN_STOCK$/);
+
+  // "Clear filters" forgets it: the breadcrumb then leads to the plain list.
+  await page.getByTestId('filter-clear').click();
+  await expect(page).toHaveURL(/\/vehicles$/);
+  await expect(page.getByTestId('filter-clear')).toHaveCount(0);
+  await page.getByTestId('vehicles-table').getByText('Toyota Corolla').click();
+  await page.getByTestId('breadcrumbs').getByRole('link', { name: 'Vehicles' }).click();
+  await expect(page).toHaveURL(/\/vehicles$/);
+
+  // Leaving the section forgets the filter as well.
+  await page.getByTestId('summary-card-IN_STOCK').click();
+  await expect(page).toHaveURL(/status=IN_STOCK/);
+  await page.getByTestId('side-nav').getByRole('menuitem', { name: 'Dashboard' }).click();
+  await expect(page).toHaveURL(/\/$/);
+  await page.getByTestId('side-nav').getByRole('menuitem', { name: 'Vehicles' }).click();
+  await expect(page).toHaveURL(/\/vehicles$/);
 
   expect(problems).toEqual([]);
 });

@@ -18,10 +18,11 @@ import { LicenseTag } from '../../../shared/ui/LicenseTag';
 import { LoadError } from '../../../shared/ui/LoadError';
 import { Money } from '../../../shared/ui/Money';
 import { PlateNo } from '../../../shared/ui/PlateNo';
+import { StatusSummaryCards } from '../../../shared/ui/StatusSummaryCards';
 import { StatusTag } from '../../../shared/ui/StatusTag';
 import { ToneTag } from '../../../shared/ui/ToneTag';
 import { YearText } from '../../../shared/ui/YearText';
-import { fetchVehicles } from '../api';
+import { fetchVehicleSummary, fetchVehicles, type VehicleSummaryQuery } from '../api';
 import { COMMON_MAKES } from '../lib/makes';
 import { vehicleKeys } from '../queryKeys';
 import type { VehicleListItem, VehicleListQuery } from '../types';
@@ -66,6 +67,18 @@ export function VehicleInventoryTab() {
   );
   const filtered = Boolean(
     query.q || query.status || query.ownership || query.isTaxi || query.make || query.yearFrom || query.yearTo,
+  );
+  // The summary cards count under every filter except the status itself.
+  const summaryQuery = useMemo<VehicleSummaryQuery>(
+    () => ({
+      q: query.q,
+      ownership: query.ownership,
+      isTaxi: query.isTaxi,
+      make: query.make,
+      yearFrom: query.yearFrom,
+      yearTo: query.yearTo,
+    }),
+    [query.q, query.ownership, query.isTaxi, query.make, query.yearFrom, query.yearTo],
   );
 
   const list = useQuery({
@@ -175,6 +188,12 @@ export function VehicleInventoryTab() {
 
   return (
     <Flex vertical gap={16}>
+      <StatusSummaryCards
+        enumName="VehicleStatus"
+        statuses={VehicleStatus.options}
+        queryKey={vehicleKeys.summary(summaryQuery)}
+        load={(signal) => fetchVehicleSummary(summaryQuery, signal)}
+      />
       <FilterBar
         searchPlaceholder={t('vehicles.searchPlaceholder')}
         filters={[

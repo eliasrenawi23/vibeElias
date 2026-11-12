@@ -14,7 +14,10 @@ export const SWAGGER_PATH = 'api/docs';
 export const SWAGGER_TAGS: readonly { name: string; description: string }[] = [
   { name: 'auth', description: 'Login / refresh / logout (httpOnly cookies) and the current user' },
   { name: 'users', description: 'User accounts (ADMIN)' },
-  { name: 'settings', description: 'Business settings singleton (names, VAT, reminder lead days)' },
+  {
+    name: 'settings',
+    description: 'Business settings singleton (names, VAT, reminder lead days) and backup status',
+  },
   {
     name: 'contacts',
     description: 'Contacts and leads: search, tags, follow-up dates, archive / unarchive',

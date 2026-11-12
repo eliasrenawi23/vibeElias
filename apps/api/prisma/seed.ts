@@ -187,6 +187,12 @@ async function seedSettings() {
 const LICENSE_HOLDER = `${BUSINESS_NAME.he} בע״מ`;
 
 /**
+ * Operating-licence renewal of the idle licence 40633, 80 days ahead: beyond the 60 lead days of
+ * licence fees / renewals, so the feed lists it as "upcoming" in a 90-day window.
+ */
+const LICENSE_40633_RENEWAL = (T: string): string => addDays(T, 80);
+
+/**
  * Older seed versions (and the app's defaults before November 2026) spelled the name רנאוי /
  * رناوي; the owner's spelling is רינאוי / ريناوي. Rewrites the word in the stored business name
  * (he/ar only; the rest of a name edited in the app is kept) and in the holder name of the demo
@@ -411,8 +417,10 @@ function placeholderCarPng(bodyColor: string, sky: string): Promise<Buffer> {
 
 interface SeedDocument {
   id: string;
-  kind: 'CAR_LICENSE' | 'INSURANCE' | 'PHOTO';
-  vehicleId: string;
+  kind: 'CAR_LICENSE' | 'INSURANCE' | 'PHOTO' | 'TAXI_PERMIT';
+  /** Owner: a vehicle, or a driver when `driverId` is set. */
+  vehicleId?: string;
+  driverId?: string;
   title: string;
   fileName: string;
   lang: string | null;
@@ -499,6 +507,23 @@ async function seedDocuments(adminId: string, T: string): Promise<void> {
       mime: 'image/png',
       render: () => placeholderCarPng('#fafafa', '#fde68a'),
     },
+    {
+      // Scan of the previous permit, expired 6 days ago -> reminders feed "overdue" (document).
+      id: 'seed_doc_mizrahi_permit',
+      kind: 'TAXI_PERMIT',
+      driverId: 'seed_drv_mizrahi',
+      title: 'היתר נהג מונית — אבי מזרחי (סריקה ישנה)',
+      fileName: 'taxi-permit-TP-71033-old.pdf',
+      lang: 'he',
+      expiresAt: addDays(T, -6),
+      mime: 'application/pdf',
+      render: () =>
+        placeholderPdf('Taxi driver permit', [
+          'Driver: Avi Mizrahi, permit TP-71033',
+          'Previous permit scan - renewed permit not uploaded yet',
+          'Valid until: ' + addDays(T, -6),
+        ]),
+    },
   ];
 
   for (const d of docs) {
@@ -535,7 +560,8 @@ async function seedDocuments(adminId: string, T: string): Promise<void> {
             title: d.title,
             lang: d.lang,
             expiresAt: d.expiresAt ? day(d.expiresAt) : null,
-            vehicleId: d.vehicleId,
+            vehicleId: d.driverId ? null : (d.vehicleId ?? null),
+            driverId: d.driverId ?? null,
             uploadedById: adminId,
           },
         }),
@@ -661,6 +687,19 @@ async function seedDemo(adminId: string, T: string): Promise<void> {
       source: 'Facebook',
       notes: 'מעוניין בהשכרת מספר בלבד לרכב שלו',
       followUpAt: day(addDays(T, -1)),
+    },
+    {
+      // Follow-up due today -> reminders feed "due" (contact follow-ups have no lead days).
+      id: 'seed_c_lead_salameh',
+      tags: ['LEAD', 'SELLER'],
+      firstName: 'وسيم',
+      lastName: 'سلامة',
+      phones: ['0547788120'],
+      city: 'يافة الناصرة',
+      preferredLang: 'ar',
+      source: 'הפניה',
+      notes: 'רוצה למכור קורולה 2018 ולקנות SUV — לתאם בדיקה במגרש',
+      followUpAt: day(T),
     },
     {
       id: 'seed_c_drv_odeh',
@@ -981,6 +1020,7 @@ async function seedDemo(adminId: string, T: string): Promise<void> {
       acquiredAt: day(addDays(T, -200)),
       acquisitionPrice: ils(262_000),
       annualFeeDueAt: feeDue,
+      renewalAt: day(LICENSE_40633_RENEWAL(T)),
       notes: 'פנוי להשכרה',
     },
   ];
@@ -990,6 +1030,11 @@ async function seedDemo(adminId: string, T: string): Promise<void> {
       () => prisma.taxiLicense.upsert({ where: { id: l.id as string }, update: {}, create: l }),
     );
   }
+  // Databases seeded before the renewal date existed get it once (only while still unset).
+  await prisma.taxiLicense.updateMany({
+    where: { id: 'seed_tl_40633', renewalAt: null },
+    data: { renewalAt: day(LICENSE_40633_RENEWAL(T)) },
+  });
 
   await migrateLegacyDemo();
 
@@ -2027,6 +2072,15 @@ async function seedDemo(adminId: string, T: string): Promise<void> {
       entityType: 'DEAL',
       entityId: 'seed_deal_sell_mazda',
       doneAt: at(addDays(T, -3), '14:00'),
+    },
+    {
+      // Due today -> reminders feed "due" (manual reminders have no lead days).
+      id: 'seed_rem_meter_seal',
+      title: 'לתאם חידוש חותמת מונה לסקודה אוקטביה (84-731-26)',
+      dueAt: day(T),
+      entityType: 'VEHICLE',
+      entityId: 'seed_v_taxi_octavia',
+      notes: 'מעבדת מונים מוסמכת — להביא את רישיון הרכב ואת אישור הכיול האחרון',
     },
   ];
   for (const r of reminders) {

@@ -1,4 +1,4 @@
-import type { FineStatus, Paginated } from '@renawi/shared';
+import type { FineStatus, FineSummary, Paginated } from '@renawi/shared';
 import { http } from '../../shared/lib/http';
 import type { FineListQuery, TrafficFine } from './types';
 
@@ -10,6 +10,17 @@ export function fetchFines(
   signal?: AbortSignal,
 ): Promise<Paginated<TrafficFine>> {
   return http.get<Paginated<TrafficFine>>('/fines', { query: { ...query }, signal });
+}
+
+/** List filters a status summary honours: everything except status, paging and sorting. */
+export type FineSummaryQuery = Omit<FineListQuery, 'status' | 'page' | 'pageSize' | 'sort' | 'order'>;
+
+/** `GET /api/fines/summary?vehicleId&driverId`: count per status. */
+export function fetchFineSummary(
+  query: FineSummaryQuery,
+  signal?: AbortSignal,
+): Promise<FineSummary> {
+  return http.get<FineSummary>('/fines/summary', { query: { ...query }, signal });
 }
 
 export interface FineCreateBody {

@@ -333,6 +333,31 @@ float.
 - **Label / value grids** (AntD `Descriptions`): columns from `descriptionColumns.ts` only:
   `DESCRIPTION_COLUMNS` (1 / 2 / 3 at xs / sm / lg), `_NARROW` (1 / 2, half-width cards and
   dialogs), `_SINGLE` (money breakdowns and drawers).
+- **Lifecycle stepper** (`LifecycleSteps`, definitions in `shared/lib/lifecycles.ts`): AntD
+  `Steps size="small"` in the `lifecycle` slot of the detail layout, on records with a linear
+  lifecycle only: leases (Draft → Active → Ended), deals (Draft → Pending → Completed, plus the
+  ownership transfer Not started → In progress → Done once a sale is completed) and fines in
+  their drawer (New → Reassignment submitted → Reassigned, or New → Paid by us). Done steps
+  show a check, the current one is marked `aria-current="step"` and breathes softly (no
+  animation under `prefers-reduced-motion`), later ones wait. A terminal off-path status
+  (Terminated, Cancelled) is a red error step that replaces the remaining ones. Vertical below
+  `md`. Vehicles and licences have no stepper: their statuses go back and forth, so they keep
+  the status tag only.
+- **Status summary cards** (`StatusSummaryCards`): a row of quick filters above the
+  `FilterBar` of the vehicles, leases, deals and fines lists, one card per status: the count
+  (h3, tabular) over the status name, a 4 px tone bar on the inline-start edge. The counts come
+  from `GET /<list>/summary` under the list's other filters, so each card says what clicking it
+  gives. A card is a toggle button (`aria-pressed`) for that value of the multi-select `status`
+  param; active cards take the tone's soft background and border. The row scrolls sideways on
+  phones and disappears if the summary cannot be loaded (the list still works).
+- **Remembered list filters** (`shared/lib/listMemory.ts`): a list's query is remembered for
+  the browser tab while the user works inside its section; the breadcrumb section link and the
+  side-navigation item lead back to it. Moving to another top-level section or pressing
+  "Clear filters" forgets it. "Clear filters" only shows when a filter differs from its
+  default.
+- **Timelines** (vehicle cycles): AntD `Timeline` with tone dots from the registry, the dates in
+  their own secondary column from `md` up (above the event on phones), then the event, who it
+  was with, and the terms. The current item is success with a soft ring, finished ones neutral.
 - **Unsaved changes**: full-page forms use `useUnsavedChangesGuard` (in-app navigation, tab
   close or reload, and the form's own Cancel ask "Discard unsaved changes?"); dialogs pass
   `dirty` to `FormDialog`, which asks before closing. The prompt is `ConfirmDialog` with a red

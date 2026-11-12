@@ -524,6 +524,122 @@ body {
   color: var(--rm-tone-text);
 }
 
+/* ---- Lifecycle stepper (shared/ui/LifecycleSteps.tsx) --------------------------------------- */
+
+.rm-lifecycle {
+  min-width: 0;
+  padding: 12px 16px;
+  border: 1px solid var(--rm-color-divider);
+  border-radius: var(--rm-radius-lg);
+  background: var(--rm-color-bg-container);
+}
+
+.rm-lifecycle-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.rm-lifecycle-row > .rm-lifecycle {
+  flex: 1 1 320px;
+}
+
+/* The current step's icon breathes softly; never under reduced motion. */
+.rm-lifecycle-pulse .ant-steps-item-icon {
+  animation: rm-lifecycle-pulse 2.4s ease-in-out infinite;
+}
+
+@keyframes rm-lifecycle-pulse {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 var(--rm-color-primary-soft);
+  }
+  50% {
+    box-shadow: 0 0 0 6px var(--rm-color-primary-soft);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rm-lifecycle-pulse .ant-steps-item-icon {
+    animation: none;
+  }
+}
+
+.rm-lifecycle-current .ant-steps-item-title {
+  font-weight: var(--rm-font-weight-semibold);
+}
+
+/* ---- Status summary cards (shared/ui/StatusSummaryCards.tsx) -------------------------------- */
+
+.rm-summary-cards {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding-bottom: 2px;
+  scrollbar-width: thin;
+}
+
+.rm-summary-card {
+  display: flex;
+  flex: 1 0 128px;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  min-width: 128px;
+  max-width: 220px;
+  padding: 10px 14px 10px 12px;
+  border: 1px solid var(--rm-color-divider);
+  border-inline-start: 4px solid var(--rm-tone-text);
+  border-radius: var(--rm-radius-md);
+  background: var(--rm-color-bg-container);
+  color: var(--rm-color-text);
+  font: inherit;
+  text-align: start;
+  cursor: pointer;
+  transition:
+    background-color var(--rm-duration-fast),
+    border-color var(--rm-duration-fast);
+}
+
+.rm-summary-card:hover {
+  border-color: var(--rm-tone-border);
+  border-inline-start-color: var(--rm-tone-text);
+}
+
+.rm-summary-card:focus-visible {
+  outline: 2px solid var(--rm-color-text);
+  outline-offset: 2px;
+}
+
+.rm-summary-card-active {
+  border-color: var(--rm-tone-border);
+  border-inline-start-color: var(--rm-tone-text);
+  background: var(--rm-tone-bg);
+}
+
+.rm-summary-count {
+  font-size: var(--rm-text-h3-size);
+  font-weight: var(--rm-font-weight-semibold);
+  line-height: var(--rm-text-h3-line-height);
+}
+
+.rm-summary-label {
+  color: var(--rm-color-text-secondary);
+  font-size: var(--rm-text-small-size);
+  line-height: var(--rm-text-small-line-height);
+}
+
+.rm-summary-card-active .rm-summary-label {
+  color: var(--rm-tone-text);
+  font-weight: var(--rm-font-weight-medium);
+}
+
+@media (max-width: 767px) {
+  .rm-summary-card {
+    flex: 0 0 auto;
+  }
+}
+
 /* ---- Lists, tables and filters -------------------------------------------------------------- */
 
 .rm-filter-search {
@@ -673,6 +789,21 @@ body {
 
 .rm-cycle-term {
   white-space: nowrap;
+}
+
+/* Timeline: date column in secondary ink; the current item's dot is ringed. */
+.rm-cycles-timeline .ant-timeline-item-title {
+  color: var(--rm-color-text-secondary);
+  font-size: var(--rm-text-small-size);
+}
+
+.rm-timeline-current .ant-timeline-item-icon {
+  box-shadow: 0 0 0 3px var(--rm-color-success-bg);
+  border-radius: 50%;
+}
+
+.rm-timeline-who {
+  font-size: var(--rm-text-small-size);
 }
 
 .rm-expense-total-tag.ant-tag {

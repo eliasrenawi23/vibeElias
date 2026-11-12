@@ -12,9 +12,10 @@ import {
 } from 'antd';
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useSearchParams } from 'react-router';
+import { useLocation, useSearchParams } from 'react-router';
 import { freeTextInputProps } from '../lib/bidi';
 import { DATE_INPUT_FORMATS, dayjsToIso, isoToDayjs } from '../lib/dates';
+import { clearListMemory, isListPath, sectionOf } from '../lib/listMemory';
 import { readListParam, setOrDelete } from '../lib/listParams';
 
 export interface FilterOption {
@@ -66,6 +67,11 @@ export interface FilterBarProps {
   extra?: ReactNode;
   /** Debounce of the search box in ms. */
   debounceMs?: number;
+  /**
+   * Values a param has when it is absent (e.g. a horizon of `30` days). A param equal to its
+   * default does not count as a filter, so "Clear filters" only shows when something differs.
+   */
+  defaults?: Readonly<Record<string, string>>;
 }
 
 /** Date range: shown as the first format, accepted typed or pasted in any of them. */
@@ -86,8 +92,10 @@ export function FilterBar({
   filters = [],
   extra,
   debounceMs = 300,
+  defaults,
 }: FilterBarProps) {
   const { t } = useTranslation();
+  const { pathname } = useLocation();
   const [params, setParams] = useSearchParams();
 
   const update = (changes: Record<string, string | null>) => {
@@ -133,7 +141,10 @@ export function FilterBar({
   }, [text, searchKey, debounceMs, setParams]);
 
   const owned = [...(searchKey ? [searchKey] : []), ...filterKeys(filters)];
-  const active = owned.some((k) => params.get(k));
+  const active = owned.some((k) => {
+    const value = params.get(k);
+    return Boolean(value) && value !== defaults?.[k];
+  });
 
   const renderFilter = (f: FilterDef) => {
     switch (f.type) {
@@ -290,8 +301,12 @@ export function FilterBar({
             type="link"
             onClick={() => {
               setText('');
+              lastWritten.current = '';
               update(Object.fromEntries(owned.map((k) => [k, null])));
+              // A list page also forgets its remembered filters (detail-page tabs keep them).
+              if (isListPath(pathname)) clearListMemory(sectionOf(pathname));
             }}
+            data-testid="filter-clear"
           >
             {t('actions.clearFilters')}
           </Button>

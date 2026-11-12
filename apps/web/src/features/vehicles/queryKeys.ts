@@ -1,3 +1,4 @@
+import type { VehicleSummaryQuery } from './api';
 import type { ExpenseListQuery, VehicleListQuery } from './types';
 
 /**
@@ -9,6 +10,7 @@ export const vehicleKeys = {
   lists: () => [...vehicleKeys.all, 'list'] as const,
   list: (filters: VehicleListQuery) => [...vehicleKeys.lists(), filters] as const,
   count: (status: string) => [...vehicleKeys.all, 'count', status] as const,
+  summary: (filters: VehicleSummaryQuery) => [...vehicleKeys.all, 'summary', filters] as const,
   detail: (id: string) => [...vehicleKeys.all, 'detail', id] as const,
   expenses: (id: string, filters: ExpenseListQuery) =>
     [...vehicleKeys.detail(id), 'expenses', filters] as const,

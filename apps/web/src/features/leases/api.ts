@@ -4,6 +4,7 @@ import type {
   DepositKind,
   HandoverChecklist,
   LeaseEndReason,
+  LeaseSummary,
   LeaseType,
   LedgerPaymentMethod,
   Paginated,
@@ -21,6 +22,17 @@ export function fetchLeases(
   signal?: AbortSignal,
 ): Promise<Paginated<LeaseListItem>> {
   return http.get<Paginated<LeaseListItem>>('/leases', { query: { ...query }, signal });
+}
+
+/** List filters a status summary honours: everything except status, paging and sorting. */
+export type LeaseSummaryQuery = Omit<LeaseListQuery, 'status' | 'page' | 'pageSize' | 'sort' | 'order'>;
+
+/** `GET /api/leases/summary?q&driverId&taxiLicenseId&vehicleId`: count per status. */
+export function fetchLeaseSummary(
+  query: LeaseSummaryQuery,
+  signal?: AbortSignal,
+): Promise<LeaseSummary> {
+  return http.get<LeaseSummary>('/leases/summary', { query: { ...query }, signal });
 }
 
 /** Number of contracts with a status (`pageSize=1`, reads `total`). */

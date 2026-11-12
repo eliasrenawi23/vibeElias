@@ -14,5 +14,7 @@ process.env.CRON_ENABLED = 'false';
 process.env.LOGIN_THROTTLE_LIMIT = '1000';
 // Uploads go to a fresh temporary folder per test file (removed by the suites that write files).
 process.env.UPLOAD_DIR = mkdtempSync(join(tmpdir(), 'renawi-e2e-uploads-'));
+// Backup status file inside the same temporary folder (the backup-status tests write it).
+process.env.BACKUP_STATUS_FILE = join(process.env.UPLOAD_DIR, 'backup', 'last-success.json');
 // Small limit so the 413 test does not need a 20 MB body.
 process.env.MAX_UPLOAD_MB = '1';

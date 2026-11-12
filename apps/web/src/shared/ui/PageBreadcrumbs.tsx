@@ -3,10 +3,14 @@ import { Breadcrumb } from 'antd';
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
+import { rememberedListPath } from '../lib/listMemory';
 
 export interface BreadcrumbEntry {
   title: ReactNode;
-  /** Link target; entries without one are plain text (the current page). */
+  /**
+   * Link target; entries without one are plain text (the current page). A bare section list
+   * (`/vehicles`) gets its remembered filters (`shared/lib/listMemory.ts`).
+   */
   to?: string;
 }
 
@@ -17,7 +21,7 @@ export interface PageBreadcrumbsProps {
 
 /**
  * Home → section list → record. Replaces the "back to the list" links of detail and `/new`
- * pages. The section link is a plain path for now; remembered list filters come later.
+ * pages. The section link restores the list's remembered filters.
  */
 export function PageBreadcrumbs({ items }: PageBreadcrumbsProps) {
   const { t } = useTranslation();
@@ -43,7 +47,7 @@ export function PageBreadcrumbs({ items }: PageBreadcrumbsProps) {
         return {
           key: String(i),
           title: entry.to ? (
-            <Link to={entry.to}>{entry.title}</Link>
+            <Link to={rememberedListPath(entry.to)}>{entry.title}</Link>
           ) : (
             <span className="rm-breadcrumb-current" aria-current={last ? 'page' : undefined}>
               {entry.title}

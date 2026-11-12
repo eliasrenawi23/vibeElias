@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useLocation, useNavigate } from 'react-router';
 import type { TKey } from '../../shared/lib/i18n';
+import { rememberedListPath } from '../../shared/lib/listMemory';
 import { BrandLogo } from '../../shared/ui/BrandLogo';
 import { NAV_ITEMS, openNavKeys, selectedNavKey, type NavItem } from './navItems';
 
@@ -48,7 +49,8 @@ export function SideNav({ collapsed = false, onNavigate }: SideNavProps) {
         openKeys={collapsed ? undefined : openKeys}
         onOpenChange={setOpenKeys}
         onClick={({ key }) => {
-          navigate(key);
+          // A section list opens with the filters remembered while working in that section.
+          navigate(rememberedListPath(key));
           onNavigate?.();
         }}
         className="rm-sidenav-menu"

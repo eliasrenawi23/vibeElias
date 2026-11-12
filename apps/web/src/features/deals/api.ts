@@ -1,4 +1,4 @@
-import type { Paginated } from '@renawi/shared';
+import type { DealSummary, Paginated } from '@renawi/shared';
 import { http } from '../../shared/lib/http';
 import type {
   DealCreateBody,
@@ -18,6 +18,17 @@ export function fetchDeals(
   signal?: AbortSignal,
 ): Promise<Paginated<DealListItem>> {
   return http.get<Paginated<DealListItem>>('/deals', { query: { ...query }, signal });
+}
+
+/** List filters a status summary honours: everything except status, paging and sorting. */
+export type DealSummaryQuery = Omit<DealListQuery, 'status' | 'page' | 'pageSize' | 'sort' | 'order'>;
+
+/** `GET /api/deals/summary?type&from&to&vehicleId&counterpartyId&q`: count per status. */
+export function fetchDealSummary(
+  query: DealSummaryQuery,
+  signal?: AbortSignal,
+): Promise<DealSummary> {
+  return http.get<DealSummary>('/deals/summary', { query: { ...query }, signal });
 }
 
 export function fetchDeal(id: string, signal?: AbortSignal): Promise<DealDetail> {

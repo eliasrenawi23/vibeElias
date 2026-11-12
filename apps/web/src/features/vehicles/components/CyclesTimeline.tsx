@@ -1,9 +1,9 @@
-import { Flex, Tag, Timeline, Typography } from 'antd';
+import { Flex, Grid, Timeline, Typography } from 'antd';
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Ltr } from '../../../shared/lib/bidi';
 import { useEnumLabel } from '../../../shared/lib/enums';
-import { TONE_DOT_COLORS } from '../../../shared/lib/statusTones';
+import { TONE_DOT_COLORS, type Tone } from '../../../shared/lib/statusTones';
 import { DateText } from '../../../shared/ui/DateText';
 import { EmptyState } from '../../../shared/ui/EmptyState';
 import { Money } from '../../../shared/ui/Money';
@@ -33,37 +33,68 @@ function Commission({ cycle }: { cycle: InventoryCycle }) {
   return <span>{enumLabel('CommissionMode', cycle.commissionMode)}</span>;
 }
 
-/** Inventory cycles, newest first: kind, dates, end reason, expenses and consignment terms. */
+/** Start – end of a cycle ("now" while it is open). */
+function CycleDates({ cycle }: { cycle: InventoryCycle }) {
+  const { t } = useTranslation();
+  return (
+    <span className="rm-cycle-dates rm-nowrap">
+      <DateText value={cycle.startedAt} />
+      {' – '}
+      {cycle.endedAt ? <DateText value={cycle.endedAt} /> : t('vehicles.cycles.now')}
+    </span>
+  );
+}
+
+/**
+ * Inventory cycles, newest first, on AntD `Timeline`: the dates in their own column (from `md`
+ * up; above the event on phones), then the event (kind, open / end reason), who it was with
+ * (the consignor) and the money terms. Dots take their tone from the registry: the open cycle is
+ * the current one (success, ringed), closed cycles are done (neutral).
+ */
 export function CyclesTimeline({ cycles }: { cycles: readonly InventoryCycle[] }) {
   const { t } = useTranslation();
   const enumLabel = useEnumLabel();
+  const screens = Grid.useBreakpoint();
+  // `screens` is empty until the first measurement; treat that as desktop.
+  const wide = screens.md !== false;
   if (cycles.length === 0) return <EmptyState compact description={t('vehicles.cycles.empty')} />;
 
   return (
     <Timeline
       className="rm-cycles-timeline"
       data-testid="cycles-timeline"
+      titleSpan={wide ? 6 : undefined}
       items={cycles.map((c) => {
         const open = !c.endedAt;
+        const tone: Tone = open ? 'success' : 'neutral';
         return {
           key: c.id,
-          color: TONE_DOT_COLORS[open ? 'success' : 'neutral'],
+          color: TONE_DOT_COLORS[tone],
+          className: open
+            ? 'rm-timeline-item rm-timeline-current'
+            : 'rm-timeline-item rm-timeline-done',
+          title: wide ? <CycleDates cycle={c} /> : undefined,
           content: (
-            <Flex vertical gap={4} data-testid="cycle-item">
-              <Flex gap={6} wrap align="center">
+            <Flex vertical gap={4} data-testid="cycle-item" data-state={open ? 'current' : 'done'}>
+              {!wide && <CycleDates cycle={c} />}
+              <Flex gap={6} wrap align="center" className="rm-timeline-event">
                 <StatusTag enumName="CycleKind" value={c.kind} />
                 {open ? (
                   <ToneTag tone="success">{t('vehicles.cycles.open')}</ToneTag>
                 ) : (
-                  c.endReason && <Tag>{enumLabel('CycleEndReason', c.endReason)}</Tag>
+                  c.endReason && (
+                    <ToneTag tone="neutral">{enumLabel('CycleEndReason', c.endReason)}</ToneTag>
+                  )
                 )}
-                <span className="rm-cycle-dates">
-                  <DateText value={c.startedAt} />
-                  {' – '}
-                  {open ? t('vehicles.cycles.now') : <DateText value={c.endedAt} />}
-                </span>
               </Flex>
-              <Flex gap={16} wrap>
+              {c.kind === 'CONSIGNED' && (
+                <span className="rm-timeline-who">
+                  <Term label={t('vehicles.cycles.consignor')}>
+                    <ContactLink id={c.consignorId} name={c.consignor?.name} />
+                  </Term>
+                </span>
+              )}
+              <Flex gap={16} wrap className="rm-timeline-terms">
                 <Term label={t('vehicles.cycles.expenseTotal')}>
                   <Money amount={c.expenseTotal ?? 0} />
                 </Term>
@@ -76,9 +107,6 @@ export function CyclesTimeline({ cycles }: { cycles: readonly InventoryCycle[] }
                   )}
                 {c.kind === 'CONSIGNED' && (
                   <>
-                    <Term label={t('vehicles.cycles.consignor')}>
-                      <ContactLink id={c.consignorId} name={c.consignor?.name} />
-                    </Term>
                     <Term label={t('vehicles.cycles.askingPrice')}>
                       <Money amount={c.askingPrice} decimals={false} />
                     </Term>

@@ -854,6 +854,19 @@ test('lease lifecycle: payment, wizard, activation, end, fine, Arabic', async ({
   await expect(page.getByTestId('lease-responsibilities')).toContainText('Us');
   await expect(page.getByTestId('checklist-view-handover')).toContainText('120,500');
   await expect(page.getByTestId('lease-action-activate')).toHaveCount(0);
+  // Lifecycle stepper: Draft done, Active current, Ended still to come.
+  const lifecycle = page.getByRole('group', { name: 'Contract progress' });
+  await expect(lifecycle).toBeVisible();
+  await expect(lifecycle.locator('[data-lifecycle-step]')).toHaveText([
+    'Draft',
+    /^Active/,
+    'Ended',
+  ]);
+  await expect(lifecycle.locator('[aria-current="step"]')).toHaveAttribute(
+    'data-lifecycle-step',
+    'ACTIVE',
+  );
+  await expect(lifecycle.locator('.ant-steps-item-finish')).toHaveCount(1);
 
   /* ---- End contract ---- */
   await page.getByTestId('lease-action-end').click();
@@ -884,6 +897,13 @@ test('lease lifecycle: payment, wizard, activation, end, fine, Arabic', async ({
     }),
   });
   await expect(page.getByTestId('lease-tags')).toContainText('Terminated');
+  // Terminated early: an error step replaces "Ended".
+  await expect(lifecycle.locator('[data-lifecycle-step]')).toHaveText([
+    'Draft',
+    'Active',
+    /^Terminated/,
+  ]);
+  await expect(lifecycle.locator('.ant-steps-item-error')).toHaveCount(1);
 
   /* ---- Fines list -> add fine ---- */
   await page.goto('/fines');

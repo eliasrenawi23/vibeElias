@@ -1524,5 +1524,15 @@
     "close": "The changes you made in this form will be lost.",
     "discard": "Discard changes",
     "stay": "Keep editing"
+  },
+  "lifecycle": {
+    "lease": "Contract progress",
+    "deal": "Deal progress",
+    "transfer": "Ownership transfer progress",
+    "fine": "Fine progress",
+    "current": "current step"
+  },
+  "summary": {
+    "label": "Quick filters by status"
   }
 }

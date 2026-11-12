@@ -10,7 +10,8 @@ import { useListParams } from '../../../shared/lib/listParams';
 import { EmptyState } from '../../../shared/ui/EmptyState';
 import { FilterBar } from '../../../shared/ui/FilterBar';
 import { LoadError } from '../../../shared/ui/LoadError';
-import { fetchDeals } from '../api';
+import { StatusSummaryCards } from '../../../shared/ui/StatusSummaryCards';
+import { fetchDealSummary, fetchDeals, type DealSummaryQuery } from '../api';
 import { DealsTable } from '../components/DealsTable';
 import { newDealPath } from '../lib/dealRules';
 import { dealKeys } from '../queryKeys';
@@ -73,6 +74,11 @@ export function DealsPage() {
     [searchParams, page, pageSize, sort, order],
   );
   const filtered = Boolean(query.q || query.type || query.status || query.from || query.to);
+  // The summary cards count under every filter except the status itself.
+  const summaryQuery = useMemo<DealSummaryQuery>(
+    () => ({ q: query.q, type: query.type, from: query.from, to: query.to }),
+    [query.q, query.type, query.from, query.to],
+  );
 
   const list = useQuery({
     queryKey: dealKeys.list(query),
@@ -82,6 +88,12 @@ export function DealsPage() {
 
   return (
     <Flex vertical gap={16}>
+      <StatusSummaryCards
+        enumName="DealStatus"
+        statuses={DealStatus.options}
+        queryKey={dealKeys.summary(summaryQuery)}
+        load={(signal) => fetchDealSummary(summaryQuery, signal)}
+      />
       <FilterBar
         searchPlaceholder={t('deals.searchPlaceholder')}
         filters={[

@@ -25,6 +25,7 @@ import { ConfirmDialog } from '../../../shared/ui/ConfirmDialog';
 import { DetailPageLayout } from '../../../shared/ui/DetailPageLayout';
 import { FactChips } from '../../../shared/ui/FactChips';
 import { LicenseTag } from '../../../shared/ui/LicenseTag';
+import { LifecycleSteps } from '../../../shared/ui/LifecycleSteps';
 import { Money } from '../../../shared/ui/Money';
 import { PlateNo } from '../../../shared/ui/PlateNo';
 import { StatusTag } from '../../../shared/ui/StatusTag';
@@ -193,6 +194,7 @@ function LeaseView({ id }: { id: string }) {
       }}
       // Ended / terminated contracts already offer only "record payment" and "deposit".
       readOnlyReason={closed ? t('leases.readOnlyClosed') : undefined}
+      lifecycle={<LifecycleSteps lifecycle="lease" status={lease.status} />}
       facts={
         <FactChips
           facts={[

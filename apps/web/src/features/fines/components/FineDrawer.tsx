@@ -23,6 +23,7 @@ import { AlertTags } from '../../../shared/ui/AlertTags';
 import { ConfirmDialog } from '../../../shared/ui/ConfirmDialog';
 import { DateText } from '../../../shared/ui/DateText';
 import { DateTimeText } from '../../../shared/ui/DateTimeText';
+import { LifecycleSteps } from '../../../shared/ui/LifecycleSteps';
 import { Money } from '../../../shared/ui/Money';
 import { PlateNo } from '../../../shared/ui/PlateNo';
 import { StatusTag } from '../../../shared/ui/StatusTag';
@@ -90,6 +91,7 @@ export function FineDrawer({ fine, onClose, onSaved }: FineDrawerProps) {
     >
       <Flex vertical gap={12}>
         {error && <Alert type="error" showIcon title={errorMessage(error)} />}
+        <LifecycleSteps lifecycle="fine" status={fine.status} labelsBelow />
         <Descriptions
           size="small"
           column={DESCRIPTION_COLUMNS_SINGLE}

@@ -1,4 +1,5 @@
 import type { LedgerQuery } from '../ledger/types';
+import type { LeaseSummaryQuery } from './api';
 import type { LeaseListQuery } from './types';
 
 /**
@@ -10,6 +11,7 @@ export const leaseKeys = {
   lists: () => [...leaseKeys.all, 'list'] as const,
   list: (filters: LeaseListQuery) => [...leaseKeys.lists(), filters] as const,
   count: (status: string) => [...leaseKeys.all, 'count', status] as const,
+  summary: (filters: LeaseSummaryQuery) => [...leaseKeys.all, 'summary', filters] as const,
   detail: (id: string) => [...leaseKeys.all, 'detail', id] as const,
   ledger: (id: string, filters: Omit<LedgerQuery, 'driverId' | 'contractId'>) =>
     [...leaseKeys.detail(id), 'ledger', filters] as const,

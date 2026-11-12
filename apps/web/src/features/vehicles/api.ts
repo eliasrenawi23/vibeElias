@@ -10,6 +10,7 @@ import type {
   Paginated,
   VehicleCreate,
   VehicleStatusChange,
+  VehicleSummary,
   VehicleUpdate,
 } from '@renawi/shared';
 import { asItems } from '../../shared/lib/collections';
@@ -37,6 +38,23 @@ export function fetchVehicles(
   signal?: AbortSignal,
 ): Promise<Paginated<VehicleListItem>> {
   return http.get<Paginated<VehicleListItem>>('/vehicles', {
+    query: { ...query, isTaxi: query.isTaxi ? true : undefined },
+    signal,
+  });
+}
+
+/** List filters a status summary honours: everything except status, paging and sorting. */
+export type VehicleSummaryQuery = Omit<
+  VehicleListQuery,
+  'status' | 'page' | 'pageSize' | 'sort' | 'order'
+>;
+
+/** `GET /api/vehicles/summary?q&ownership&isTaxi&make&yearFrom&yearTo`: count per status. */
+export function fetchVehicleSummary(
+  query: VehicleSummaryQuery,
+  signal?: AbortSignal,
+): Promise<VehicleSummary> {
+  return http.get<VehicleSummary>('/vehicles/summary', {
     query: { ...query, isTaxi: query.isTaxi ? true : undefined },
     signal,
   });

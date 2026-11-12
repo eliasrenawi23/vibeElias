@@ -17,6 +17,7 @@ import type { ActionDef } from '../../../shared/ui/ActionBar';
 import { AlertTags } from '../../../shared/ui/AlertTags';
 import { DetailPageLayout } from '../../../shared/ui/DetailPageLayout';
 import { FactChips } from '../../../shared/ui/FactChips';
+import { LifecycleSteps } from '../../../shared/ui/LifecycleSteps';
 import { Money } from '../../../shared/ui/Money';
 import { StatusTag } from '../../../shared/ui/StatusTag';
 import { TabLabel } from '../../../shared/ui/TabLabel';
@@ -163,6 +164,13 @@ function DealView({ id }: { id: string }) {
       }}
       // A cancelled deal already has no actions at all.
       readOnlyReason={deal.status === 'CANCELLED' ? t('deals.readOnlyCancelled') : undefined}
+      lifecycle={
+        <div className="rm-lifecycle-row">
+          <LifecycleSteps lifecycle="deal" status={deal.status} />
+          {/* The ownership transfer starts once a sale is completed. */}
+          {transfer && <LifecycleSteps lifecycle="transfer" status={deal.transferStatus} />}
+        </div>
+      }
       facts={
         <FactChips
           facts={[
