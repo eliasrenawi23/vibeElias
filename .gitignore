@@ -22,6 +22,8 @@ blob-report/
 
 # Runtime data
 uploads/
+# Local backups of the production stack (docker-compose.prod.yml, BACKUP_LOCAL_DIR)
+/backups/
 /data/
 apps/api/data/
 

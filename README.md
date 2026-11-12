@@ -115,6 +115,24 @@ Optional database UI: `docker compose --profile tools up -d` starts pgAdmin on
 
 Root scripts load `.env` (via `dotenv-cli`) before calling Prisma or starting the apps.
 
+## Production
+
+One small Linux server (Hetzner, Ubuntu 24.04) runs the stack with Docker Compose
+(`docker-compose.prod.yml`): Caddy (automatic HTTPS) → nginx (the built web app, `/api/` proxied)
+→ API (with Chromium for PDFs) → PostgreSQL 17, plus a backup container that sends a nightly
+database dump and the uploaded documents to a Backblaze B2 bucket. Every push to `main` runs **CI**
+(`.github/workflows/ci.yml`); **Deploy** (`.github/workflows/deploy.yml`) is started by hand in
+GitHub Actions: it builds and pushes the images to GHCR and runs `deploy/deploy.sh` on the server
+over SSH (automatic deploys after a green CI run can be switched on later, see the deploy guide).
+Runtime secrets live only in the server's `.env` (template: `.env.production.example`).
+
+- [Deploy guide](docs/ops/deploy.md): server, domain, HTTPS, first admin, backups, GitHub secrets,
+  updates, rollback, logs, common problems
+- [Restore guide](docs/ops/restore.md): restoring backups and the quarterly rehearsal
+- [Security](docs/ops/security.md): what is hardened, owner checklist, rotating secrets, personal data
+- User guides: [English](docs/user-guide.en.md) · [עברית](docs/user-guide.he.md)
+- Local rehearsal of the production stack over HTTP: `deploy/docker-compose.local-test.yml`
+
 ## Workspace layout
 
 | Path              | Contents                                                                                                       |

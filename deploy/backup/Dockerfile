@@ -28,7 +28,6 @@ ENV TZ=Asia/Jerusalem \
 # /data/uploads is not created here: an image folder would be copied (root-owned) into a new
 # uploads volume. Compose mounts it; docker-compose.prod.yml's volume-init sets its owner.
 RUN mkdir -p /backups /data/backup
-VOLUME ["/backups"]
 
 HEALTHCHECK --interval=1m --timeout=5s --retries=3 CMD pgrep crond > /dev/null || exit 1
 
