@@ -1,0 +1,21 @@
+# Build the Renawi Motors images on the server (from a git checkout of this repo) instead of
+# pulling them from GHCR. Use it together with docker-compose.prod.yml, e.g. in .env:
+#
+#   COMPOSE_FILE=docker-compose.prod.yml:docker-compose.build.yml
+#   IMAGE_PREFIX=renawi            # local image names: renawi/renawi-api:latest, ...
+#
+# then `git pull && bash deploy/deploy.sh` (deploy.sh builds whatever has a build section).
+# Building the API image needs ~2 GB of free memory and downloads Chromium; on the 4 GB server
+# it takes several minutes.
+services:
+  api:
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile
+  web:
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+  backup:
+    build:
+      context: deploy/backup

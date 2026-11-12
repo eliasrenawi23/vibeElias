@@ -1,0 +1,276 @@
+# Renawi Motors - production stack for one small VPS (Hetzner CX22: 2 vCPU, 4 GB RAM + 2 GB swap).
+#
+#   caddy (80/443, HTTPS) -> web (nginx: app + /api/ proxy) -> api (NestJS, Chromium for PDFs)
+#                                                               -> postgres (no host port)
+#   backup: nightly pg_dump + uploads archive -> local folder + S3 bucket (Backblaze B2)
+#
+# On the server (/opt/renawi; COMPOSE_FILE=docker-compose.prod.yml is set in .env, so plain
+# `docker compose ...` uses this file). Step by step: docs/ops/deploy.md.
+#   bash deploy/deploy.sh                          pull the images, (re)start, wait for health
+#   docker compose run --rm admin                  create the first admin user (ADMIN_* in .env)
+#   docker compose exec backup backup.sh --now     run a backup now
+#   docker compose run --rm restore <db.dump> [uploads.tgz]      see docs/ops/restore.md
+#
+# Images come from GHCR (pushed by .github/workflows/deploy.yml). To build them on the server
+# from a git checkout instead: COMPOSE_FILE=docker-compose.prod.yml:docker-compose.build.yml
+# Every setting comes from .env (template: .env.production.example).
+name: renawi
+
+x-logging: &logging
+  driver: json-file
+  options:
+    max-size: '10m'
+    max-file: '5'
+
+x-api-image: &api-image ${IMAGE_PREFIX:?set IMAGE_PREFIX in .env, e.g. ghcr.io/your-github-user}/renawi-api:${IMAGE_TAG:-latest}
+x-backup-image: &backup-image ${IMAGE_PREFIX:?set IMAGE_PREFIX in .env}/renawi-backup:${IMAGE_TAG:-latest}
+
+# Built from POSTGRES_* unless DATABASE_URL is set in .env (the password must then be URL-safe:
+# generate it with `openssl rand -hex 32`).
+x-database-url: &database-url ${DATABASE_URL:-postgresql://${POSTGRES_USER:-renawi}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-renawi}?schema=public}
+
+# Shared by the backup sidecar and the restore tool.
+x-backup-env: &backup-env
+  TZ: ${BACKUP_TZ:-Asia/Jerusalem}
+  PGHOST: postgres
+  PGPORT: '5432'
+  PGUSER: ${POSTGRES_USER:-renawi}
+  PGPASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}
+  PGDATABASE: ${POSTGRES_DB:-renawi}
+  S3_ENDPOINT: ${S3_ENDPOINT:-}
+  S3_REGION: ${S3_REGION:-}
+  S3_BUCKET: ${S3_BUCKET:-}
+  S3_ACCESS_KEY: ${S3_ACCESS_KEY:-}
+  S3_SECRET_KEY: ${S3_SECRET_KEY:-}
+  S3_PREFIX: ${S3_PREFIX:-renawi/}
+  S3_PROVIDER: ${S3_PROVIDER:-Other}
+
+services:
+  postgres:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-renawi}
+      # Applied only when the data volume is created; see docs/ops/security.md to change it later.
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}
+      POSTGRES_DB: ${POSTGRES_DB:-renawi}
+      TZ: UTC
+      PGTZ: UTC
+    command:
+      - postgres
+      - -c
+      - shared_buffers=256MB
+      - -c
+      - effective_cache_size=1GB
+      - -c
+      - max_connections=50
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    networks: [backend]
+    shm_size: 128mb
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U "$$POSTGRES_USER" -d "$$POSTGRES_DB"']
+      interval: 10s
+      timeout: 5s
+      retries: 6
+      start_period: 30s
+    stop_grace_period: 1m
+    security_opt: ['no-new-privileges:true']
+    deploy:
+      resources:
+        limits: { cpus: '1.0', memory: 768M }
+    logging: *logging
+
+  # One-shot: gives the uploads volume to the API's `node` user (uid 1000). Docker creates a new
+  # volume root-owned when another container (the backup sidecar) happens to mount it first.
+  volume-init:
+    image: *backup-image
+    entrypoint:
+      - sh
+      - -c
+      - chown 1000:1000 /data/uploads && find /data/uploads ! -user 1000 -exec chown 1000:1000 {} +
+    volumes:
+      - uploads:/data/uploads
+    network_mode: none
+    restart: 'no'
+    logging: *logging
+
+  api:
+    image: *api-image
+    restart: unless-stopped
+    # tini as PID 1 reaps the Chromium helper processes of the PDF renderer.
+    init: true
+    depends_on:
+      postgres:
+        condition: service_healthy
+      volume-init:
+        condition: service_completed_successfully
+    # The image applies pending migrations (prisma migrate deploy) and then starts the API.
+    environment:
+      NODE_ENV: production
+      PORT: '3000'
+      TZ: UTC
+      BUSINESS_TZ: ${BUSINESS_TZ:-Asia/Jerusalem}
+      DATABASE_URL: *database-url
+      JWT_ACCESS_SECRET: ${JWT_ACCESS_SECRET:?set JWT_ACCESS_SECRET in .env}
+      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET:?set JWT_REFRESH_SECRET in .env}
+      ACCESS_TTL: ${ACCESS_TTL:-15m}
+      REFRESH_TTL: ${REFRESH_TTL:-30d}
+      COOKIE_SECURE: ${COOKIE_SECURE:-true}
+      CORS_ORIGIN: ${CORS_ORIGIN:-https://${DOMAIN}}
+      # Caddy and nginx sit on private Docker networks in front of the API. (Express rejects
+      # the literal value "true".)
+      TRUST_PROXY: ${TRUST_PROXY:-loopback,uniquelocal}
+      LOGIN_THROTTLE_LIMIT: ${LOGIN_THROTTLE_LIMIT:-10}
+      CRON_ENABLED: ${CRON_ENABLED:-true}
+      UPLOAD_DIR: /data/uploads
+      MAX_UPLOAD_MB: ${MAX_UPLOAD_MB:-20}
+      BACKUP_STATUS_FILE: /data/backup/last-success.json
+      PDF_CONCURRENCY: ${PDF_CONCURRENCY:-1}
+      PDF_TIMEOUT_MS: ${PDF_TIMEOUT_MS:-60000}
+      # Node heap cap; the rest of the memory limit is for Chromium while a PDF renders.
+      NODE_OPTIONS: --max-old-space-size=640
+    volumes:
+      - uploads:/data/uploads
+      # Written by the backup sidecar, read by GET /api/settings/backup-status.
+      - backup-status:/data/backup:ro
+    networks: [frontend, backend]
+    # Chromium uses /dev/shm (also started with --disable-dev-shm-usage).
+    shm_size: 256mb
+    healthcheck:
+      test:
+        - CMD
+        - node
+        - -e
+        - "fetch('http://127.0.0.1:3000/api/health').then(r=>r.json()).then(j=>process.exit(j.db==='up'?0:1)).catch(()=>process.exit(1))"
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 90s
+    stop_grace_period: 30s
+    security_opt: ['no-new-privileges:true']
+    deploy:
+      resources:
+        limits: { cpus: '1.5', memory: 1536M }
+    logging: *logging
+
+  web:
+    image: ${IMAGE_PREFIX:?set IMAGE_PREFIX in .env}/renawi-web:${IMAGE_TAG:-latest}
+    restart: unless-stopped
+    # nginx resolves `api` per request, so it starts (and keeps serving the app) without it.
+    depends_on: [api]
+    networks: [frontend]
+    healthcheck:
+      test: ['CMD', 'wget', '-q', '-O', '/dev/null', 'http://127.0.0.1/healthz']
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    security_opt: ['no-new-privileges:true']
+    deploy:
+      resources:
+        limits: { cpus: '0.5', memory: 128M }
+    logging: *logging
+
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    depends_on: [web]
+    ports:
+      - '80:80'
+      - '443:443'
+      - '443:443/udp'
+    environment:
+      DOMAIN: ${DOMAIN:?set DOMAIN in .env}
+      ACME_EMAIL: ${ACME_EMAIL:?set ACME_EMAIL in .env}
+    volumes:
+      - ./deploy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+      - caddy-config:/config
+    networks: [frontend]
+    security_opt: ['no-new-privileges:true']
+    deploy:
+      resources:
+        limits: { cpus: '0.5', memory: 256M }
+    logging: *logging
+
+  backup:
+    image: *backup-image
+    restart: unless-stopped
+    init: true
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      <<: *backup-env
+      BACKUP_CRON: ${BACKUP_CRON:-}
+      BACKUP_RETENTION_DAYS: ${BACKUP_RETENTION_DAYS:-30}
+      BACKUP_LOCAL_KEEP: ${BACKUP_LOCAL_KEEP:-7}
+      HEALTHCHECK_PING_URL: ${HEALTHCHECK_PING_URL:-}
+    volumes:
+      # Read-only: the backup never changes the documents it archives.
+      - uploads:/data/uploads:ro
+      - backup-status:/data/backup
+      # Local copies (newest BACKUP_LOCAL_KEEP); a host folder so they are easy to download.
+      - ${BACKUP_LOCAL_DIR:-./backups}:/backups
+    networks: [backend]
+    security_opt: ['no-new-privileges:true']
+    deploy:
+      resources:
+        limits: { cpus: '1.0', memory: 512M }
+    logging: *logging
+
+  # ---- One-off tools (profile "tools": never started by `up`) --------------------------------
+
+  # Creates the first admin user from ADMIN_EMAIL / ADMIN_PASSWORD / ADMIN_NAME, or resets the
+  # password of an existing one: docker compose run --rm admin node create-admin.cjs --reset-password
+  admin:
+    image: *api-image
+    profiles: [tools]
+    depends_on:
+      postgres:
+        condition: service_healthy
+    command: ['node', 'create-admin.cjs']
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: *database-url
+      ADMIN_EMAIL: ${ADMIN_EMAIL:-}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-}
+      ADMIN_NAME: ${ADMIN_NAME:-}
+    volumes:
+      - ./deploy/create-admin.cjs:/app/apps/api/create-admin.cjs:ro
+    networks: [backend]
+    healthcheck:
+      disable: true
+    logging: *logging
+
+  # Restores a backup (uploads volume mounted read-write): see docs/ops/restore.md.
+  restore:
+    image: *backup-image
+    profiles: [tools]
+    depends_on:
+      postgres:
+        condition: service_healthy
+    entrypoint: ['restore.sh']
+    environment:
+      <<: *backup-env
+    volumes:
+      - uploads:/data/uploads
+      - ${BACKUP_LOCAL_DIR:-./backups}:/backups
+    networks: [backend]
+    healthcheck:
+      disable: true
+    logging: *logging
+
+networks:
+  # caddy <-> web <-> api
+  frontend:
+  # api / backup <-> postgres (caddy and nginx cannot reach the database)
+  backend:
+
+volumes:
+  pgdata:
+  uploads:
+  backup-status:
+  caddy-data:
+  caddy-config:

@@ -64,6 +64,17 @@ COPY --from=prod-deps --chown=node:node /app/package.json ./package.json
 COPY --from=prod-deps --chown=node:node /app/node_modules ./node_modules
 COPY --from=prod-deps --chown=node:node /app/apps/api/node_modules ./apps/api/node_modules
 COPY --from=prod-deps --chown=node:node /app/packages/shared/node_modules ./packages/shared/node_modules
+
+# Chromium for the PDF renderer (Playwright, version from apps/api/package.json), with its
+# system libraries and fonts. Installed as root into a shared folder the node user can read.
+# Placed before the app files so this large layer is reused until the dependencies change.
+# The CLI is called by path: with --omit=dev npm links no `playwright` bin (the name is also
+# claimed by @playwright/test, a dev dependency of the web app).
+ENV PLAYWRIGHT_BROWSERS_PATH=/ms-playwright
+RUN node node_modules/playwright/cli.js install --with-deps --only-shell chromium \
+ && chmod -R a+rX /ms-playwright \
+ && rm -rf /var/lib/apt/lists/* /root/.cache /tmp/*
+
 COPY --from=build --chown=node:node /app/packages/shared/package.json ./packages/shared/package.json
 COPY --from=build --chown=node:node /app/packages/shared/dist ./packages/shared/dist
 COPY --from=build --chown=node:node /app/packages/shared/src/locales ./packages/shared/src/locales
@@ -74,13 +85,6 @@ COPY --from=build --chown=node:node /app/apps/api/dist ./apps/api/dist
 # (the API finds them at /app/packages/brand from dist/pdf).
 COPY --chown=node:node packages/brand/fonts ./packages/brand/fonts
 COPY --chown=node:node packages/brand/logo ./packages/brand/logo
-
-# Chromium for the PDF renderer (Playwright, version from apps/api/package.json), with its
-# system libraries and fonts. Installed as root into a shared folder the node user can read.
-ENV PLAYWRIGHT_BROWSERS_PATH=/ms-playwright
-RUN npx --no-install playwright install --with-deps --only-shell chromium \
- && chmod -R a+rX /ms-playwright \
- && rm -rf /var/lib/apt/lists/* /root/.cache /tmp/*
 
 # Uploaded documents (milestone 2) live here; mount a volume in production.
 RUN mkdir -p /data/uploads && chown node:node /data/uploads

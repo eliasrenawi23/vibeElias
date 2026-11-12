@@ -1,0 +1,31 @@
+# Local rehearsal of the production stack over plain HTTP: no Caddy, no TLS, the web container
+# on http://127.0.0.1:8088, cookies without the Secure flag, backups in a throw-away volume.
+# Run from the REPO ROOT (relative paths resolve against the first -f file's folder) with an
+# env file made from .env.production.example (DOMAIN=localhost, IMAGE_PREFIX=renawi-prodtest,
+# IMAGE_TAG=test, S3_BUCKET empty) and a separate project name:
+#
+#   docker compose -p renawi-prodtest --env-file <test.env> \
+#     -f docker-compose.prod.yml -f docker-compose.build.yml -f deploy/docker-compose.local-test.yml \
+#     up -d --build
+#   ...
+#   docker compose -p renawi-prodtest --env-file <test.env> -f ... down -v
+services:
+  caddy:
+    # Disabled: only started when the "disabled" profile is requested (never).
+    profiles: [disabled]
+  web:
+    ports:
+      - '127.0.0.1:8088:80'
+  api:
+    environment:
+      COOKIE_SECURE: 'false'
+      CORS_ORIGIN: http://localhost:8088
+  backup:
+    volumes:
+      - local-backups:/backups
+  restore:
+    volumes:
+      - local-backups:/backups
+
+volumes:
+  local-backups:

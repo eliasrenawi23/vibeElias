@@ -1,0 +1,38 @@
+# Ignore rules for `docker build -f apps/web/Dockerfile .` (context = repo root).
+# BuildKit uses <Dockerfile name>.dockerignore next to the Dockerfile instead of a root
+# .dockerignore, so these rules apply to the web image only.
+
+.git
+.claude
+.vscode
+**/node_modules
+**/dist
+**/dev-dist
+**/coverage
+**/.vite
+**/*.tsbuildinfo
+**/*.log
+**/.env
+**/.env.*
+data
+docs
+backups
+
+# Only the nginx configuration is needed from deploy/.
+deploy/*
+!deploy/nginx.conf
+!deploy/nginx-security-headers.conf
+
+# API: only its manifest is needed (npm ci validates the lockfile).
+apps/api/*
+!apps/api/package.json
+
+# Web test output and browser tests.
+apps/web/e2e
+apps/web/test-results
+apps/web/playwright-report
+apps/web/blob-report
+
+# Brand build tooling and preview page (the web build only reads tokens, logos and icons).
+packages/brand/scripts
+packages/brand/brand-preview.html

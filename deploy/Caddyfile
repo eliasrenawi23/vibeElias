@@ -1,0 +1,25 @@
+# Caddy in front of the Renawi Motors stack: automatic HTTPS certificates (Let's Encrypt) for
+# DOMAIN, HTTP -> HTTPS redirect, compression, HSTS, and a reverse proxy to the web container
+# (nginx serves the app and forwards /api/ to the API).
+#
+# DOMAIN and ACME_EMAIL come from .env (docker-compose.prod.yml passes them to this container).
+# First deploy without a domain: DOMAIN=<server IP with dashes>.sslip.io, e.g. 203-0-113-10.sslip.io
+{
+	email {$ACME_EMAIL}
+}
+
+{$DOMAIN} {
+	encode zstd gzip
+
+	header {
+		Strict-Transport-Security "max-age=31536000"
+		-Server
+	}
+
+	reverse_proxy web:80
+
+	log {
+		output stdout
+		format json
+	}
+}
