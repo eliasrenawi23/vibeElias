@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { parseDurationMs } from './duration';
+import { parseTrustProxy, type TrustProxySetting } from './trust-proxy';
 
 const bool = z
   .enum(['true', 'false', '1', '0', 'yes', 'no'])
@@ -29,8 +30,21 @@ export const EnvSchema = z.object({
   COOKIE_SECURE: bool.default('false'),
   /** Comma-separated list of allowed browser origins. */
   CORS_ORIGIN: z.string().default('http://localhost:5173'),
-  /** Express `trust proxy` setting when running behind a reverse proxy (e.g. `1`, `loopback`). */
-  TRUST_PROXY: z.string().optional(),
+  /**
+   * Express `trust proxy` behind reverse proxies: `true` (= 2 hops, Caddy + nginx), a hop count,
+   * or a list such as `loopback,uniquelocal`; empty / `false` = off. See `parseTrustProxy`.
+   */
+  TRUST_PROXY: z
+    .string()
+    .optional()
+    .transform((value, ctx): TrustProxySetting => {
+      try {
+        return parseTrustProxy(value);
+      } catch (e) {
+        ctx.addIssue({ code: z.ZodIssueCode.custom, message: (e as Error).message });
+        return z.NEVER;
+      }
+    }),
   BUSINESS_TZ: z.string().default('Asia/Jerusalem'),
   /** Login attempts allowed per IP per minute. */
   LOGIN_THROTTLE_LIMIT: z.coerce.number().int().min(1).default(10),

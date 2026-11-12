@@ -7,13 +7,17 @@ export const NO_BACKUP: Readonly<BackupStatus> = Object.freeze({
   lastSuccessAt: null,
   lastFile: null,
   ok: false,
+  offsite: null,
+  remote: null,
 });
 
 /**
  * Parses the status file the backup sidecar writes after every successful run
- * (`{"lastSuccessAt": "<ISO instant>", "lastFile": "<name>"}`). `ok` = the last success is at
- * most `maxAgeHours` old (and not in the future by more than a few minutes of clock skew).
- * Anything unusable (no file, bad JSON, no valid instant) reports `NO_BACKUP`.
+ * (`{"lastSuccessAt": "<ISO instant>", "lastFile": "<name>", "offsite": true|false,
+ * "remote": "s3:<bucket>/<prefix>"}`). `ok` = the last success is at most `maxAgeHours` old (and
+ * not in the future by more than a few minutes of clock skew). `offsite` is passed through
+ * (`null` when the file predates the field or holds something else); `remote` only when
+ * `offsite` is true. Anything unusable (no file, bad JSON, no valid instant) reports `NO_BACKUP`.
  */
 export function parseBackupStatus(
   raw: string | null,
@@ -33,12 +37,19 @@ export function parseBackupStatus(
   if (!at || Number.isNaN(at.getTime())) return { ...NO_BACKUP };
   const lastFile =
     typeof record.lastFile === 'string' && record.lastFile.trim() ? record.lastFile.trim() : null;
+  const offsite = typeof record.offsite === 'boolean' ? record.offsite : null;
+  const remote =
+    offsite === true && typeof record.remote === 'string' && record.remote.trim()
+      ? record.remote.trim()
+      : null;
   const ageMs = now.getTime() - at.getTime();
   const skewMs = 5 * 60_000;
   return {
     lastSuccessAt: at.toISOString(),
     lastFile,
     ok: ageMs >= -skewMs && ageMs <= maxAgeHours * 3_600_000,
+    offsite,
+    remote,
   };
 }
 

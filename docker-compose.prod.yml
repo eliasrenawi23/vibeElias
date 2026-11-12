@@ -120,8 +120,8 @@ services:
       REFRESH_TTL: ${REFRESH_TTL:-30d}
       COOKIE_SECURE: ${COOKIE_SECURE:-true}
       CORS_ORIGIN: ${CORS_ORIGIN:-https://${DOMAIN}}
-      # Caddy and nginx sit on private Docker networks in front of the API. (Express rejects
-      # the literal value "true".)
+      # Caddy and nginx sit on private Docker networks in front of the API. Also accepted: true
+      # (= 2 hops, Caddy -> nginx), a hop count, or false (see apps/api/src/config/trust-proxy.ts).
       TRUST_PROXY: ${TRUST_PROXY:-loopback,uniquelocal}
       LOGIN_THROTTLE_LIMIT: ${LOGIN_THROTTLE_LIMIT:-10}
       CRON_ENABLED: ${CRON_ENABLED:-true}

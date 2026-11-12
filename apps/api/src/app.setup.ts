@@ -109,9 +109,9 @@ export function configureApp(app: NestExpressApplication): void {
   app.use(cookieParser());
   app.disable('x-powered-by');
 
+  // Already parsed by the env schema (`parseTrustProxy`): false, a hop count or an address list.
   const trustProxy = config.get('TRUST_PROXY', { infer: true });
-  if (trustProxy)
-    app.set('trust proxy', /^\d+$/.test(trustProxy) ? Number(trustProxy) : trustProxy);
+  if (trustProxy !== false && trustProxy !== undefined) app.set('trust proxy', trustProxy);
 
   const origins = config
     .get('CORS_ORIGIN', { infer: true })

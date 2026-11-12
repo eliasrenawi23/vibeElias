@@ -131,12 +131,16 @@ export const DEFAULT_SETTINGS: Readonly<Settings> = Object.freeze({
 /**
  * `GET /settings/backup-status`: last successful nightly backup, read from the status file the
  * backup sidecar writes (`BACKUP_STATUS_FILE`). `ok` = a backup succeeded within the last
- * `BACKUP_MAX_AGE_HOURS` hours.
+ * `BACKUP_MAX_AGE_HOURS` hours. `offsite` = that backup was also copied to the S3 bucket
+ * (`false` = it stays on the server only; `null` = unknown, a status file of an older sidecar);
+ * `remote` = where it was copied (`s3:<bucket>/<prefix>`), null otherwise.
  */
 export const BackupStatusSchema = z.object({
   lastSuccessAt: isoDateTime.nullable(),
   lastFile: z.string().nullable(),
   ok: z.boolean(),
+  offsite: z.boolean().nullable().optional(),
+  remote: z.string().nullable().optional(),
 });
 export type BackupStatus = z.infer<typeof BackupStatusSchema>;
 
