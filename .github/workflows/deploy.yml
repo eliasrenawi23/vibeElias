@@ -1,0 +1,183 @@
+# Release: build the api, web and backup images, push them to GitHub Container Registry
+# (ghcr.io/<owner>/renawi-*:latest and :sha-<commit>), then deploy them to the server over SSH.
+#
+# Runs after a green CI run on main, or by hand (Actions -> Deploy -> Run workflow, main only).
+# Repository secrets (Settings -> Secrets and variables -> Actions):
+#   VPS_HOST     server IP or host name    - without it the images are pushed but not deployed
+#   VPS_USER     SSH user (deploy)
+#   VPS_SSH_KEY  private key of a key pair whose public half is in ~deploy/.ssh/authorized_keys
+#   VPS_PORT     optional, default 22
+# Runtime secrets (database password, JWT secrets, S3 keys) live only in /opt/renawi/.env on the
+# server, never in GitHub. Step by step: docs/ops/deploy.md
+name: Deploy
+
+on:
+  workflow_run:
+    workflows: [CI]
+    types: [completed]
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      deploy:
+        description: Deploy to the server after pushing the images
+        type: boolean
+        default: true
+
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  meta:
+    name: Release tag
+    if: >-
+      (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main') ||
+      (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success' &&
+       github.event.workflow_run.event == 'push')
+    runs-on: ubuntu-24.04
+    outputs:
+      sha: ${{ steps.vars.outputs.sha }}
+      tag: ${{ steps.vars.outputs.tag }}
+      prefix: ${{ steps.vars.outputs.prefix }}
+    steps:
+      - id: vars
+        env:
+          SHA: ${{ github.event.workflow_run.head_sha || github.sha }}
+          OWNER: ${{ github.repository_owner }}
+        # GHCR repository names must be lowercase.
+        run: |
+          {
+            echo "sha=${SHA}"
+            echo "tag=sha-${SHA::7}"
+            echo "prefix=ghcr.io/${OWNER,,}"
+          } >> "$GITHUB_OUTPUT"
+
+  images:
+    name: Image ${{ matrix.image }}
+    needs: meta
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    permissions:
+      contents: read
+      packages: write
+    strategy:
+      fail-fast: true
+      matrix:
+        include:
+          - image: renawi-api
+            context: .
+            file: apps/api/Dockerfile
+          - image: renawi-web
+            context: .
+            file: apps/web/Dockerfile
+          - image: renawi-backup
+            context: deploy/backup
+            file: deploy/backup/Dockerfile
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.meta.outputs.sha }}
+      - uses: docker/setup-buildx-action@v3
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - uses: docker/build-push-action@v6
+        with:
+          context: ${{ matrix.context }}
+          file: ${{ matrix.file }}
+          push: true
+          provenance: false
+          tags: |
+            ${{ needs.meta.outputs.prefix }}/${{ matrix.image }}:latest
+            ${{ needs.meta.outputs.prefix }}/${{ matrix.image }}:${{ needs.meta.outputs.tag }}
+          labels: |
+            org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
+            org.opencontainers.image.revision=${{ needs.meta.outputs.sha }}
+          cache-from: type=gha,scope=${{ matrix.image }}
+          cache-to: type=gha,mode=max,scope=${{ matrix.image }}
+
+  deploy:
+    name: Deploy to the server
+    needs: [meta, images]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    environment: production
+    permissions:
+      contents: read
+      packages: read
+    steps:
+      - name: Check the server secrets
+        id: check
+        env:
+          VPS_HOST: ${{ secrets.VPS_HOST }}
+          DEPLOY_INPUT: ${{ github.event.inputs.deploy }}
+        run: |
+          if [ -z "$VPS_HOST" ]; then
+            echo "::notice title=Deploy skipped::The VPS_HOST secret is not set: the images were pushed to GHCR but nothing was deployed. Add VPS_HOST, VPS_USER and VPS_SSH_KEY (docs/ops/deploy.md)."
+            echo "enabled=false" >> "$GITHUB_OUTPUT"
+          elif [ "$DEPLOY_INPUT" = "false" ]; then
+            echo "::notice title=Deploy skipped::Run started with deploy = false: images pushed only."
+            echo "enabled=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "enabled=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - uses: actions/checkout@v4
+        if: steps.check.outputs.enabled == 'true'
+        with:
+          ref: ${{ needs.meta.outputs.sha }}
+          sparse-checkout: |
+            docker-compose.prod.yml
+            docker-compose.build.yml
+            .env.production.example
+            deploy
+          sparse-checkout-cone-mode: false
+
+      # Keeps the server's compose file and scripts in step with the images (.env is untouched).
+      - name: Copy the deployment files
+        if: steps.check.outputs.enabled == 'true'
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          port: ${{ secrets.VPS_PORT || 22 }}
+          source: docker-compose.prod.yml,docker-compose.build.yml,.env.production.example,deploy/Caddyfile,deploy/deploy.sh,deploy/create-admin.cjs
+          target: /opt/renawi
+          overwrite: true
+
+      # The workflow token pulls the private images; a throw-away DOCKER_CONFIG keeps it out of
+      # the deploy user's own docker login.
+      - name: Pull and restart
+        if: steps.check.outputs.enabled == 'true'
+        uses: appleboy/ssh-action@v1.2.0
+        env:
+          IMAGE_TAG: ${{ needs.meta.outputs.tag }}
+          GHCR_USER: ${{ github.actor }}
+          GHCR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          port: ${{ secrets.VPS_PORT || 22 }}
+          envs: IMAGE_TAG,GHCR_USER,GHCR_TOKEN
+          command_timeout: 15m
+          script: |
+            set -eu
+            cd /opt/renawi
+            DOCKER_CONFIG="$(mktemp -d)"
+            export DOCKER_CONFIG
+            trap 'rm -rf "$DOCKER_CONFIG"' EXIT
+            echo "$GHCR_TOKEN" | docker login ghcr.io -u "$GHCR_USER" --password-stdin
+            bash deploy/deploy.sh "$IMAGE_TAG"
+
+      - name: Summary
+        if: steps.check.outputs.enabled == 'true'
+        env:
+          TAG: ${{ needs.meta.outputs.tag }}
+        run: echo "Deployed images tagged \`${TAG}\`. Roll back on the server with \`bash deploy/deploy.sh <older tag>\`." >> "$GITHUB_STEP_SUMMARY"
