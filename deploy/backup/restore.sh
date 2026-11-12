@@ -3,13 +3,16 @@
 # and, optionally, the matching uploads archive (replacing the uploads folder).
 #
 #   restore.sh [options] <db-YYYYMMDD-HHMM.dump> [uploads-YYYYMMDD-HHMM.tgz]
+#   restore.sh --list
 #
 # Run it through the "restore" tool service, which mounts the uploads volume read-write:
+#   docker compose run --rm restore --list
 #   docker compose stop api
 #   docker compose run --rm restore db-20261112-0230.dump uploads-20261112-0230.tgz
 #   docker compose start api
 #
 # Options:
+#   --list             list the backups on this server and in the bucket, then exit
 #   --yes              do not ask for confirmation
 #   --db NAME          restore into database NAME instead of $PGDATABASE (created if missing);
 #                      use a scratch name such as renawi_restore_test for a rehearsal
@@ -20,8 +23,10 @@
 # downloaded from the bucket (S3_* settings, prefix S3_PREFIX) first.
 set -Eeuo pipefail
 
-usage() { sed -n '2,23p' "$0" | sed 's/^# \{0,1\}//'; }
-log() { printf '%s [restore] %s\n' "$(date '+%Y-%m-%d %H:%M:%S %Z')" "$*"; }
+# The comment block at the top of this file.
+usage() { awk 'NR == 1 { next } /^#/ { sub(/^# ?/, ""); print; next } { exit }' "$0"; }
+# Messages go to stderr: resolve_file runs in $(...) and must not capture them.
+log() { printf '%s [restore] %s\n' "$(date '+%Y-%m-%d %H:%M:%S %Z')" "$*" >&2; }
 die() { log "ERROR: $*"; exit 1; }
 
 BACKUP_DIR=${BACKUP_DIR:-/backups}
@@ -33,12 +38,39 @@ S3_PREFIX=${S3_PREFIX:-renawi/}
 [[ -z "$S3_PREFIX" || "$S3_PREFIX" == */ ]] || S3_PREFIX="${S3_PREFIX}/"
 S3_PREFIX=${S3_PREFIX#/}
 
+remote_ready() {
+  [[ -n "${S3_BUCKET:-}" && -n "${S3_ENDPOINT:-}" && -n "${S3_ACCESS_KEY:-}" && -n "${S3_SECRET_KEY:-}" ]] || return 1
+  export RCLONE_CONFIG_REMOTE_TYPE=s3
+  export RCLONE_CONFIG_REMOTE_PROVIDER="${S3_PROVIDER:-Other}"
+  export RCLONE_CONFIG_REMOTE_ENDPOINT="$S3_ENDPOINT"
+  export RCLONE_CONFIG_REMOTE_REGION="${S3_REGION:-}"
+  export RCLONE_CONFIG_REMOTE_ACCESS_KEY_ID="$S3_ACCESS_KEY"
+  export RCLONE_CONFIG_REMOTE_SECRET_ACCESS_KEY="$S3_SECRET_KEY"
+  export RCLONE_CONFIG_REMOTE_ENV_AUTH=false
+  export RCLONE_CONFIG_REMOTE_NO_CHECK_BUCKET=true
+}
+
+list_backups() {
+  echo "On this server (${BACKUP_DIR}):"
+  find "$BACKUP_DIR" -maxdepth 1 -type f \( -name 'db-*.dump' -o -name 'uploads-*.tgz' \) \
+    -exec du -h {} + 2> /dev/null | sort -k2 | awk '{printf "    %-34s %s\n", substr($2, length(d) + 2), $1}' d="$BACKUP_DIR"
+  if remote_ready; then
+    echo "In the bucket (s3:${S3_BUCKET}/${S3_PREFIX}):"
+    rclone lsl "remote:${S3_BUCKET}/${S3_PREFIX}" --max-depth 1 \
+      --include '/db-*.dump' --include '/uploads-*.tgz' \
+      | sort -k4 | awk '{printf "    %-34s %8.1f MB  %s %s\n", $4, $1 / 1048576, $2, substr($3, 1, 5)}'
+  else
+    echo "Bucket: not configured (S3_BUCKET / S3_ENDPOINT / S3_ACCESS_KEY / S3_SECRET_KEY)."
+  fi
+}
+
 assume_yes=false
 target_db=${PGDATABASE:-}
 uploads_target=$UPLOADS_DIR
 args=()
 while (($#)); do
   case "$1" in
+    --list) list_backups; exit 0 ;;
     --yes | -y) assume_yes=true ;;
     --db) [[ $# -ge 2 ]] || die "--db needs a name"; target_db=$2; shift ;;
     --db=*) target_db=${1#--db=} ;;
@@ -58,18 +90,6 @@ done
 [[ -n "$target_db" ]] || die "no target database (set PGDATABASE or pass --db)"
 [[ "$target_db" =~ ^[A-Za-z_][A-Za-z0-9_]*$ ]] || die "invalid database name: ${target_db}"
 
-remote_ready() {
-  [[ -n "${S3_BUCKET:-}" && -n "${S3_ENDPOINT:-}" && -n "${S3_ACCESS_KEY:-}" && -n "${S3_SECRET_KEY:-}" ]] || return 1
-  export RCLONE_CONFIG_REMOTE_TYPE=s3
-  export RCLONE_CONFIG_REMOTE_PROVIDER="${S3_PROVIDER:-Other}"
-  export RCLONE_CONFIG_REMOTE_ENDPOINT="$S3_ENDPOINT"
-  export RCLONE_CONFIG_REMOTE_REGION="${S3_REGION:-}"
-  export RCLONE_CONFIG_REMOTE_ACCESS_KEY_ID="$S3_ACCESS_KEY"
-  export RCLONE_CONFIG_REMOTE_SECRET_ACCESS_KEY="$S3_SECRET_KEY"
-  export RCLONE_CONFIG_REMOTE_ENV_AUTH=false
-  export RCLONE_CONFIG_REMOTE_NO_CHECK_BUCKET=true
-}
-
 # Prints the local path of a backup file, downloading it from the bucket when needed.
 resolve_file() {
   local arg=$1 name
@@ -77,10 +97,12 @@ resolve_file() {
   name=$(basename -- "$arg")
   if [[ -f "${BACKUP_DIR}/${name}" ]]; then printf '%s\n' "${BACKUP_DIR}/${name}"; return; fi
   remote_ready || die "${arg} not found (not a path, not in ${BACKUP_DIR}, and S3 is not configured)"
-  log "downloading ${name} from s3:${S3_BUCKET}/${S3_PREFIX}" >&2
+  log "downloading ${name} from s3:${S3_BUCKET}/${S3_PREFIX}"
   mkdir -p "$BACKUP_DIR"
   rclone copyto "remote:${S3_BUCKET}/${S3_PREFIX}${name}" "${BACKUP_DIR}/${name}" --retries 3 >&2
-  [[ -f "${BACKUP_DIR}/${name}" ]] || die "download of ${name} failed"
+  # rclone exits 0 when the object does not exist.
+  [[ -f "${BACKUP_DIR}/${name}" ]] \
+    || die "${name} is not in s3:${S3_BUCKET}/${S3_PREFIX} (see: docker compose run --rm restore --list)"
   printf '%s\n' "${BACKUP_DIR}/${name}"
 }
 

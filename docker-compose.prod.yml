@@ -84,7 +84,9 @@ services:
   # One-shot: gives the uploads volume to the API's `node` user (uid 1000). Docker creates a new
   # volume root-owned when another container (the backup sidecar) happens to mount it first.
   volume-init:
-    image: *backup-image
+    # Any small image with chown/find; this one is pulled for the database anyway.
+    image: postgres:17-alpine
+    user: root
     entrypoint:
       - sh
       - -c

@@ -17,9 +17,8 @@
 # (nothing written to the status file, "/fail" ping sent).
 set -Eeuo pipefail
 
-usage() {
-  sed -n '2,17p' "$0" | sed 's/^# \{0,1\}//'
-}
+# The comment block at the top of this file.
+usage() { awk 'NR == 1 { next } /^#/ { sub(/^# ?/, ""); print; next } { exit }' "$0"; }
 
 case "${1:---now}" in
   --now | --cron) ;;
