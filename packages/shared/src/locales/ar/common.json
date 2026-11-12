@@ -1662,10 +1662,8 @@
     "amount": "المبلغ",
     "cars": "سيارات",
     "share": "النسبة",
-    "total": "المجموع",
     "quarter": "الربع {{q}} {{year}}",
-    "inventoryLabel": "{{total}} سيارة: {{parts}}",
-    "barLabel": "{{name}}: {{value}}"
+    "inventoryLabel": "{{total}} سيارة: {{parts}}"
   },
   "breadcrumbs": {
     "label": "مسار التنقل",
@@ -1759,7 +1757,6 @@
       "linkedTo": "مرتبط بـ",
       "done": "تم"
     },
-    "open": "فتح",
     "manual": {
       "add": "إضافة تذكير",
       "addTitle": "تذكير جديد",

@@ -1662,10 +1662,8 @@
     "amount": "סכום",
     "cars": "רכבים",
     "share": "חלק",
-    "total": "סה״כ",
     "quarter": "רבעון {{q}} {{year}}",
-    "inventoryLabel": "{{total}} רכבים: {{parts}}",
-    "barLabel": "{{name}}: {{value}}"
+    "inventoryLabel": "{{total}} רכבים: {{parts}}"
   },
   "breadcrumbs": {
     "label": "נתיב ניווט",
@@ -1759,7 +1757,6 @@
       "linkedTo": "מקושר אל",
       "done": "בוצע"
     },
-    "open": "פתיחה",
     "manual": {
       "add": "הוספת תזכורת",
       "addTitle": "תזכורת חדשה",

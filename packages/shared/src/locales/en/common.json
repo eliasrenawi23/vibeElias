@@ -1662,10 +1662,8 @@
     "amount": "Amount",
     "cars": "Cars",
     "share": "Share",
-    "total": "Total",
     "quarter": "Q{{q}} {{year}}",
-    "inventoryLabel": "{{total}} cars: {{parts}}",
-    "barLabel": "{{name}}: {{value}}"
+    "inventoryLabel": "{{total}} cars: {{parts}}"
   },
   "breadcrumbs": {
     "label": "Breadcrumb",
@@ -1759,7 +1757,6 @@
       "linkedTo": "Linked to",
       "done": "Done"
     },
-    "open": "Open",
     "manual": {
       "add": "Add reminder",
       "addTitle": "New reminder",

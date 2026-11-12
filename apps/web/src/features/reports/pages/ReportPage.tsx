@@ -55,6 +55,10 @@ export function ReportPage() {
 
 const num = (v: unknown) => (typeof v === 'number' ? v : Number(v ?? 0) || 0);
 
+/** A total or count the API may leave out: null (shown as "—"), never a fake 0. */
+const maybeNum = (v: unknown): number | null =>
+  v === null || v === undefined || v === '' || !Number.isFinite(Number(v)) ? null : Number(v);
+
 /** Profit report rows as chart points (period, profit, lease income). */
 function profitPoints(result: ReportResult): ProfitPoint[] {
   return result.rows.map((row) => ({
@@ -206,13 +210,13 @@ function ReportView({ report }: { report: ReportDef }) {
                 {AGEING_BUCKETS.map((bucket) => (
                   <Col key={bucket} xs={12} sm={8} lg={4}>
                     <StatCard title={t(AGEING_LABEL_KEYS[bucket])} data-testid={`ageing-${bucket}`}>
-                      <Money amount={num(totals[bucket])} decimals={false} />
+                      <Money amount={maybeNum(totals[bucket])} decimals={false} />
                     </StatCard>
                   </Col>
                 ))}
                 <Col xs={12} sm={8} lg={4}>
                   <StatCard title={t('reports.columns.overdue')} data-testid="ageing-overdue">
-                    <Money amount={num(totals.overdue)} decimals={false} />
+                    <Money amount={maybeNum(totals.overdue)} decimals={false} />
                   </StatCard>
                 </Col>
               </Row>
@@ -224,7 +228,11 @@ function ReportView({ report }: { report: ReportDef }) {
                 {INVENTORY_AGE_BUCKETS.map((bucket) => (
                   <Col key={bucket} xs={12} md={6}>
                     <StatCard title={t(AGE_BUCKET_KEYS[bucket])} data-testid={`bucket-${bucket}`}>
-                      <bdi dir="ltr">{formatCount(num(buckets[bucket]), lang)}</bdi>{' '}
+                      {maybeNum(buckets[bucket]) === null ? (
+                        <span className="rm-empty-value">—</span>
+                      ) : (
+                        <bdi dir="ltr">{formatCount(num(buckets[bucket]), lang)}</bdi>
+                      )}{' '}
                       <Typography.Text type="secondary" className="rm-small-text">
                         {t('charts.cars')}
                       </Typography.Text>

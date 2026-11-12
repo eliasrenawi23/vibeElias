@@ -131,6 +131,28 @@ describe('ReportTable', () => {
     expect(totals).toHaveTextContent('₪72,500.00');
   });
 
+  it('shows contract numbers as identifiers, without a thousands separator', () => {
+    renderWithProviders(
+      <MemoryRouter>
+        <ReportTable
+          label="Receivables"
+          result={{
+            report: 'receivables',
+            params: { asOf: '2026-11-12' },
+            columns: [
+              { key: 'contractNo', label: 'reports.columns.contractNo', type: 'int' },
+              { key: 'balance', label: 'reports.columns.balance', type: 'money' },
+            ],
+            rows: [{ contractNo: 1024, balance: -150 }],
+          }}
+        />
+      </MemoryRouter>,
+    );
+    const cells = within(screen.getByTestId('report-table')).getAllByRole('cell');
+    expect(cells[0]).toHaveTextContent('#1024');
+    expect(cells[1]?.querySelector('.rm-money-negative')).toHaveTextContent('-₪150.00');
+  });
+
   it('shows "no data" without a totals row for an empty result', () => {
     renderWithProviders(
       <MemoryRouter>

@@ -10,6 +10,7 @@ import { DateText } from '../../../shared/ui/DateText';
 import { DateTimeText } from '../../../shared/ui/DateTimeText';
 import { EmptyState } from '../../../shared/ui/EmptyState';
 import { Money } from '../../../shared/ui/Money';
+import { ContractNo } from '../../leases/components/ContractNo';
 import { PlateNo } from '../../../shared/ui/PlateNo';
 
 /** Columns whose cells are numbers (end-aligned, summed in the totals row). */
@@ -42,6 +43,8 @@ export function ReportCellView({
     case 'money':
       return <Money amount={Number(value)} signColor />;
     case 'int':
+      // Contract numbers are identifiers (`#1024`), not quantities: no thousands separator.
+      if (column.key === 'contractNo') return <ContractNo no={Number(value)} />;
       return <Ltr>{formatCount(Number(value), i18n.resolvedLanguage)}</Ltr>;
     case 'date':
       return <DateText value={String(value)} />;
