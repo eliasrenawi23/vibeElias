@@ -2,7 +2,7 @@ import { FilePdfOutlined } from '@ant-design/icons';
 import { LOCALES, PDF_TEMPLATE_TITLE_KEYS, type Locale, type PdfTemplate } from '@renawi/shared';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Alert, App, Button, Flex, Form, Modal, Radio, Segmented, Tooltip, Typography } from 'antd';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useDynamicT, useErrorMessage } from '../../../shared/lib/i18n';
 import { generatePdf, type PdfChoice } from '../pdf';
@@ -19,13 +19,27 @@ export function usePdfTemplateName(): (template: PdfTemplate) => string {
 }
 
 /**
- * Open a generated document in a new tab. Returns false when the browser blocked the tab (the
- * document is still listed under Documents).
+ * A new tab opened at the click, while the browser still counts it as the user's action
+ * (rendering a PDF can take longer than popup blockers allow); null when it was blocked.
  */
-export function openDocumentTab(url: string): boolean {
-  const tab = window.open(url, '_blank');
-  if (!tab) return false;
-  tab.opener = null;
+export function reserveDocumentTab(): Window | null {
+  const tab = window.open('', '_blank');
+  if (tab) tab.opener = null;
+  return tab;
+}
+
+/**
+ * Show a generated document in the reserved tab (or a new one). Returns false when the browser
+ * blocked it (the document is still listed under Documents).
+ */
+export function showDocumentInTab(tab: Window | null, url: string): boolean {
+  if (tab && !tab.closed) {
+    tab.location.href = url;
+    return true;
+  }
+  const opened = window.open(url, '_blank');
+  if (!opened) return false;
+  opened.opener = null;
   return true;
 }
 
@@ -57,17 +71,41 @@ export function GeneratePdfDialog({
   const [index, setIndex] = useState(0);
   const [lang, setLang] = useState<LangChoice>(defaultLang ?? 'auto');
   const choice = choices[index] ?? choices[0];
+  const tab = useRef<Window | null>(null);
 
   const mutation = useMutation({
     mutationFn: (c: PdfChoice) => generatePdf(c.template, c.id, lang === 'auto' ? null : lang),
     onSuccess: (document) => {
       void queryClient.invalidateQueries({ queryKey: documentKeys.all });
       void message.success(t('pdf.generated'));
-      if (!openDocumentTab(document.url)) void message.info(t('pdf.popupBlocked'));
+      if (!showDocumentInTab(tab.current, document.url)) {
+        void message.info({
+          content: (
+            <span>
+              {t('pdf.popupBlocked')}{' '}
+              <a href={document.url} target="_blank" rel="noopener noreferrer">
+                {t('pdf.openDocument')}
+              </a>
+            </span>
+          ),
+        });
+      }
+      tab.current = null;
       onGenerated?.(document);
       onClose();
     },
+    onError: () => {
+      // Nothing to show: close the tab opened for it.
+      tab.current?.close();
+      tab.current = null;
+    },
   });
+
+  const generate = () => {
+    if (!choice) return;
+    tab.current = reserveDocumentTab();
+    mutation.mutate(choice);
+  };
 
   return (
     <Modal
@@ -82,7 +120,7 @@ export function GeneratePdfDialog({
             icon={<FilePdfOutlined />}
             loading={mutation.isPending}
             disabled={!choice}
-            onClick={() => choice && mutation.mutate(choice)}
+            onClick={generate}
             data-testid="pdf-generate"
           >
             {t('pdf.create')}

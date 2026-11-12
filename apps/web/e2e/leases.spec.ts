@@ -275,6 +275,7 @@ async function mockApi(page: Page) {
     renewedFromId: null,
     signedAt: '2026-01-01T10:00:00.000Z',
   };
+  let pdfCount = 0;
   const leases = new Map<string, Json>();
   leases.set('lc_1', {
     ...leaseBase,
@@ -613,6 +614,24 @@ async function mockApi(page: Page) {
       });
       drivers.push(created);
       return json(route, 201, driverDetail(created));
+    }
+    // Generated PDFs: every call stores a new document.
+    const pdfMatch = /^\/api\/pdf\/([a-z-]+)\/([^/]+)$/.exec(path);
+    if (pdfMatch && method === 'POST') {
+      pdfCount += 1;
+      return json(route, 201, {
+        id: `doc_pdf_${pdfCount}`,
+        kind: pdfMatch[1] === 'deposit-receipt' ? 'RECEIPT' : 'HANDOVER',
+        fileName: `${pdfMatch[1]}.pdf`,
+        mime: 'application/pdf',
+        size: 48213,
+        hasThumb: false,
+        title: null,
+        lang: url.searchParams.get('lang'),
+        expiresAt: null,
+        createdAt: '2026-11-12T10:00:00.000Z',
+        url: `/api/documents/doc_pdf_${pdfCount}/file`,
+      });
     }
     if (path === '/api/documents') return json(route, 200, []);
     if (path === '/api/contacts')
@@ -967,6 +986,53 @@ test('lease lifecycle: payment, wizard, activation, end, fine, Arabic', async ({
   const tableText = await page.getByTestId('licenses-table').innerText();
   expect(tableText).not.toMatch(/[٠-٩]/);
 
+  expect(problems).toEqual([]);
+});
+
+test('generate PDFs: a lease report in Arabic and a deposit confirmation', async ({ page }) => {
+  const api = await mockApi(page);
+  const problems = watchConsole(page);
+  // The generated file opens in a new tab (a new page of the context, outside page.route).
+  await page
+    .context()
+    .route('**/api/documents/*/file', (route) =>
+      route.fulfill({ status: 200, contentType: 'text/html', body: '<p>PDF</p>' }),
+    );
+  const pdfPosts = () =>
+    api.calls.filter((c) => c.method === 'POST' && c.path.startsWith('/api/pdf/'));
+
+  await page.goto('/leases/lc_1');
+  await expect(page.getByTestId('lease-detail')).toBeVisible();
+  await page.getByTestId('lease-action-pdf').click();
+  const dialog = page.getByRole('dialog', { name: 'Generate a document' });
+  await expect(dialog).toBeVisible();
+  // An active car + number lease: contract, handover and return reports.
+  await expect(dialog.locator('[data-template]')).toHaveCount(3);
+  await dialog.getByText('Handover report').click();
+  await dialog.getByText('Arabic').click();
+  const popupOpened = page.waitForEvent('popup');
+  await dialog.getByTestId('pdf-generate').click();
+  const popup = await popupOpened;
+  await expect.poll(() => popup.url()).toMatch(/\/api\/documents\/doc_pdf_1\/file$/);
+  await expect(page.getByText('Document generated and saved under Documents')).toBeVisible();
+  await expect(dialog).toBeHidden();
+  expect(pdfPosts().map((c) => `${c.path}${c.search}`)).toEqual(['/api/pdf/handover/lc_1?lang=ar']);
+  await popup.close();
+
+  // Ledger tab: a deposit confirmation from the deposit row, in the customer's language.
+  await page.getByRole('tab', { name: 'Ledger' }).click();
+  await page.getByTestId('pdf-row-deposit-receipt').click();
+  const receipt = page.getByRole('dialog', { name: 'Generate a document' });
+  await expect(receipt).toContainText('Deposit confirmation');
+  const secondPopup = page.waitForEvent('popup');
+  await receipt.getByTestId('pdf-generate').click();
+  await expect.poll(async () => (await secondPopup).url()).toMatch(/doc_pdf_2\/file$/);
+  expect(pdfPosts().map((c) => `${c.path}${c.search}`)).toEqual([
+    '/api/pdf/handover/lc_1?lang=ar',
+    '/api/pdf/deposit-receipt/le_dep',
+  ]);
+  // The rent charge has no document to print.
+  await expect(page.getByTestId('pdf-row-payment-confirmation')).toHaveCount(0);
   expect(problems).toEqual([]);
 });
 

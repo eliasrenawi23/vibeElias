@@ -400,6 +400,18 @@ float.
   effective period under the title, and "Export CSV" / "Export Excel" download links carrying
   the same parameters and the UI language. The trade book carries a note that it is the ספר
   סחר for the accountant.
+- **Generated documents (PDF)** (`features/documents/components/GeneratePdf.tsx`): a
+  `FilePdfOutlined` action that opens one small dialog: the document (a radio list when the
+  record has several, e.g. a lease's contract, handover and return reports) and the language
+  (a segmented control: "Customer's language", the default, then Hebrew, Arabic, English).
+  "Generate" stores a new document, refreshes the Documents tabs and opens the file in a new
+  tab ("Document generated and saved under Documents"; if the browser blocks the tab, the
+  message says where to find it). Only the documents that fit the record are offered (no return
+  report for a draft or number-only lease, nothing on a cancelled deal, no confirmation for a
+  trade-in or a voided row); an API refusal shows its sentence in the dialog. Record pages put
+  it in the header actions (lease: "Generate PDF"; deal: the agreement, and the disclosure form
+  next to "Record disclosure"; consigned car: the consignment agreement); ledger and deal
+  payment rows show it as an icon button before the row's other actions.
 - **Unsaved changes**: full-page forms use `useUnsavedChangesGuard` (in-app navigation, tab
   close or reload, and the form's own Cancel ask "Discard unsaved changes?"); dialogs pass
   `dirty` to `FormDialog`, which asks before closing. The prompt is `ConfirmDialog` with a red
