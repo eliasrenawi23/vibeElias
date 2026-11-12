@@ -1,5 +1,6 @@
 import {
   TaxiLicenseCreateSchema,
+  TaxiLicenseFeePaidSchema,
   TaxiLicenseQuerySchema,
   TaxiLicenseRegisterVehicleSchema,
   TaxiLicenseUpdateSchema,
@@ -10,3 +11,4 @@ export class TaxiLicenseCreateDto extends createZodDto(TaxiLicenseCreateSchema) 
 export class TaxiLicenseUpdateDto extends createZodDto(TaxiLicenseUpdateSchema) {}
 export class TaxiLicenseQueryDto extends createZodDto(TaxiLicenseQuerySchema) {}
 export class TaxiLicenseRegisterVehicleDto extends createZodDto(TaxiLicenseRegisterVehicleSchema) {}
+export class TaxiLicenseFeePaidDto extends createZodDto(TaxiLicenseFeePaidSchema) {}

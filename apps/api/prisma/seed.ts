@@ -3,8 +3,12 @@
  * data set with dates relative to today (Asia/Jerusalem).
  *
  *   npm run db:seed            (repo root, loads .env)
- *   SEED_DEMO=false ...        admin + settings only (production)
+ *   SEED_DEMO=false ...        admin + a neutral settings row only: the API's defaults (business
+ *                              name, VAT 18, lead days, responsibilities), no legal ID, dealer
+ *                              licence, address, phone, e-mail or sample contract clauses
  *
+ * The settings row is created only when missing: re-running never changes business details
+ * entered in the app (with either SEED_DEMO value).
  * Every demo row has a fixed `seed_*` id and is upserted with `update: {}`: re-running creates
  * what is missing and never overwrites data (or the admin password) changed in the app. The only
  * exceptions are `migrateLegacyDemo()`, which once rewrites the demo rows of older seed versions,
@@ -34,6 +38,7 @@ import {
   DEFAULT_BUSINESS_TZ,
   DEFAULT_REMINDER_LEAD_DAYS,
   DEFAULT_RESPONSIBILITIES,
+  DEFAULT_SETTINGS,
   fineReassignDeadline,
   HandoverChecklistSchema,
   ReturnChecklistSchema,
@@ -157,7 +162,32 @@ const LEASE_CLAUSES = {
   ].join('\n'),
 };
 
-async function seedSettings() {
+/**
+ * Business details of the demo data set (sample legal ID, dealer licence, address, phone,
+ * e-mail and contract clauses). Never used with SEED_DEMO=false.
+ */
+function demoBusinessDetails(): Pick<
+  Prisma.SettingsCreateInput,
+  'legalId' | 'dealerLicenseNo' | 'address' | 'phone' | 'email'
+> & { clauses: typeof LEASE_CLAUSES } {
+  return {
+    legalId: withCheckDigit('51642718'),
+    dealerLicenseNo: '2026-0417',
+    address: 'רח׳ פאולוס השישי 45, נצרת',
+    phone: '046001234',
+    email: 'office@renawimotors.co.il',
+    clauses: LEASE_CLAUSES,
+  };
+}
+
+/**
+ * The settings singleton, created only when missing (`update: {}`: details entered in the app
+ * are never overwritten). Without demo data it matches what the API creates on first use
+ * (`DEFAULT_SETTINGS`): every business detail empty, to be filled in under Settings before
+ * printing anything.
+ */
+async function seedSettings(demo: boolean) {
+  const demoDetails = demo ? demoBusinessDetails() : null;
   await ensure(
     () => prisma.settings.findUnique({ where: { id: 1 } }),
     () =>
@@ -166,17 +196,17 @@ async function seedSettings() {
         update: {},
         create: {
           id: 1,
-          businessName: { ...BUSINESS_NAME },
-          legalId: withCheckDigit('51642718'),
-          dealerLicenseNo: '2026-0417',
-          address: 'רח׳ פאולוס השישי 45, נצרת',
-          phone: '046001234',
-          email: 'office@renawimotors.co.il',
-          vatRate: new Prisma.Decimal('18.00'),
+          businessName: { ...DEFAULT_SETTINGS.businessName },
+          legalId: demoDetails?.legalId ?? null,
+          dealerLicenseNo: demoDetails?.dealerLicenseNo ?? null,
+          address: demoDetails?.address ?? null,
+          phone: demoDetails?.phone ?? null,
+          email: demoDetails?.email ?? null,
+          vatRate: new Prisma.Decimal(DEFAULT_SETTINGS.vatRate.toFixed(2)),
           reminderLeadDays: { ...DEFAULT_REMINDER_LEAD_DAYS },
           defaultLeaseTerms: {
             responsibilities: { ...DEFAULT_RESPONSIBILITIES },
-            clauses: LEASE_CLAUSES,
+            clauses: demoDetails?.clauses ?? { ...DEFAULT_SETTINGS.defaultLeaseTerms.clauses },
           },
         },
       }),
@@ -2117,11 +2147,11 @@ interface AgeingRow {
 async function main(): Promise<void> {
   const tz = process.env.BUSINESS_TZ || DEFAULT_BUSINESS_TZ;
   const today = todayInBusinessTz(tz);
+  const demo = !['false', '0', 'no'].includes((process.env.SEED_DEMO ?? 'true').toLowerCase());
   const admin = await seedAdmin();
-  await seedSettings();
+  await seedSettings(demo);
   await migrateLegacySpelling();
 
-  const demo = !['false', '0', 'no'].includes((process.env.SEED_DEMO ?? 'true').toLowerCase());
   if (demo) await seedDemo(admin.id, today);
 
   console.log(`Seed done (today ${today} ${tz}): ${created} created, ${existing} already present.`);

@@ -4,22 +4,25 @@ import {
   addDays,
   annualFeeDueDate,
   contactDisplayName,
+  nextAnnualFeeDueAt,
   normalizePlate,
   taxiAgeStatus,
   type Paginated,
   type TaxiLicenseAlert,
   type TaxiLicenseCreate,
+  type TaxiLicenseFeePaid,
   type TaxiLicenseQuery,
   type TaxiLicenseRegisterVehicle,
   type TaxiLicenseStatus,
   type TaxiLicenseUpdate,
 } from '@renawi/shared';
+import { AuditService } from '../common/audit/audit.service';
 import { expiryState, readLeadDays } from '../common/business-settings';
 import { Clock } from '../common/clock';
 import { dbDate, dbDateOpt, isoOrNull } from '../common/dates';
 import { AppException, ErrorKey } from '../common/errors/app-exception';
 import { CONTACT_NAME_SELECT, NamedRef, searchTokens } from '../common/refs';
-import { toDbMoneyOrNull } from '../prisma/prisma.decimal';
+import { toDbMoney, toDbMoneyOrNull } from '../prisma/prisma.decimal';
 import { PrismaService } from '../prisma/prisma.service';
 
 /** Segment with its contract, driver and car (for licence views). */
@@ -140,6 +143,7 @@ export class TaxiLicensesService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly clock: Clock,
+    private readonly audit: AuditService,
   ) {}
 
   async list(query: TaxiLicenseQuery): Promise<Paginated<TaxiLicenseListItem>> {
@@ -291,6 +295,58 @@ export class TaxiLicensesService {
       });
     } catch (e) {
       rethrowUnique(e);
+    }
+    return this.get(id);
+  }
+
+  /**
+   * The annual operating-licence fee was paid: `annualFeeDueAt` moves to 31 December of the year
+   * after the current due date's year (no due date: the year after the payment). With an
+   * `amount` and a car registered on the licence, a LICENSE_FEE expense paid by us is recorded on
+   * that car (no VAT on the government fee; linked to the car's open cycle like any expense) and
+   * audit-logged as a VehicleExpense CREATE. A sold licence pays no more fees (409).
+   */
+  async feePaid(
+    id: string,
+    dto: TaxiLicenseFeePaid,
+    userId: string | null,
+  ): Promise<TaxiLicenseDetail> {
+    const license = await this.getRow(id);
+    if (license.status === 'SOLD') throw AppException.conflict(ErrorKey.licenseNotActive);
+    const paidAt = dto.paidAt ?? this.clock.today();
+    const nextDue = nextAnnualFeeDueAt(isoOrNull(license.annualFeeDueAt), paidAt);
+    const vehicleId = license.registeredVehicleId;
+    const amount = dto.amount ?? null;
+    const expense = await this.prisma.$transaction(async (tx) => {
+      await tx.taxiLicense.update({ where: { id }, data: { annualFeeDueAt: dbDate(nextDue) } });
+      if (!vehicleId || amount === null) return null;
+      const cycle = await tx.inventoryCycle.findFirst({
+        where: { vehicleId, endedAt: null },
+        orderBy: { startedAt: 'desc' },
+        select: { id: true },
+      });
+      return tx.vehicleExpense.create({
+        data: {
+          vehicleId,
+          cycleId: cycle?.id ?? null,
+          category: 'LICENSE_FEE',
+          date: dbDate(paidAt),
+          amount: toDbMoney(amount),
+          vatIncluded: false,
+          vatReclaimable: false,
+          paidBy: 'US',
+          description: dto.note ?? null,
+        },
+      });
+    });
+    if (expense) {
+      await this.audit.record({
+        userId,
+        entity: 'VehicleExpense',
+        entityId: expense.id,
+        action: 'CREATE',
+        after: expense,
+      });
     }
     return this.get(id);
   }

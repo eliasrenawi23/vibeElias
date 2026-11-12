@@ -1,5 +1,6 @@
 import {
   CarOutlined,
+  CheckCircleOutlined,
   DollarOutlined,
   EditOutlined,
   FileProtectOutlined,
@@ -28,16 +29,19 @@ import { TabLabel } from '../../../shared/ui/TabLabel';
 import { EntityDocuments } from '../../documents/components/EntityDocuments';
 import { driverPath } from '../../drivers/lib/driverRules';
 import { ContractNo } from '../../leases/components/ContractNo';
+import { reminderKeys } from '../../reminders/queryKeys';
 import { vehicleKeys } from '../../vehicles/queryKeys';
 import { fetchTaxiLicense, updateTaxiLicense } from '../api';
 import { AnnualFeeText } from '../components/AnnualFeeText';
 import { LicensePnlTab } from '../components/LicensePnlTab';
+import { FeePaidDialog } from '../dialogs/FeePaidDialog';
 import { RegisterVehicleDialog } from '../dialogs/RegisterVehicleDialog';
+import { annualFeeState } from '../lib/licenseRules';
 import { TaxiLicenseForm } from '../forms/TaxiLicenseForm';
 import { taxiLicenseKeys } from '../queryKeys';
 import type { LicenseSegment, TaxiLicenseDetail } from '../types';
 
-type LicenseActionKey = 'edit' | 'register';
+type LicenseActionKey = 'edit' | 'register' | 'feePaid';
 
 const empty = <span className="rm-empty-value">—</span>;
 const leasePath = (id: string) => `/leases/${encodeURIComponent(id)}`;
@@ -54,6 +58,7 @@ function LicenseView({ id }: { id: string }) {
   const queryClient = useQueryClient();
   const [editing, setEditing] = useState(false);
   const [registering, setRegistering] = useState(false);
+  const [payingFee, setPayingFee] = useState(false);
 
   const query = useQuery({
     queryKey: taxiLicenseKeys.detail(id),
@@ -92,10 +97,27 @@ function LicenseView({ id }: { id: string }) {
   }
   const license = query.data;
   const seg = license.currentSegment;
+  const feeState = annualFeeState(license.alerts ?? []);
   const actions: ActionDef<LicenseActionKey>[] = [
+    // Paying the annual fee is the thing to do next once it is due or overdue.
+    ...(license.status === 'SOLD'
+      ? []
+      : [
+          {
+            key: 'feePaid' as const,
+            label: t('taxiLicenses.feePaid.action'),
+            icon: <CheckCircleOutlined />,
+            primary: feeState !== null,
+          },
+        ]),
     { key: 'edit', label: t('actions.edit'), icon: <EditOutlined /> },
     { key: 'register', label: t('taxiLicenses.register.action'), icon: <CarOutlined /> },
   ];
+  const onAction = (key: LicenseActionKey) => {
+    if (key === 'edit') setEditing(true);
+    else if (key === 'register') setRegistering(true);
+    else setPayingFee(true);
+  };
 
   return (
     <DetailPageLayout
@@ -120,7 +142,7 @@ function LicenseView({ id }: { id: string }) {
           ? null
           : {
               actions,
-              onAction: (key) => (key === 'edit' ? setEditing(true) : setRegistering(true)),
+              onAction,
               menuLabel: t('taxiLicenses.actionsMenu'),
               testIdPrefix: 'license-action',
             }
@@ -215,6 +237,25 @@ function LicenseView({ id }: { id: string }) {
           onSubmit={(values) => update.mutateAsync(values)}
           submitting={update.isPending}
           onCancel={() => setEditing(false)}
+        />
+      )}
+
+      {payingFee && (
+        <FeePaidDialog
+          license={license}
+          onClose={() => setPayingFee(false)}
+          onSaved={(updated, expenseRecorded) => {
+            setPayingFee(false);
+            apply(updated);
+            // The reminders feed lists the fee due date; the car got an expense.
+            void queryClient.invalidateQueries({ queryKey: reminderKeys.all });
+            if (expenseRecorded) void queryClient.invalidateQueries({ queryKey: vehicleKeys.all });
+            void message.success(
+              expenseRecorded
+                ? t('taxiLicenses.feePaid.savedWithExpense')
+                : t('taxiLicenses.feePaid.saved'),
+            );
+          }}
         />
       )}
 

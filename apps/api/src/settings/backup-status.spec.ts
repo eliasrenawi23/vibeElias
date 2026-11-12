@@ -21,7 +21,25 @@ describe('parseBackupStatus', () => {
       lastSuccessAt: '2026-11-12T00:30:00.000Z',
       lastFile: 'renawi-2026-11-12.dump',
       ok: true,
+      // A status file of an older sidecar has no off-site field: unknown.
+      offsite: null,
+      remote: null,
     });
+  });
+
+  it('passes the off-site flag and the bucket through (remote only when copied)', () => {
+    const at = '2026-11-12T00:30:00Z';
+    const parse = (extra: Record<string, unknown>) =>
+      parseBackupStatus(JSON.stringify({ lastSuccessAt: at, lastFile: 'db.dump', ...extra }), NOW);
+    expect(parse({ offsite: true, remote: ' s3:renawi-backups/renawi/ ' })).toMatchObject({
+      ok: true,
+      offsite: true,
+      remote: 's3:renawi-backups/renawi/',
+    });
+    expect(parse({ offsite: false })).toMatchObject({ ok: true, offsite: false, remote: null });
+    expect(parse({ offsite: false, remote: 's3:x/' })).toMatchObject({ offsite: false, remote: null });
+    expect(parse({ offsite: true })).toMatchObject({ offsite: true, remote: null });
+    expect(parse({ offsite: 'yes', remote: 's3:x/' })).toMatchObject({ offsite: null, remote: null });
   });
 
   it('older than the maximum age (36 h) or far in the future -> not ok', () => {
@@ -49,6 +67,8 @@ describe('readBackupStatus', () => {
       lastSuccessAt: '2026-11-12T01:00:00.000Z',
       lastFile: 'a.dump',
       ok: true,
+      offsite: null,
+      remote: null,
     });
   });
 });

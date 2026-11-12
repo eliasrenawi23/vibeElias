@@ -1,5 +1,9 @@
 import { describe, expect, it } from 'vitest';
 import {
+  BackupStatusSchema,
+  DealTransferRequestSchema,
+  TaxiLicenseFeePaidSchema,
+  nextAnnualFeeDueAt,
   ConsignSchema,
   ContactCreateSchema,
   DEFAULT_REMINDER_LEAD_DAYS,
@@ -302,6 +306,45 @@ describe('documents', () => {
   });
 });
 
+describe('backup status', () => {
+  it('off-site fields are optional and nullable (older status files have none)', () => {
+    const base = { lastSuccessAt: '2026-11-12T00:30:00.000Z', lastFile: 'db.dump', ok: true };
+    expect(BackupStatusSchema.safeParse(base).success).toBe(true);
+    expect(BackupStatusSchema.safeParse({ ...base, offsite: null, remote: null }).success).toBe(
+      true,
+    );
+    expect(
+      BackupStatusSchema.parse({ ...base, offsite: true, remote: 's3:renawi/renawi/' }),
+    ).toMatchObject({ offsite: true, remote: 's3:renawi/renawi/' });
+    expect(BackupStatusSchema.safeParse({ ...base, offsite: 'no' }).success).toBe(false);
+  });
+});
+
+describe('taxi licence annual fee', () => {
+  it('moves the due date to 31 December of the following year', () => {
+    expect(nextAnnualFeeDueAt('2026-12-31', '2026-11-12')).toBe('2027-12-31');
+    // Paid late (after the due date's year): still one year after the due date.
+    expect(nextAnnualFeeDueAt('2025-12-31', '2026-01-20')).toBe('2026-12-31');
+    // A due date in the middle of the year keeps the rule (year + 1, 31 December).
+    expect(nextAnnualFeeDueAt('2026-06-30', '2026-06-01')).toBe('2027-12-31');
+    // No due date: the year after the payment.
+    expect(nextAnnualFeeDueAt(null, '2026-11-12')).toBe('2027-12-31');
+  });
+
+  it('validates the request (everything optional, positive amount)', () => {
+    expect(TaxiLicenseFeePaidSchema.parse({})).toEqual({});
+    expect(
+      TaxiLicenseFeePaidSchema.parse({ paidAt: '2026-11-12', amount: 1450, note: '  slip ' }),
+    ).toEqual({ paidAt: '2026-11-12', amount: 1450, note: 'slip' });
+    expect(TaxiLicenseFeePaidSchema.parse({ amount: null, note: '' })).toEqual({
+      amount: null,
+      note: null,
+    });
+    expect(TaxiLicenseFeePaidSchema.safeParse({ amount: 0 }).success).toBe(false);
+    expect(TaxiLicenseFeePaidSchema.safeParse({ paidAt: '12/11/2026' }).success).toBe(false);
+  });
+});
+
 describe('checklists', () => {
   it('creates empty checklists', () => {
     const t = createTransferChecklist();
@@ -312,6 +355,24 @@ describe('checklists', () => {
       km: null,
       fuelLevel: null,
     });
+  });
+
+  it('transfer details (fee, filing date, notes) are partial, nullable and validated', () => {
+    expect(
+      DealTransferRequestSchema.parse({
+        checklist: { transferFee: 43, filedAt: '2026-11-10', notes: ' at the post office ' },
+      }).checklist,
+    ).toEqual({ transferFee: 43, filedAt: '2026-11-10', notes: 'at the post office' });
+    // Clearing a value; ticks are not reset by a partial update.
+    expect(
+      DealTransferRequestSchema.parse({ checklist: { transferFee: null, notes: '' } }).checklist,
+    ).toEqual({ transferFee: null, notes: null });
+    expect(
+      DealTransferRequestSchema.safeParse({ checklist: { transferFee: -1 } }).success,
+    ).toBe(false);
+    expect(
+      DealTransferRequestSchema.safeParse({ checklist: { filedAt: '2026-13-01' } }).success,
+    ).toBe(false);
   });
 
   it('ignores the taxi item for regular cars', () => {

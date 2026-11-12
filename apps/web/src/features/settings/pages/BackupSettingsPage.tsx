@@ -1,5 +1,5 @@
 import { CloudServerOutlined, ReloadOutlined } from '@ant-design/icons';
-import { BACKUP_MAX_AGE_HOURS } from '@renawi/shared';
+import { BACKUP_MAX_AGE_HOURS, type BackupStatus } from '@renawi/shared';
 import { useQuery } from '@tanstack/react-query';
 import { Alert, Button, Card, Descriptions, Flex, Result, Skeleton } from 'antd';
 import { useTranslation } from 'react-i18next';
@@ -12,7 +12,53 @@ import { ToneTag } from '../../../shared/ui/ToneTag';
 import { fetchBackupStatus } from '../api';
 import { settingsKeys } from '../queryKeys';
 
-/** `/settings/backup`: when the nightly backup last succeeded, and whether that is recent enough. */
+export type BackupState = 'ok' | 'localOnly' | 'never' | 'stale';
+
+const BACKUP_TONES = {
+  ok: 'success',
+  localOnly: 'warning',
+  never: 'warning',
+  stale: 'error',
+} as const satisfies Record<BackupState, 'success' | 'warning' | 'error'>;
+
+/**
+ * A recent backup is ok when it was copied off the server (or the status file of an older
+ * sidecar does not say), amber when it stays on this server only; none yet = amber; too old = red.
+ */
+export function backupState(status: BackupStatus): BackupState {
+  if (status.ok) return status.offsite === false ? 'localOnly' : 'ok';
+  return status.lastSuccessAt ? 'stale' : 'never';
+}
+
+/** Off-site copy: yes (with the bucket), no (this server only) or unknown (older status file). */
+function OffsiteText({ status }: { status: BackupStatus }) {
+  const { t } = useTranslation();
+  if (status.offsite === true) {
+    return (
+      <Flex gap={6} align="center" wrap data-offsite="true">
+        <ToneTag tone="success">{t('settings.backup.offsiteYes')}</ToneTag>
+        {status.remote && <Ltr tabular={false}>{status.remote}</Ltr>}
+      </Flex>
+    );
+  }
+  if (status.offsite === false) {
+    return (
+      <ToneTag tone="warning" data-offsite="false">
+        {t('settings.backup.offsiteNo')}
+      </ToneTag>
+    );
+  }
+  return (
+    <span className="rm-empty-value" data-offsite="unknown">
+      {t('settings.backup.offsiteUnknown')}
+    </span>
+  );
+}
+
+/**
+ * `/settings/backup`: when the nightly backup last succeeded, whether that is recent enough, and
+ * whether it was copied off the server.
+ */
 export function BackupSettingsPage() {
   const { t } = useTranslation();
   const query = useQuery({
@@ -56,27 +102,24 @@ export function BackupSettingsPage() {
     );
   } else {
     const status = query.data;
-    const never = !status.lastSuccessAt;
-    const tone = status.ok ? 'success' : never ? 'warning' : 'error';
-    const label = status.ok
-      ? t('settings.backup.ok')
-      : never
-        ? t('settings.backup.never')
-        : t('settings.backup.stale');
+    const state = backupState(status);
+    const tone = BACKUP_TONES[state];
+    const label = {
+      ok: t('settings.backup.ok'),
+      localOnly: t('settings.backup.localOnly'),
+      never: t('settings.backup.never'),
+      stale: t('settings.backup.stale'),
+    }[state];
+    const hint = {
+      ok: t('settings.backup.okHint', { hours: BACKUP_MAX_AGE_HOURS }),
+      localOnly: t('settings.backup.localOnlyHint'),
+      never: t('settings.backup.never'),
+      stale: t('settings.backup.staleHint', { hours: BACKUP_MAX_AGE_HOURS }),
+    }[state];
     body = (
-      <Card variant="borderless" data-testid="backup-status">
+      <Card variant="borderless" data-testid="backup-status" data-state={state}>
         <Flex vertical gap={16}>
-          <Alert
-            type={status.ok ? 'success' : never ? 'warning' : 'error'}
-            showIcon
-            title={
-              status.ok
-                ? t('settings.backup.okHint', { hours: BACKUP_MAX_AGE_HOURS })
-                : never
-                  ? t('settings.backup.never')
-                  : t('settings.backup.staleHint', { hours: BACKUP_MAX_AGE_HOURS })
-            }
-          />
+          <Alert type={tone} showIcon title={hint} data-testid="backup-alert" />
           <Descriptions
             column={DESCRIPTION_COLUMNS_SINGLE}
             items={[
@@ -93,6 +136,11 @@ export function BackupSettingsPage() {
                 key: 'last',
                 label: t('settings.backup.lastSuccess'),
                 children: <DateTimeText value={status.lastSuccessAt} />,
+              },
+              {
+                key: 'offsite',
+                label: t('settings.backup.offsite'),
+                children: <OffsiteText status={status} />,
               },
               {
                 key: 'file',

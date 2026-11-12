@@ -1,5 +1,6 @@
 import { createBrowserRouter, Navigate, type RouteObject } from 'react-router';
 import { RequireAuth } from '../features/auth/components/RequireAuth';
+import { AccountPage } from '../features/auth/pages/AccountPage';
 import { LoginPage } from '../features/auth/pages/LoginPage';
 import { ContactDetailPage } from '../features/contacts/pages/ContactDetailPage';
 import { ContactsPage } from '../features/contacts/pages/ContactsPage';
@@ -138,6 +139,11 @@ export const routes: RouteObject[] = [
                 path: 'backup',
                 element: <BackupSettingsPage />,
                 handle: handle('settings.nav.backup'),
+              },
+              {
+                path: 'account',
+                element: <AccountPage />,
+                handle: handle('settings.nav.account'),
               },
             ],
           },

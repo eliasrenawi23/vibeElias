@@ -25,7 +25,8 @@ export class LedgerController {
   @Get()
   @ApiOperation({
     summary:
-      'Ledger entries (newest first by default) with driver { id, name }; charges carry ' +
+      'Ledger entries (newest first by default) with driver { id, name } and documentCount ' +
+      '(generated confirmations, listed by GET /documents?ledgerEntryId=); charges carry ' +
       'allocated / remaining. totals { charged, paid, credited } over all matching non-voided rows',
   })
   list(@Query() query: LedgerQueryDto): Promise<LedgerList> {

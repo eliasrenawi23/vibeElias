@@ -31,6 +31,9 @@ A TypeScript monorepo (npm workspaces) with one backend, one frontend, one datab
 - **Money**: `Decimal(12,2)` in the database, `decimal.js` for arithmetic, shekels only.
 - **Files**: uploads stored on disk under `UPLOAD_DIR`, type checked by file signature, image thumbnails with `sharp`.
 - **Scheduled jobs**: nightly rent billing (`@nestjs/schedule`, Asia/Jerusalem time).
+- **PDFs**: lease contracts, handover / return reports, deposit and payment confirmations, sale /
+  purchase / consignment agreements and the disclosure form in he/ar/en, rendered from Handlebars
+  templates by headless Chromium (Playwright) inside the API and stored as documents.
 - **Exports**: Excel and CSV reports with `exceljs`.
 - **Audit log**: every create, update and delete on core records is recorded.
 - **Tests**: Jest unit tests and Jest + supertest end-to-end tests against a separate test database.
@@ -51,7 +54,8 @@ A TypeScript monorepo (npm workspaces) with one backend, one frontend, one datab
 
 - PostgreSQL 17 running in Docker (`docker-compose.yml`), data kept in a Docker volume.
 - Schema and migrations in `apps/api/prisma` (Prisma 6). Two SQL views give driver balances and overdue ageing.
-- Demo data comes from `npm run db:seed`.
+- Demo data comes from `npm run db:seed` (`SEED_DEMO=false`: only the admin user and empty business
+  settings).
 - Main tables: users, contacts, drivers, vehicles, inventory cycles, vehicle expenses, insurance policies,
   odometer logs, taxi licences, lease contracts and segments, ledger entries and payment allocations, traffic
   fines, deals and deal payments, documents, reminders, settings, audit log.
@@ -69,9 +73,15 @@ A TypeScript monorepo (npm workspaces) with one backend, one frontend, one datab
 - **Language**: TypeScript everywhere; ESLint + Prettier.
 - **Local development**: Docker for PostgreSQL, `npm run dev` starts API (port 3000) and web (port 5173); the web
   dev server proxies `/api` to the API.
-- **Planned production setup**: one small Linux server running Docker Compose (PostgreSQL, API, nginx serving
-  the built web app, Caddy for HTTPS) with nightly database and file backups. Not deployed yet.
-- **Planned**: PDF generation of contracts and forms with headless Chromium (Playwright) on the server.
+- **Production setup**: one small Linux server running Docker Compose (`docker-compose.prod.yml`:
+  PostgreSQL, the API image with Chromium, nginx serving the built web app, Caddy for HTTPS) with a
+  backup container for nightly database and file backups to an S3 bucket. The images, compose
+  files, Caddy / nginx configuration, backup and restore scripts and GitHub Actions workflows are
+  built and were tested end to end on a local copy of the stack
+  (`deploy/docker-compose.local-test.yml`); deploying to a real server waits for the owner's
+  domain and server (step by step: [docs/ops/deploy.md](docs/ops/deploy.md)).
+- **CI**: GitHub Actions (`.github/workflows/ci.yml`) runs lint, typecheck, unit tests, the API
+  end-to-end tests on PostgreSQL 17, the Playwright UI tests and a check of the deployment files.
 
 ## Prerequisites
 
@@ -135,14 +145,16 @@ Runtime secrets live only in the server's `.env` (template: `.env.production.exa
 
 ## Workspace layout
 
-| Path              | Contents                                                                                                       |
-| ----------------- | -------------------------------------------------------------------------------------------------------------- |
-| `apps/api`        | NestJS 11 + Prisma 6 + PostgreSQL 17 REST API (`/api`, Swagger at `/api/docs`)                                 |
-| `apps/web`        | React 19 + Vite + Ant Design v6 web app / PWA (he, ar, en; RTL; light/dark)                                    |
-| `packages/shared` | `@renawi/shared`: zod schemas and enums shared by API and web, money/date/bidi/plate helpers, he/ar/en locales |
-| `packages/brand`  | `@renawi/brand`: logos, icons, design tokens (CSS + TS), brand preview page                                    |
-| `deploy/`         | Database init scripts (production deployment files follow in a later milestone)                                |
-| `docs/`           | Research, brand style guide, operations and user guides                                                        |
+| Path              | Contents                                                                                                                                   |
+| ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| `apps/api`        | NestJS 11 + Prisma 6 + PostgreSQL 17 REST API (`/api`, Swagger at `/api/docs`)                                                             |
+| `apps/web`        | React 19 + Vite + Ant Design v6 web app / PWA (he, ar, en; RTL; light/dark)                                                                |
+| `packages/shared` | `@renawi/shared`: zod schemas and enums shared by API and web, money/date/bidi/plate helpers, he/ar/en locales                             |
+| `packages/brand`  | `@renawi/brand`: logos, icons, design tokens (CSS + TS), brand preview page                                                                |
+| `deploy/`         | Production stack: Caddy and nginx config, backup / restore image, deploy and provision scripts, first-admin tool, local rehearsal, DB init |
+| `.github/`        | GitHub Actions: CI (lint, types, unit, API e2e, Playwright, deployment files) and the manual Deploy                                        |
+| `docs/ops`        | Operations: deploy, restore, security                                                                                                      |
+| `docs/`           | User guides (`user-guide.en.md`, `user-guide.he.md`), research, brand style guide, plans                                                   |
 
 ## Documentation
 

@@ -132,4 +132,46 @@ describe('TransferChecklist', () => {
     expect(init?.method).toBe('PATCH');
     expect(JSON.parse(String(init?.body))).toEqual({ checklist: { finesChecked: true } });
   });
+  it('shows the saved fee and filing date and saves the transfer details together', async () => {
+    const saved = deal({
+      transferChecklist: {
+        ...TAXI_CHECKLIST,
+        transferFee: 257,
+        filedAt: null,
+        notes: 'Filed online',
+      },
+    });
+    const fetchMock = vi
+      .spyOn(globalThis, 'fetch')
+      .mockImplementation(async () => jsonResponse(saved));
+    const onSaved = vi.fn();
+    renderWithProviders(
+      <TransferChecklist
+        deal={deal({ transferChecklist: { ...TAXI_CHECKLIST, transferFee: 43 } })}
+        onSaved={onSaved}
+      />,
+    );
+    expect(screen.getByTestId('transfer-fee-value')).toHaveTextContent('₪43.00');
+    const details = screen.getByTestId('transfer-details');
+    // Nothing changed yet: saving is disabled.
+    expect(within(details).getByTestId('transfer-details-save')).toBeDisabled();
+
+    fireEvent.change(within(details).getByLabelText('Transfer fee'), {
+      target: { value: '257' },
+    });
+    fireEvent.change(within(details).getByLabelText('Notes'), {
+      target: { value: '  Filed online ' },
+    });
+    fireEvent.click(within(details).getByTestId('transfer-details-save'));
+
+    await waitFor(() => expect(onSaved).toHaveBeenCalled());
+    expect(onSaved.mock.calls[0]?.[0]).toEqual(saved);
+    const [url, init] = fetchMock.mock.calls[0] ?? [];
+    expect(String(url)).toBe('/api/deals/deal_1/transfer');
+    expect(init?.method).toBe('PATCH');
+    // Only the three details (trimmed), never the ticks.
+    expect(JSON.parse(String(init?.body))).toEqual({
+      checklist: { transferFee: 257, filedAt: null, notes: 'Filed online' },
+    });
+  });
 });

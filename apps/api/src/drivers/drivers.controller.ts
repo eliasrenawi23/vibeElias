@@ -60,7 +60,8 @@ export class DriversController {
   @ApiOperation({
     summary:
       'Statement oldest first with runningBalance (deposit rows do not move it), allocated / ' +
-      'remaining on charges, openingBalance (before from), closingBalance, balance, depositHeld',
+      'remaining on charges, documentCount per entry, openingBalance (before from), ' +
+      'closingBalance, balance, depositHeld',
   })
   ledger(@Param('id') id: string, @Query() query: DriverLedgerQueryDto): Promise<DriverStatement> {
     return this.drivers.statement(id, query);

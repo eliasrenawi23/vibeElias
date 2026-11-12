@@ -243,8 +243,8 @@ export interface DealPaymentBody {
 
 /** `PATCH /api/deals/:id/transfer` */
 export interface DealTransferBody {
-  /** Changed items only; the API merges them into the stored checklist. */
-  checklist?: Partial<Record<TransferChecklistKey, boolean>>;
+  /** Changed items / details only; the API merges them into the stored checklist. */
+  checklist?: TransferChecklistValue;
   transferStatus?: TransferStatus;
   transferredAt?: string | null;
 }

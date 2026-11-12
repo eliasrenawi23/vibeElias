@@ -243,6 +243,45 @@ describe('Ledger (e2e)', () => {
     expect((fines.body as { total: number }).total).toBe(1);
   });
 
+  it('counts the documents stored on each entry (statement, list, single entry)', async () => {
+    const driver = await f.driver();
+    const pay = (
+      await s.api
+        .post('/api/ledger/payments')
+        .send({ driverId: driver.id, amount: 300, date: today(), method: 'CASH' })
+        .expect(201)
+    ).body as LedgerEntryBody & { documentCount: number };
+    expect(pay.documentCount).toBe(0);
+    // Two generated confirmations of the payment (rows only; the files are not needed here).
+    for (const n of [1, 2]) {
+      await s.t.prisma.document.create({
+        data: {
+          kind: 'RECEIPT',
+          fileKey: `test/ledger-${pay.id}-${n}.pdf`,
+          fileName: `payment-${n}.pdf`,
+          mime: 'application/pdf',
+          size: 1234,
+          ledgerEntryId: pay.id,
+        },
+      });
+    }
+    const statement = (await s.api.get(`/api/drivers/${driver.id}/ledger`).expect(200)).body as {
+      items: (LedgerEntryBody & { documentCount: number })[];
+    };
+    expect(statement.items.map((e) => [e.id, e.documentCount])).toEqual([[pay.id, 2]]);
+    const list = (await s.api.get(`/api/ledger?driverId=${driver.id}`).expect(200)).body as {
+      items: { documentCount: number }[];
+    };
+    expect(list.items.map((e) => e.documentCount)).toEqual([2]);
+    expect(((await entry(pay.id)) as unknown as { documentCount: number }).documentCount).toBe(2);
+    // The paperclip list of the row.
+    const docs = (await s.api.get(`/api/documents?ledgerEntryId=${pay.id}`).expect(200)).body as
+      | { fileName: string }[]
+      | { items: { fileName: string }[] };
+    const items = Array.isArray(docs) ? docs : docs.items;
+    expect(items.map((d) => d.fileName).sort()).toEqual(['payment-1.pdf', 'payment-2.pdf']);
+  });
+
   it('balances: debtors / overdue filters and paging', async () => {
     const debtor = await f.driver();
     await charge({

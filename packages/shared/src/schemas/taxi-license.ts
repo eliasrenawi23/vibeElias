@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { annualFeeDueDate } from '../dates.js';
 import { TaxiLicenseStatus } from '../enums.js';
 import { msg } from '../messages.js';
 import {
@@ -8,6 +9,7 @@ import {
   optionalIsoDate,
   optionalText,
   pagination,
+  positiveMoney,
   queryBool,
   queryList,
   querySearch,
@@ -83,3 +85,24 @@ export const TaxiLicenseRegisterVehicleSchema = z.object({
   notes: optionalText(1000),
 });
 export type TaxiLicenseRegisterVehicle = z.infer<typeof TaxiLicenseRegisterVehicleSchema>;
+
+/**
+ * `POST /taxi-licenses/:id/fee-paid`: the annual operating-licence fee was paid. `annualFeeDueAt`
+ * moves to 31 December of the year after the current due date's year (no due date: the year
+ * after `paidAt`). With an `amount` and a car registered on the licence, a LICENSE_FEE expense
+ * paid by us is recorded on that car (dated `paidAt`, the note as its description).
+ */
+export const TaxiLicenseFeePaidSchema = z.object({
+  /** Payment date; defaults to today. */
+  paidAt: isoDate.optional(),
+  amount: positiveMoney.nullish(),
+  note: optionalText(500),
+});
+export type TaxiLicenseFeePaid = z.infer<typeof TaxiLicenseFeePaidSchema>;
+export type TaxiLicenseFeePaidInput = z.input<typeof TaxiLicenseFeePaidSchema>;
+
+/** Next annual-fee due date after paying the fee due on `currentDueAt` (31 Dec of Y + 1). */
+export function nextAnnualFeeDueAt(currentDueAt: string | null, paidAt: string): string {
+  const year = Number((currentDueAt ?? paidAt).slice(0, 4));
+  return annualFeeDueDate(year + 1);
+}

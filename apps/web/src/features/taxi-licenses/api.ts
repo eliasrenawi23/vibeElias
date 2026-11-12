@@ -1,4 +1,9 @@
-import type { Paginated, TaxiLicenseCreate, TaxiLicenseUpdate } from '@renawi/shared';
+import type {
+  Paginated,
+  TaxiLicenseCreate,
+  TaxiLicenseFeePaid,
+  TaxiLicenseUpdate,
+} from '@renawi/shared';
 import { http } from '../../shared/lib/http';
 import type {
   TaxiLicenseDetail,
@@ -39,6 +44,16 @@ export function updateTaxiLicense(id: string, body: TaxiLicenseUpdate): Promise<
  */
 export function registerVehicle(id: string, vehicleId: string | null): Promise<TaxiLicenseDetail> {
   return http.post<TaxiLicenseDetail>(`${licensePath(id)}/register-vehicle`, { vehicleId });
+}
+
+/**
+ * `POST /api/taxi-licenses/:id/fee-paid { paidAt?, amount?, note? }`: the annual fee was paid.
+ * The due date moves to 31 Dec of the following year; with an amount and a registered car the
+ * API records a LICENSE_FEE expense on that car. Returns the full licence (409
+ * `errors.licenseNotActive` for a sold licence).
+ */
+export function markAnnualFeePaid(id: string, body: TaxiLicenseFeePaid): Promise<TaxiLicenseDetail> {
+  return http.post<TaxiLicenseDetail>(`${licensePath(id)}/fee-paid`, body);
 }
 
 /** `GET /api/taxi-licenses/:id/pnl` */

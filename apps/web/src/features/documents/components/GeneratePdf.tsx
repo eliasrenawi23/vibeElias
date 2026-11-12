@@ -51,6 +51,11 @@ export interface GeneratePdfDialogProps {
   onClose: () => void;
   /** After the document was stored (the documents lists are refreshed already). */
   onGenerated?: (document: DocumentItem) => void;
+  /**
+   * Where the user finds the stored document again, for the success / popup-blocked messages:
+   * the record's Documents tab (default), or the paperclip of the table row (ledger entries).
+   */
+  savedTo?: 'documents' | 'row';
 }
 
 /**
@@ -62,6 +67,7 @@ export function GeneratePdfDialog({
   defaultLang,
   onClose,
   onGenerated,
+  savedTo = 'documents',
 }: GeneratePdfDialogProps) {
   const { t } = useTranslation();
   const { message } = App.useApp();
@@ -77,12 +83,12 @@ export function GeneratePdfDialog({
     mutationFn: (c: PdfChoice) => generatePdf(c.template, c.id, lang === 'auto' ? null : lang),
     onSuccess: (document) => {
       void queryClient.invalidateQueries({ queryKey: documentKeys.all });
-      void message.success(t('pdf.generated'));
+      void message.success(savedTo === 'row' ? t('pdf.generatedRow') : t('pdf.generated'));
       if (!showDocumentInTab(tab.current, document.url)) {
         void message.info({
           content: (
             <span>
-              {t('pdf.popupBlocked')}{' '}
+              {savedTo === 'row' ? t('pdf.popupBlockedRow') : t('pdf.popupBlocked')}{' '}
               <a href={document.url} target="_blank" rel="noopener noreferrer">
                 {t('pdf.openDocument')}
               </a>
@@ -175,10 +181,12 @@ export interface PdfRowButtonProps {
   choice: PdfChoice;
   defaultLang?: Locale | null;
   onGenerated?: (document: DocumentItem) => void;
+  /** See `GeneratePdfDialogProps.savedTo` (deal payments: the deal's Documents tab). */
+  savedTo?: 'documents' | 'row';
 }
 
 /** A small "generate PDF" icon button for a table row (deposit, payment), with its dialog. */
-export function PdfRowButton({ choice, defaultLang, onGenerated }: PdfRowButtonProps) {
+export function PdfRowButton({ choice, defaultLang, onGenerated, savedTo }: PdfRowButtonProps) {
   const { t } = useTranslation();
   const templateName = usePdfTemplateName();
   const [open, setOpen] = useState(false);
@@ -201,6 +209,7 @@ export function PdfRowButton({ choice, defaultLang, onGenerated }: PdfRowButtonP
           defaultLang={defaultLang}
           onClose={() => setOpen(false)}
           onGenerated={onGenerated}
+          savedTo={savedTo}
         />
       )}
     </>

@@ -7,8 +7,11 @@
  * The production API image has no dev dependencies, so `prisma db seed` (tsx + demo data) cannot
  * run there. This script does what the seed does with SEED_DEMO=false for the user: same email
  * normalisation, password policy and argon2id parameters (the compiled dist/auth/password.js).
- * The business settings row is created by the API with its defaults on first use; fill in the
- * real details under Settings -> Business details before printing anything.
+ * The business settings row is created by the API on first use with the same neutral defaults
+ * the seed writes with SEED_DEMO=false (no legal ID, dealer licence, address, phone, e-mail or
+ * sample clauses); fill in the real details under Settings -> Business details before printing.
+ * A signed-in user changes a known password in the app (user menu -> My account); this script's
+ * --reset-password is for a forgotten one.
  *
  * Mounted into the API image at /app/apps/api/create-admin.cjs by docker-compose.prod.yml.
  */

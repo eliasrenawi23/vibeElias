@@ -55,6 +55,17 @@ ping_hc() {
 
 human_size() { du -h "$1" | cut -f1; }
 
+# A string as the inside of a JSON string literal (backslash, quote and control characters).
+json_escape() {
+  local s=$1
+  s=${s//\\/\\\\}
+  s=${s//\"/\\\"}
+  s=${s//$'\t'/\\t}
+  s=${s//$'\n'/\\n}
+  s=${s//$'\r'/\\r}
+  printf '%s' "$s"
+}
+
 PARTIALS=()
 on_error() {
   local rc=$? line=$1
@@ -145,9 +156,16 @@ for pattern in 'db-*.dump' 'uploads-*.tgz'; do
 done
 
 # ---- 5. Status for the app (shape read by apps/api/src/settings/backup-status.ts) -----------------
+# {"lastSuccessAt":"<UTC>","lastFile":"<db dump>","offsite":true|false[,"remote":"s3:<bucket>/<prefix>"]}
+# offsite false = this backup exists on this server only (Settings -> Backup shows a warning).
 mkdir -p "$(dirname "$STATUS_FILE")"
-printf '{"lastSuccessAt":"%s","lastFile":"%s"}\n' "$(date -u '+%Y-%m-%dT%H:%M:%SZ')" "$DB_FILE" \
-  > "${STATUS_FILE}.tmp"
+if [[ "$offsite" == "none" ]]; then
+  offsite_json='"offsite":false'
+else
+  offsite_json="\"offsite\":true,\"remote\":\"$(json_escape "$offsite")\""
+fi
+printf '{"lastSuccessAt":"%s","lastFile":"%s",%s}\n' "$(date -u '+%Y-%m-%dT%H:%M:%SZ')" \
+  "$(json_escape "$DB_FILE")" "$offsite_json" > "${STATUS_FILE}.tmp"
 chmod 0644 "${STATUS_FILE}.tmp"
 mv -f "${STATUS_FILE}.tmp" "$STATUS_FILE"
 

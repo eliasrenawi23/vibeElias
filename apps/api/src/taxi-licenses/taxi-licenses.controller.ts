@@ -11,9 +11,12 @@ import {
 } from '@nestjs/common';
 import { ApiConflictResponse, ApiCookieAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import type { Paginated } from '@renawi/shared';
+import type { AuthenticatedUser } from '../auth/auth.types';
+import { CurrentUser } from '../auth/decorators';
 import { Audited } from '../common/audit/audit.decorator';
 import {
   TaxiLicenseCreateDto,
+  TaxiLicenseFeePaidDto,
   TaxiLicenseQueryDto,
   TaxiLicenseRegisterVehicleDto,
   TaxiLicenseUpdateDto,
@@ -82,5 +85,23 @@ export class TaxiLicensesController {
     @Body() dto: TaxiLicenseRegisterVehicleDto,
   ): Promise<TaxiLicenseDetail> {
     return this.licenses.registerVehicle(id, dto);
+  }
+
+  @Post(':id/fee-paid')
+  @HttpCode(HttpStatus.OK)
+  @Audited('TaxiLicense')
+  @ApiOperation({
+    summary:
+      'Annual fee paid: annualFeeDueAt -> 31 Dec of the year after the current due date (none: ' +
+      'after paidAt, default today). With amount and a registered car, records a LICENSE_FEE ' +
+      'expense paid by US on that car (note = description). Returns the full licence',
+  })
+  @ApiConflictResponse({ description: 'errors.licenseNotActive (the licence is sold)' })
+  feePaid(
+    @Param('id') id: string,
+    @Body() dto: TaxiLicenseFeePaidDto,
+    @CurrentUser() user: AuthenticatedUser,
+  ): Promise<TaxiLicenseDetail> {
+    return this.licenses.feePaid(id, dto, user.id);
   }
 }

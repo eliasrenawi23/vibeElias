@@ -1,12 +1,32 @@
 import { CheckCircleOutlined } from '@ant-design/icons';
-import type { TransferChecklistKey } from '@renawi/shared';
+import { TransferChecklistSchema, type TransferChecklistKey } from '@renawi/shared';
 import { useMutation } from '@tanstack/react-query';
-import { Alert, App, Button, Card, Checkbox, Descriptions, Flex, Progress, Typography } from 'antd';
-import { useState } from 'react';
+import {
+  Alert,
+  App,
+  Button,
+  Card,
+  Checkbox,
+  Col,
+  Descriptions,
+  Divider,
+  Flex,
+  Progress,
+  Row,
+  Typography,
+} from 'antd';
+import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useFormErrors } from '../../../shared/form/useFormErrors';
+import { useZodForm } from '../../../shared/form/useZodForm';
 import { isolateLtr } from '../../../shared/lib/bidi';
 import { useErrorMessage } from '../../../shared/lib/i18n';
 import { DateText } from '../../../shared/ui/DateText';
+import { FormDateField } from '../../../shared/ui/FormDateField';
+import { FormLayout } from '../../../shared/ui/FormLayout';
+import { FormMoneyField } from '../../../shared/ui/FormMoneyField';
+import { FormTextAreaField } from '../../../shared/ui/FormTextAreaField';
+import { Money } from '../../../shared/ui/Money';
 import { StatusTag } from '../../../shared/ui/StatusTag';
 import { updateDealTransfer } from '../api';
 import { TransferDoneDialog } from '../dialogs/DealDialogs';
@@ -96,6 +116,20 @@ export function TransferChecklist({ deal, onSaved }: TransferChecklistProps) {
               label: t('deals.fields.transferredAt'),
               children: <DateText value={deal.transferredAt} />,
             },
+            {
+              key: 'filedAt',
+              label: t('checklist.transfer.filedAt'),
+              children: <DateText value={deal.transferChecklist?.filedAt ?? null} />,
+            },
+            {
+              key: 'fee',
+              label: t('checklist.transfer.transferFee'),
+              children: (
+                <span data-testid="transfer-fee-value">
+                  <Money amount={deal.transferChecklist?.transferFee ?? null} />
+                </span>
+              ),
+            },
           ]}
         />
         {!done && <Typography.Text type="secondary">{t('deals.transfer.dueHint')}</Typography.Text>}
@@ -140,6 +174,8 @@ export function TransferChecklist({ deal, onSaved }: TransferChecklistProps) {
             data-testid="transfer-done"
           />
         )}
+        <Divider className="rm-divider-tight" />
+        <TransferDetailsForm deal={deal} onSaved={onSaved} />
       </Flex>
       {marking && (
         <TransferDoneDialog
@@ -153,5 +189,100 @@ export function TransferChecklist({ deal, onSaved }: TransferChecklistProps) {
         />
       )}
     </Card>
+  );
+}
+
+/** Fee, filing date and notes of the transfer (stored in the deal's transfer checklist JSON). */
+export const TransferDetailsSchema = TransferChecklistSchema.pick({
+  transferFee: true,
+  filedAt: true,
+  notes: true,
+});
+
+function detailValues(deal: DealDetail) {
+  const c = deal.transferChecklist;
+  return { transferFee: c?.transferFee ?? null, filedAt: c?.filedAt ?? null, notes: c?.notes ?? '' };
+}
+
+/**
+ * Transfer details saved together with one button (unlike the ticks, which save at once). Only
+ * these three fields are sent; the API merges them into the stored checklist.
+ */
+function TransferDetailsForm({ deal, onSaved }: TransferChecklistProps) {
+  const { t } = useTranslation();
+  const { message } = App.useApp();
+  const form = useZodForm(TransferDetailsSchema, { defaultValues: detailValues(deal) });
+  const { reset, formState } = form;
+  useEffect(() => {
+    reset(detailValues(deal));
+  }, [deal, reset]);
+  const { formError, handleError } = useFormErrors(form.setError, {
+    fields: ['transferFee', 'filedAt', 'notes'],
+  });
+  const mutation = useMutation({
+    mutationFn: (body: DealTransferBody) => updateDealTransfer(deal.id, body),
+  });
+  const submit = form.handleSubmit(async (v) => {
+    try {
+      const updated = await mutation.mutateAsync({
+        checklist: { transferFee: v.transferFee, filedAt: v.filedAt, notes: v.notes },
+      });
+      onSaved(updated);
+      void message.success(t('deals.transfer.detailsSaved'));
+    } catch (error) {
+      handleError(error);
+    }
+  });
+
+  return (
+    <FormLayout onSubmit={submit} aria-label={t('deals.transfer.details')}>
+      <Flex vertical gap={8} data-testid="transfer-details">
+        <Typography.Text strong>{t('deals.transfer.details')}</Typography.Text>
+        {formError && <Alert type="error" showIcon title={formError} />}
+        <Row gutter={12}>
+          <Col xs={24} sm={12}>
+            <FormMoneyField
+              control={form.control}
+              name="transferFee"
+              label={t('checklist.transfer.transferFee')}
+              help={t('deals.transfer.feeHelp')}
+              min={0}
+            />
+          </Col>
+          <Col xs={24} sm={12}>
+            <FormDateField
+              control={form.control}
+              name="filedAt"
+              label={t('checklist.transfer.filedAt')}
+            />
+          </Col>
+          <Col xs={24}>
+            <FormTextAreaField
+              control={form.control}
+              name="notes"
+              label={t('checklist.transfer.notes')}
+              maxLength={2000}
+            />
+          </Col>
+        </Row>
+        <Flex justify="flex-end" gap={8}>
+          <Button
+            onClick={() => reset(detailValues(deal))}
+            disabled={!formState.isDirty || mutation.isPending}
+          >
+            {t('actions.reset')}
+          </Button>
+          <Button
+            type="primary"
+            htmlType="submit"
+            loading={mutation.isPending}
+            disabled={!formState.isDirty}
+            data-testid="transfer-details-save"
+          >
+            {t('deals.transfer.saveDetails')}
+          </Button>
+        </Flex>
+      </Flex>
+    </FormLayout>
   );
 }

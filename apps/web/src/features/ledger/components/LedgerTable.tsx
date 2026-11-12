@@ -16,6 +16,7 @@ import { PdfRowButton } from '../../documents/components/GeneratePdf';
 import { ledgerPdfChoice } from '../../documents/pdf';
 import { isDeposit, openAmount, withRunningBalance, type StatementRow } from '../lib/ledger';
 import type { LedgerEntry } from '../types';
+import { LedgerRowDocuments } from './LedgerRowDocuments';
 
 export interface LedgerTableProps {
   /** Rows oldest to newest (as the statements return them). */
@@ -25,8 +26,13 @@ export interface LedgerTableProps {
   opening?: number;
   /** Shows a "void" action on rows that are not voided yet. */
   onVoid?: (entry: LedgerEntry) => void;
-  /** Deposit confirmation / payment confirmation PDFs on deposit and payment rows. */
+  /**
+   * Deposit confirmation / payment confirmation PDFs on deposit and payment rows, and the
+   * paperclip listing the documents already stored on a row.
+   */
   pdfActions?: boolean;
+  /** After a PDF was generated from a row (refresh the statement so the paperclip appears). */
+  onDocumentGenerated?: () => void;
   empty?: ReactNode;
   label?: string;
   'data-testid'?: string;
@@ -53,6 +59,7 @@ export function LedgerTable({
   opening = 0,
   onVoid,
   pdfActions = false,
+  onDocumentGenerated,
   empty,
   label,
   'data-testid': testId = 'ledger-table',
@@ -173,10 +180,18 @@ export function LedgerTable({
             align: 'end' as const,
             render: (e: StatementRow) => {
               const pdf = pdfActions ? ledgerPdfChoice(e) : null;
-              if (e.voidedAt && !pdf) return null;
+              const docs = pdfActions ? (e.documentCount ?? 0) : 0;
+              if (e.voidedAt && !pdf && docs === 0) return null;
               return (
                 <Flex gap={2} justify="flex-end">
-                  {pdf && <PdfRowButton choice={pdf} />}
+                  {docs > 0 && <LedgerRowDocuments entryId={e.id} count={docs} />}
+                  {pdf && (
+                    <PdfRowButton
+                      choice={pdf}
+                      savedTo="row"
+                      onGenerated={onDocumentGenerated}
+                    />
+                  )}
                   {onVoid && !e.voidedAt && (
                     <Tooltip title={t('ledger.void.action')}>
                       <Button

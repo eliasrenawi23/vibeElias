@@ -856,6 +856,17 @@ body {
   font-size: var(--rm-text-small-size);
 }
 
+/* Divider between two parts of one card (e.g. transfer checklist / transfer details). */
+.rm-divider-tight.ant-divider {
+  margin: 4px 0;
+}
+
+/* Paperclip list of a ledger row (generated confirmations). */
+.rm-ledger-docs {
+  min-width: 240px;
+  max-width: min(360px, calc(100vw - 48px));
+}
+
 .rm-stat-card.ant-card {
   height: 100%;
 }

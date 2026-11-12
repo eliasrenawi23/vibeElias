@@ -40,6 +40,8 @@ const ZERO = new Prisma.Decimal(0);
 
 const ENTRY_INCLUDE = {
   driver: { select: { id: true, contact: { select: CONTACT_NAME_SELECT } } },
+  // Generated deposit / payment confirmations hang on the entry (paperclip in the statement).
+  _count: { select: { documents: true } },
 } satisfies Prisma.LedgerEntryInclude;
 type EntryWithDriver = Prisma.LedgerEntryGetPayload<{ include: typeof ENTRY_INCLUDE }>;
 
@@ -424,7 +426,7 @@ export class LedgerService {
         })
       : [];
     const allocatedById = new Map(sums.map((s) => [s.chargeId, s._sum?.amount ?? ZERO]));
-    return rows.map(({ driver, ...entry }) => {
+    return rows.map(({ driver, _count, ...entry }) => {
       const isCharge = entry.type === 'CHARGE';
       const allocated = isCharge ? (allocatedById.get(entry.id) ?? ZERO) : null;
       const remaining =
@@ -438,6 +440,7 @@ export class LedgerService {
         driver: { id: driver.id, name: contactDisplayName(driver.contact) },
         allocated,
         remaining,
+        documentCount: _count.documents,
       };
     });
   }

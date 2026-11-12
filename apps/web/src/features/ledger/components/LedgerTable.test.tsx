@@ -1,7 +1,7 @@
-import { act, screen, within } from '@testing-library/react';
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { act, fireEvent, screen, within } from '@testing-library/react';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import i18n from '../../../app/i18n';
-import { renderWithProviders } from '../../../test/renderWithProviders';
+import { jsonResponse, renderWithProviders } from '../../../test/renderWithProviders';
 import { withRunningBalance } from '../lib/ledger';
 import type { LedgerEntry } from '../types';
 import { LedgerTable } from './LedgerTable';
@@ -26,6 +26,7 @@ beforeEach(async () => {
 
 afterEach(() => {
   window.matchMedia = jsdomMatchMedia;
+  vi.restoreAllMocks();
 });
 
 function entry(
@@ -170,5 +171,46 @@ describe('LedgerTable', () => {
     await screen.findByTestId('ledger-table');
     expect(within(row('e1')).getByTestId('ledger-void')).toBeInTheDocument();
     expect(within(row('e3')).queryByTestId('ledger-void')).toBeNull();
+  });
+  it('shows a paperclip on rows with documents and lists them with open / download', async () => {
+    const fetchMock = vi.spyOn(globalThis, 'fetch').mockImplementation(async () =>
+      jsonResponse([
+        {
+          id: 'doc_1',
+          kind: 'RECEIPT',
+          fileName: 'payment-confirmation-2026-11-03.pdf',
+          mime: 'application/pdf',
+          size: 52_000,
+          hasThumb: false,
+          title: 'Payment confirmation',
+          lang: 'en',
+          expiresAt: null,
+          createdAt: '2026-11-03T10:00:00.000Z',
+          url: '/api/documents/doc_1/file',
+        },
+      ]),
+    );
+    const items = ITEMS.map((e) => (e.id === 'e2' ? { ...e, documentCount: 1 } : e));
+    renderWithProviders(<LedgerTable items={items} pdfActions />);
+    await screen.findByTestId('ledger-table');
+    // Only the payment row has a document; the rent charge has none.
+    expect(within(row('e1')).queryByTestId('ledger-documents')).toBeNull();
+    const clip = within(row('e2')).getByTestId('ledger-documents');
+    expect(clip).toHaveAttribute('aria-label', expect.stringContaining('Documents of this entry'));
+    // Nothing is fetched before the click.
+    expect(fetchMock).not.toHaveBeenCalled();
+
+    fireEvent.click(clip);
+    const list = await screen.findByTestId('ledger-documents-list');
+    expect(String(fetchMock.mock.calls[0]?.[0])).toBe('/api/documents?ledgerEntryId=e2');
+    expect(list).toHaveTextContent('Payment confirmation');
+    expect(within(list).getByTestId('ledger-document-open')).toHaveAttribute(
+      'href',
+      '/api/documents/doc_1/file',
+    );
+    expect(within(list).getByTestId('ledger-document-download')).toHaveAttribute(
+      'href',
+      '/api/documents/doc_1/file?download=1',
+    );
   });
 });

@@ -67,8 +67,10 @@ the personal data the system holds. Setup: [deploy.md](deploy.md); backups: [res
 
 All on the server in `/opt/renawi`, then check that the site works.
 
-**Admin password** (also when forgotten): put the new password in `ADMIN_PASSWORD` in `.env`,
-run `docker compose run --rm admin node create-admin.cjs --reset-password` (signs out all of that
+**Admin password**: in the app, user menu → **My account** → **Change password** (needs the
+current password; every other device of that user is signed out). When it is forgotten: put the
+new password in `ADMIN_PASSWORD` in `.env`, run
+`docker compose run --rm admin node create-admin.cjs --reset-password` (signs out all of that
 user's sessions), then remove the line again.
 
 **JWT secrets** (after a suspected leak of `.env`, or yearly): generate two new values with
@@ -113,7 +115,8 @@ which duties apply to your business. In practice:
 
 ## Known limits
 
-- No two-factor sign-in and no change-password screen in the app yet (use the admin tool above).
+- No two-factor sign-in, and no "forgot password" e-mail: a forgotten password is reset with the
+  admin tool above (a known one is changed under **My account**).
 - The API documentation (Swagger) at `/api/docs` is public; it shows the API's shape but every
   call needs a sign-in. To hide it, add `location ^~ /api/docs { return 404; }` to
   `deploy/nginx.conf` and rebuild the web image.

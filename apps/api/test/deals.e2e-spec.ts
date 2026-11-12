@@ -1087,6 +1087,66 @@ describe('Deals (e2e)', () => {
       expect(dated).toMatchObject({ transferStatus: 'DONE', transferredAt: daysFromToday(-1) });
     });
 
+    it('stores the transfer fee, filing date and notes without touching the ticks', async () => {
+      const p = await purchase();
+      const d = await sale(p.vehicleId);
+      await sign(d.id);
+      await complete(d.id);
+      ok<DealBody>(
+        await s.api.patch(`/api/deals/${d.id}/transfer`).send({ checklist: { idCopies: true } }),
+      );
+
+      const details = ok<DealBody>(
+        await s.api.patch(`/api/deals/${d.id}/transfer`).send({
+          checklist: { transferFee: 257, filedAt: daysFromToday(-1), notes: '  הוגש בדואר ' },
+        }),
+      );
+      expect(details).toMatchObject({
+        transferStatus: 'IN_PROGRESS',
+        transferChecklist: {
+          idCopies: true,
+          liensChecked: false,
+          transferFee: 257,
+          filedAt: daysFromToday(-1),
+          notes: 'הוגש בדואר',
+        },
+      });
+      // GET returns the same; a later tick keeps the details.
+      const ticked = ok<DealBody>(
+        await s.api.patch(`/api/deals/${d.id}/transfer`).send({ checklist: { liensChecked: true } }),
+      );
+      expect(ticked.transferChecklist).toMatchObject({ transferFee: 257, notes: 'הוגש בדואר' });
+      const fetched = ok<DealBody>(await s.api.get(`/api/deals/${d.id}`), 200);
+      expect(fetched.transferChecklist).toMatchObject({ filedAt: daysFromToday(-1) });
+
+      // Clearing: null / '' remove a value.
+      const cleared = ok<DealBody>(
+        await s.api
+          .patch(`/api/deals/${d.id}/transfer`)
+          .send({ checklist: { transferFee: null, filedAt: null, notes: '' } }),
+      );
+      expect(cleared.transferChecklist).toMatchObject({
+        idCopies: true,
+        liensChecked: true,
+        transferFee: null,
+        filedAt: null,
+        notes: null,
+      });
+
+      const negative = await s.api
+        .patch(`/api/deals/${d.id}/transfer`)
+        .send({ checklist: { transferFee: -5 } });
+      expect(negative.status).toBe(400);
+      expect(negative.body).toMatchObject({
+        message: 'errors.validation',
+        errors: [{ path: 'checklist.transferFee' }],
+      });
+      const badDate = await s.api
+        .patch(`/api/deals/${d.id}/transfer`)
+        .send({ checklist: { filedAt: '2026-02-30' } });
+      expect(badDate.status).toBe(400);
+    });
+
     it('a non-taxi has no licence item; overdue transfers are listed and flagged', async () => {
       const p = await purchase({ date: daysFromToday(-40) });
       const d = await sale(p.vehicleId, { date: daysFromToday(-20) });

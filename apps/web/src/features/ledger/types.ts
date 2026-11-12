@@ -35,6 +35,8 @@ export interface LedgerEntry {
   driver?: NamedRef | null;
   /** Contract number, when the API includes it. */
   contractNo?: number | null;
+  /** Documents stored on the entry (generated deposit / payment confirmations). */
+  documentCount?: number;
 }
 
 /** `GET /api/drivers/:id/ledger` */

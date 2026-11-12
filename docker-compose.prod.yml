@@ -225,7 +225,8 @@ services:
   # ---- One-off tools (profile "tools": never started by `up`) --------------------------------
 
   # Creates the first admin user from ADMIN_EMAIL / ADMIN_PASSWORD / ADMIN_NAME, or resets the
-  # password of an existing one: docker compose run --rm admin node create-admin.cjs --reset-password
+  # forgotten password of an existing one (a known password is changed in the app, My account):
+  #   docker compose run --rm admin node create-admin.cjs --reset-password
   admin:
     image: *api-image
     profiles: [tools]

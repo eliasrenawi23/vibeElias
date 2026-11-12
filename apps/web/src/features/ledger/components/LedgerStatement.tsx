@@ -144,6 +144,7 @@ export function LedgerStatement({
           loading={query.isFetching}
           onVoid={(entry) => setDialog({ type: 'void', entry })}
           pdfActions
+          onDocumentGenerated={() => void query.refetch()}
           empty={
             filtered ? <EmptyState compact description={t('table.emptyFiltered')} /> : undefined
           }

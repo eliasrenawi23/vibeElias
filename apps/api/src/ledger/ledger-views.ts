@@ -97,6 +97,8 @@ export type LedgerEntryView = LedgerEntry & {
   driver: NamedRef;
   allocated: Prisma.Decimal | null;
   remaining: Prisma.Decimal | null;
+  /** Documents stored on the entry (generated deposit / payment confirmations). */
+  documentCount: number;
 };
 
 /** `GET /drivers/:id/ledger` item: entry view + running balance after the entry. */

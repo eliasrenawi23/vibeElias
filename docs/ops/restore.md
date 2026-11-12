@@ -14,7 +14,8 @@ Every night at 02:30 Israel time the `backup` container writes two files, named 
 | `uploads-YYYYMMDD-HHMM.tgz` | Every uploaded document and photo and every generated PDF (the files the database points to).                           |
 
 The newest 7 nights stay on the server in `/opt/renawi/backups`; 30 days are kept in the B2
-bucket under `renawi/`. **Not** in the backup: `/opt/renawi/.env` (keep it in your password
+bucket under `renawi/` (only when `S3_BUCKET` is set: **Settings → Backup** shows whether the last
+backup was copied off the server). **Not** in the backup: `/opt/renawi/.env` (keep it in your password
 manager) and the HTTPS certificates (Caddy simply gets new ones).
 
 A database dump and an uploads archive with the same time stamp belong together. Restore both, or
@@ -113,7 +114,8 @@ system is not touched.
 
 - [ ] `docker compose run --rm restore --list`: last night's files are in the bucket, sizes look
       normal (similar to previous nights, not tiny).
-- [ ] Settings → Backup in the app shows last night's time.
+- [ ] Settings → Backup in the app shows last night's time and **Off-site copy: Yes** (an amber
+      "local backups only" warning means the bucket is not set up: nothing below would work).
 - [ ] Remove the local copies of that night so the files really come from the bucket:
       `sudo rm /opt/renawi/backups/db-<stamp>.dump /opt/renawi/backups/uploads-<stamp>.tgz`
 - [ ] Restore into scratch:

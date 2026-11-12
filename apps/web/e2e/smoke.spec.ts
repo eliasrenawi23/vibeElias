@@ -25,11 +25,17 @@ interface MockApi {
   }[];
   user: MockUser;
   settings: Record<string, unknown>;
+  /** Current password of the mocked account (changed by PATCH /auth/me). */
+  password: string;
+  /** `GET /settings/backup-status` body (null = 404, monitoring not set up). */
+  backup: Record<string, unknown> | null;
 }
 
 async function mockApi(page: Page, options: { loggedIn?: boolean } = {}): Promise<MockApi> {
   const api: MockApi = {
     calls: [],
+    password: 'ChangeMe123!',
+    backup: null,
     settings: {
       businessName: { he: 'רינאוי מוטורס', ar: 'ريناوي موتورز', en: 'Renawi Motors' },
       legalId: null,
@@ -70,7 +76,7 @@ async function mockApi(page: Page, options: { loggedIn?: boolean } = {}): Promis
 
     if (path === '/api/auth/login' && method === 'POST') {
       const { email, password } = (body ?? {}) as { email?: string; password?: string };
-      if (email === api.user.email && password === 'ChangeMe123!') {
+      if (email === api.user.email && password === api.password) {
         loggedIn = true;
         return json(route, 200, { user: api.user });
       }
@@ -85,7 +91,24 @@ async function mockApi(page: Page, options: { loggedIn?: boolean } = {}): Promis
     }
     if (path === '/api/auth/me') {
       if (!loggedIn) return json(route, 401, unauthorized);
-      if (method === 'PATCH') api.user = { ...api.user, ...(body as Partial<MockUser>) };
+      if (method === 'PATCH') {
+        const { currentPassword, newPassword, ...prefs } = (body ?? {}) as Partial<MockUser> & {
+          currentPassword?: string;
+          newPassword?: string;
+        };
+        if (newPassword !== undefined) {
+          // Same contract as the API: a wrong current password is a field error on it.
+          if (currentPassword !== api.password) {
+            return json(route, 400, {
+              statusCode: 400,
+              message: 'errors.validation',
+              errors: [{ path: 'currentPassword', message: 'auth.invalidCredentials' }],
+            });
+          }
+          api.password = newPassword;
+        }
+        api.user = { ...api.user, ...prefs };
+      }
       return json(route, 200, { user: api.user });
     }
     // Dashboard KPIs: stock, leases, receivables, month profit, open deals, overdue transfers.
@@ -99,6 +122,12 @@ async function mockApi(page: Page, options: { loggedIn?: boolean } = {}): Promis
         openDeals: 3,
         transfersOverdue: 1,
       });
+    }
+    if (path === '/api/settings/backup-status' && method === 'GET') {
+      if (!loggedIn) return json(route, 401, unauthorized);
+      return api.backup
+        ? json(route, 200, api.backup)
+        : json(route, 404, { statusCode: 404, message: 'errors.notFound' });
     }
     if (path === '/api/settings') {
       if (!loggedIn) return json(route, 401, unauthorized);
@@ -268,5 +297,80 @@ test('business settings load, validate and save', async ({ page }) => {
     legalId: null,
     vatRate: 18,
   });
+  expect(problems).toEqual([]);
+});
+
+test('account page: change the password from the user menu', async ({ page }) => {
+  const api = await mockApi(page, { loggedIn: true });
+  const problems = watchConsole(page);
+  await page.goto('/');
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText('לוח בקרה');
+
+  // User menu -> My account.
+  await page.getByRole('button', { name: 'תפריט משתמש' }).click();
+  await page.getByRole('menuitem', { name: 'החשבון שלי' }).click();
+  await expect(page).toHaveURL(/\/settings\/account$/);
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText('החשבון שלי');
+  await expect(page.getByTestId('account-profile')).toContainText('אליאס רינאוי');
+  await expect(page.getByTestId('account-profile')).toContainText('admin@renawi.local');
+  await expect(page.getByTestId('change-password-note')).toContainText('יתנתקו');
+
+  const current = page.locator('input[name="currentPassword"]');
+  const next = page.locator('input[name="newPassword"]');
+  const confirm = page.locator('input[name="confirmPassword"]');
+
+  // Confirmation differs: caught before any request.
+  await current.fill('ChangeMe123!');
+  await next.fill('NewSecret456');
+  await confirm.fill('NewSecret457');
+  await page.getByTestId('change-password-submit').click();
+  await expect(page.getByText('הסיסמאות אינן תואמות')).toBeVisible();
+  expect(api.calls.some((c) => c.method === 'PATCH' && c.path === '/api/auth/me')).toBe(false);
+
+  // Wrong current password: the API's field error is shown on that field.
+  await current.fill('Wrong-pass1');
+  await confirm.fill('NewSecret456');
+  await page.getByTestId('change-password-submit').click();
+  await expect(page.getByText('הסיסמה הנוכחית שגויה')).toBeVisible();
+  await expect(current).toHaveAttribute('aria-invalid', 'true');
+
+  // Right password: changed, the form is cleared.
+  await current.fill('ChangeMe123!');
+  await page.getByTestId('change-password-submit').click();
+  await expect(page.getByText('הסיסמה הוחלפה. המכשירים האחרים נותקו.')).toBeVisible();
+  await expect(current).toHaveValue('');
+  const patches = api.calls.filter((c) => c.method === 'PATCH' && c.path === '/api/auth/me');
+  expect(patches.at(-1)?.body).toEqual({
+    currentPassword: 'ChangeMe123!',
+    newPassword: 'NewSecret456',
+  });
+  expect(api.password).toBe('NewSecret456');
+  expect(problems).toEqual([]);
+});
+
+test('backup page warns when the backups stay on the server only', async ({ page }) => {
+  const api = await mockApi(page, { loggedIn: true });
+  const problems = watchConsole(page);
+  const recent = new Date(Date.now() - 3 * 3_600_000).toISOString();
+  api.backup = {
+    lastSuccessAt: recent,
+    lastFile: 'db-20261112-0230.dump',
+    ok: true,
+    offsite: false,
+    remote: null,
+  };
+  await page.goto('/settings/backup');
+  const card = page.getByTestId('backup-status');
+  await expect(card).toHaveAttribute('data-state', 'localOnly');
+  await expect(page.getByTestId('backup-alert')).toHaveClass(/ant-alert-warning/);
+  await expect(page.getByTestId('backup-alert')).toContainText('לא מוגן מפני אובדן השרת');
+  await expect(card.locator('[data-offsite="false"]')).toBeVisible();
+
+  // Copied to the bucket: green, with the bucket shown.
+  api.backup = { ...api.backup, offsite: true, remote: 's3:renawi-backups/renawi/' };
+  await page.getByTestId('backup-refresh').click();
+  await expect(card).toHaveAttribute('data-state', 'ok');
+  await expect(page.getByTestId('backup-alert')).toHaveClass(/ant-alert-success/);
+  await expect(card).toContainText('s3:renawi-backups/renawi/');
   expect(problems).toEqual([]);
 });

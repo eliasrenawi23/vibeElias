@@ -27,9 +27,11 @@ export class SettingsController {
   @Get('backup-status')
   @ApiOperation({
     summary:
-      'Last successful nightly backup (shared BackupStatusSchema { lastSuccessAt, lastFile, ok }) ' +
-      'read from BACKUP_STATUS_FILE; ok = succeeded within the last 36 hours. A missing or ' +
-      'malformed file reports { lastSuccessAt: null, lastFile: null, ok: false }.',
+      'Last successful nightly backup (shared BackupStatusSchema { lastSuccessAt, lastFile, ok, ' +
+      'offsite, remote }) read from BACKUP_STATUS_FILE; ok = succeeded within the last 36 hours; ' +
+      'offsite = also copied to the S3 bucket (false = local only, null = unknown: older status ' +
+      'file); remote = s3:<bucket>/<prefix> when copied. A missing or malformed file reports ' +
+      '{ lastSuccessAt: null, lastFile: null, ok: false, offsite: null, remote: null }.',
   })
   backupStatus(): Promise<BackupStatus> {
     return readBackupStatus(this.config.get('BACKUP_STATUS_FILE', { infer: true }));

@@ -1,4 +1,5 @@
 import { annualFeeDueDate } from '@renawi/shared';
+import request from 'supertest';
 import { Factory } from './factories';
 import { daysFromToday, expectError, Session, startSession, today } from './helpers';
 
@@ -233,5 +234,116 @@ describe('Taxi licences (e2e)', () => {
     );
     const leased = await s.api.get('/api/taxi-licenses?available=false').expect(200);
     expect((leased.body as { items: LicenseBody[] }).items.map((l) => l.id)).toEqual([lic.id]);
+  });
+  describe('fee-paid', () => {
+    const feePaid = (id: string, body: Record<string, unknown> = {}) =>
+      s.api.post(`/api/taxi-licenses/${id}/fee-paid`).send(body);
+
+    it('moves the due date to 31 Dec of the following year (overdue alert cleared)', async () => {
+      const due = daysFromToday(-3);
+      const dueYear = Number(due.slice(0, 4));
+      const lic = await create({ licenseNo: '55540', annualFeeDueAt: due });
+      expect(lic.alerts).toContain('annualFeeOverdue');
+
+      const paid = (await feePaid(lic.id).expect(200)).body as LicenseBody;
+      expect(paid).toMatchObject({
+        id: lic.id,
+        licenseNo: '55540',
+        annualFeeDueAt: `${dueYear + 1}-12-31`,
+        segments: [],
+      });
+      expect(paid.alerts).not.toContain('annualFeeOverdue');
+      // Paying again moves it one more year (each call is one year's fee).
+      const again = (await feePaid(lic.id, { paidAt: today() }).expect(200)).body as LicenseBody;
+      expect(again.annualFeeDueAt).toBe(`${dueYear + 2}-12-31`);
+
+      // No due date: the year after the payment date.
+      const none = await create({ licenseNo: '55541', annualFeeDueAt: null });
+      expect(none.annualFeeDueAt).toBeNull();
+      const set = (await feePaid(none.id, { paidAt: '2026-11-12' }).expect(200)).body;
+      expect(set).toMatchObject({ annualFeeDueAt: '2027-12-31' });
+
+      // Audited as an update of the licence with the due-date change.
+      const audit = await s.t.prisma.auditLog.findFirst({
+        where: { entity: 'TaxiLicense', entityId: none.id, action: 'UPDATE' },
+        orderBy: { at: 'desc' },
+      });
+      expect(audit?.userId).toBe(s.userId);
+      expect(audit?.diff).toMatchObject({
+        changes: { annualFeeDueAt: { from: null, to: '2027-12-31' } },
+      });
+    });
+
+    it('records the amount as a LICENSE_FEE expense on the registered car', async () => {
+      const lic = await create({ licenseNo: '55542', annualFeeDueAt: daysFromToday(20) });
+      const taxi = await f.taxi({ year: 2022 });
+      await s.api
+        .post(`/api/taxi-licenses/${lic.id}/register-vehicle`)
+        .send({ vehicleId: taxi.id })
+        .expect(200);
+      const vehicle = (await s.api.get(`/api/vehicles/${taxi.id}`).expect(200)).body as {
+        openCycle: { id: string } | null;
+      };
+
+      const year = Number(daysFromToday(20).slice(0, 4));
+      const paid = await feePaid(lic.id, {
+        paidAt: today(),
+        amount: 1450.5,
+        note: 'שובר דצמבר',
+      }).expect(200);
+      expect(paid.body).toMatchObject({
+        annualFeeDueAt: `${year + 1}-12-31`,
+        registeredVehicle: { id: taxi.id },
+      });
+
+      const expenses = (await s.api.get(`/api/vehicles/${taxi.id}/expenses`).expect(200)).body as {
+        items: Record<string, unknown>[];
+      };
+      expect(expenses.items).toHaveLength(1);
+      expect(expenses.items[0]).toMatchObject({
+        vehicleId: taxi.id,
+        cycleId: vehicle.openCycle?.id ?? null,
+        category: 'LICENSE_FEE',
+        paidBy: 'US',
+        amount: 1450.5,
+        date: today(),
+        vatIncluded: false,
+        description: 'שובר דצמבר',
+      });
+      const expenseAudit = await s.t.prisma.auditLog.findFirst({
+        where: { entity: 'VehicleExpense', entityId: expenses.items[0]?.id as string },
+      });
+      expect(expenseAudit).toMatchObject({ action: 'CREATE', userId: s.userId });
+
+      // Without an amount nothing is recorded on the car.
+      await feePaid(lic.id).expect(200);
+      const after = (await s.api.get(`/api/vehicles/${taxi.id}/expenses`).expect(200)).body as {
+        items: unknown[];
+      };
+      expect(after.items).toHaveLength(1);
+    });
+
+    it('an amount without a registered car only moves the date; validation and 404 / 409', async () => {
+      const lic = await create({ licenseNo: '55543' });
+      const before = await s.t.prisma.vehicleExpense.count();
+      await feePaid(lic.id, { amount: 900 }).expect(200);
+      expect(await s.t.prisma.vehicleExpense.count()).toBe(before);
+
+      expectError(await feePaid(lic.id, { amount: 0 }), 400, 'errors.validation', [
+        { path: 'amount', message: expect.any(String) as unknown as string },
+      ]);
+      const badDate = await feePaid(lic.id, { paidAt: '31/12/2026' });
+      expect(badDate.status).toBe(400);
+      expectError(await feePaid('missing'), 404, 'errors.notFound');
+
+      const sold = await create({ licenseNo: '55544', status: 'SOLD', soldAt: today() });
+      expectError(await feePaid(sold.id), 409, 'errors.licenseNotActive');
+      // Mutations need the CSRF header like every other action.
+      await request(s.t.http)
+        .post(`/api/taxi-licenses/${lic.id}/fee-paid`)
+        .set('Cookie', s.cookie)
+        .send({})
+        .expect(403);
+    });
   });
 });

@@ -581,14 +581,50 @@ describe('Milestone 5 coverage: feed kinds, reminders, exports, backup (e2e)', (
       rmSync(file, { force: true });
       const missing = await s.api.get('/api/settings/backup-status');
       expect(missing.status).toBe(200);
-      expect(missing.body).toEqual({ lastSuccessAt: null, lastFile: null, ok: false });
+      expect(missing.body).toEqual({
+        lastSuccessAt: null,
+        lastFile: null,
+        ok: false,
+        offsite: null,
+        remote: null,
+      });
 
       mkdirSync(dirname(file), { recursive: true });
       const recent = new Date(Date.now() - 3 * 3_600_000).toISOString();
       writeFileSync(file, JSON.stringify({ lastSuccessAt: recent, lastFile: 'renawi.dump' }));
       const fresh = await s.api.get('/api/settings/backup-status');
       expect(BackupStatusSchema.safeParse(fresh.body).success).toBe(true);
-      expect(fresh.body).toEqual({ lastSuccessAt: recent, lastFile: 'renawi.dump', ok: true });
+      // A status file of an older sidecar (no off-site field): unknown.
+      expect(fresh.body).toEqual({
+        lastSuccessAt: recent,
+        lastFile: 'renawi.dump',
+        ok: true,
+        offsite: null,
+        remote: null,
+      });
+
+      // Current sidecar: local only, or copied to the bucket.
+      writeFileSync(
+        file,
+        JSON.stringify({ lastSuccessAt: recent, lastFile: 'renawi.dump', offsite: false }),
+      );
+      const local = await s.api.get('/api/settings/backup-status');
+      expect(BackupStatusSchema.safeParse(local.body).success).toBe(true);
+      expect(local.body).toMatchObject({ ok: true, offsite: false, remote: null });
+      writeFileSync(
+        file,
+        JSON.stringify({
+          lastSuccessAt: recent,
+          lastFile: 'renawi.dump',
+          offsite: true,
+          remote: 's3:renawi-backups/renawi/',
+        }),
+      );
+      expect((await s.api.get('/api/settings/backup-status')).body).toMatchObject({
+        ok: true,
+        offsite: true,
+        remote: 's3:renawi-backups/renawi/',
+      });
 
       const stale = new Date(Date.now() - 40 * 3_600_000).toISOString();
       writeFileSync(file, JSON.stringify({ lastSuccessAt: stale, lastFile: 'old.dump' }));

@@ -42,6 +42,7 @@ export const NAV_ITEMS: readonly NavItem[] = [
       { path: '/settings/contracts', labelKey: 'settings.nav.contracts' },
       { path: '/settings/reminders', labelKey: 'settings.nav.reminders' },
       { path: '/settings/backup', labelKey: 'settings.nav.backup' },
+      { path: '/settings/account', labelKey: 'settings.nav.account' },
     ],
   },
 ];

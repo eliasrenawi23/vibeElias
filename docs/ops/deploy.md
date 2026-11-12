@@ -166,14 +166,18 @@ docker compose run --rm admin
 
 It prints `Admin user ... created`. Sign in at `https://<DOMAIN>` with `ADMIN_EMAIL` /
 `ADMIN_PASSWORD`, then remove the `ADMIN_PASSWORD` line from `.env` (keep the password in your
-password manager). There is no change-password screen in the app yet; to set a new password, put
-it back in `.env` and run `docker compose run --rm admin node create-admin.cjs --reset-password`
-(this also signs out every open session).
+password manager). To change the password later, sign in and use **My account** in the user menu
+(the avatar in the top bar) → **Change password**: it asks for the current password and signs out
+every other device. A **forgotten** password: put a new one in `ADMIN_PASSWORD` in `.env` and run
+`docker compose run --rm admin node create-admin.cjs --reset-password` (this also signs out every
+open session), then remove the line again.
 
-Why not `npm run db:seed` with `SEED_DEMO=false` as in development? The seed needs development
-tools that are not in the production image, and it would store sample business details (legal ID,
-dealer licence number, address) in Settings. The admin tool creates only the user; Settings starts
-empty with the standard defaults.
+Why not `npm run db:seed` with `SEED_DEMO=false` as in development? The seed runs TypeScript
+through `tsx` and imports the demo-data helpers, none of which are in the production image. The
+admin tool (`deploy/create-admin.cjs`, mounted into the API container by the `admin` service)
+does the same for the user with the compiled password code. Neither stores sample business
+details: Settings is created on first use with the standard defaults (business name, VAT 18%,
+reminder timing, who pays what) and every other detail empty, exactly as `SEED_DEMO=false` would.
 
 **Before printing any contract or form**, open **Settings → Business details** and enter the real
 business names (he/ar/en), legal ID, dealer licence number, address, phone and e-mail: the PDFs
@@ -215,14 +219,17 @@ print them. Then review **Settings → Contracts** and **Settings → Reminder t
    ```
 
    The log ends with `off-site: s3:renawi-backups-xxxx/renawi/`. The files appear in the bucket
-   under `renawi/`, and **Settings → Backup** in the app shows the time of the last backup.
+   under `renawi/`, and **Settings → Backup** in the app shows the time of the last backup with
+   **Off-site copy: Yes** and the bucket name.
 
 7. Optional: at <https://healthchecks.io> create a check with schedule `30 2 * * *`, time zone
    `Asia/Jerusalem`, grace time 2 hours; put its ping URL in `HEALTHCHECK_PING_URL` and run
    `docker compose up -d backup`. You get an e-mail when a night is missed or fails.
 
-Without `S3_BUCKET` the backups stay on the server only (the backup log says so every night) and
-are lost if the server is lost. Restoring: [restore.md](restore.md).
+Without `S3_BUCKET` the backups stay on the server only and are lost if the server is lost: the
+backup log says so every night, and **Settings → Backup** shows an amber "local backups only — not
+protected against server loss" warning (the status file the backup writes has `"offsite": false`)
+until a night has copied to the bucket. Restoring: [restore.md](restore.md).
 
 ## 11. Deploys from GitHub
 
@@ -309,13 +316,14 @@ takes several minutes on the small server.
 | --------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Browser warns about the certificate, or Caddy logs `challenge failed` | DNS does not point at the server yet (`nslookup <DOMAIN>`), or ports 80/443 are blocked (Hetzner firewall). Fix and run `docker compose restart caddy`. After many failures Let's Encrypt pauses for an hour. |
 | `502 Bad Gateway`                                                     | The API is starting (migrations, up to a minute) or crashed: `docker compose logs --tail 100 api`.                                                                                                            |
-| API restarts with `Invalid environment configuration`                 | A required `.env` value is missing or too short (JWT secrets need 32+ characters). A misspelt `TRUST_PROXY` is reported there too (valid: `loopback,uniquelocal`, `true` = 2 hops, a hop count, `false`).                                                          |
+| API restarts with `Invalid environment configuration`                 | A required `.env` value is missing or too short (JWT secrets need 32+ characters). A misspelt `TRUST_PROXY` is reported there too (valid: `loopback,uniquelocal`, `true` = 2 hops, a hop count, `false`).     |
 | Sign-in works but you are signed out at once                          | You opened the site over `http://` or by IP: with `COOKIE_SECURE=true` the browser only keeps the cookies over HTTPS. Use `https://<DOMAIN>`.                                                                 |
 | `deploy.sh`: `pull access denied` / `denied`                          | `IMAGE_PREFIX` is wrong (must be lowercase) or the server is not logged in to GHCR (manual pulls need `docker login ghcr.io`, section 7).                                                                     |
 | `deploy.sh`: `not healthy after 300 s`                                | Read the printed logs; roll back with `bash deploy/deploy.sh <previous tag>`.                                                                                                                                 |
 | Upload fails with "file too large"                                    | The limit is `MAX_UPLOAD_MB` (20 MB). Photos from phones are usually far smaller; scan multi-page PDFs at 200–300 dpi.                                                                                        |
 | Generating a PDF fails or is slow                                     | The first PDF after a restart starts Chromium (a few seconds). Repeated failures: `docker compose logs api                                                                                                    | grep -i pdf`and memory in`docker stats --no-stream`. |
 | Settings → Backup shows an old date                                   | `docker compose logs --tail 50 backup`. Typical: wrong B2 key, bucket name or endpoint; disk full. Fix `.env`, `docker compose up -d backup`, then `docker compose exec backup backup.sh --now`.              |
+| Settings → Backup says "local backups only"                           | `S3_BUCKET` is empty, so nothing was copied off the server. Set up the bucket (section 10), `docker compose up -d backup`, then `docker compose exec backup backup.sh --now`.                                 |
 | Disk almost full                                                      | `docker system df`; old images: `docker image prune -a` (keeps images in use); local backups are capped at 7 nights.                                                                                          |
 | Forgot the admin password                                             | Section 8: `--reset-password`.                                                                                                                                                                                |
 | Need to change the domain                                             | Point DNS, set `DOMAIN` (and `CORS_ORIGIN` if you set it explicitly) in `.env`, `docker compose up -d`.                                                                                                       |

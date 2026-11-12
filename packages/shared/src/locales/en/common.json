@@ -33,7 +33,12 @@
     "newPassword": "New password",
     "confirmPassword": "Confirm new password",
     "passwordChanged": "Password changed",
-    "passwordMismatch": "Passwords do not match"
+    "passwordMismatch": "Passwords do not match",
+    "passwordPolicy": "At least {{min}} characters, with letters and digits.",
+    "passwordUnchanged": "The new password must differ from the current one",
+    "wrongCurrentPassword": "The current password is wrong",
+    "otherSessionsNote": "After the change every other device and browser signed in to this account is signed out and must sign in again with the new password. This device stays signed in.",
+    "passwordChangedOthers": "Password changed. Other devices were signed out."
   },
   "actions": {
     "save": "Save",
@@ -637,7 +642,8 @@
       "business": "Business details",
       "contracts": "Contracts",
       "reminders": "Reminder timing",
-      "backup": "Backup"
+      "backup": "Backup",
+      "account": "My account"
     },
     "business": {
       "description": "Shown on contracts, agreements and the disclosure form.",
@@ -697,7 +703,7 @@
       "responsibilities": "Default responsibilities",
       "responsibilitiesHelp": "New contracts start with these; each contract can change them.",
       "clauses": "Standard clauses",
-      "clausesHelp": "Printed on the lease contract in the contract's language.",
+      "clausesHelp": "Printed on every lease contract in the document's language (in Hebrew when that language is empty). When a contract has terms of its own, both are printed: the contract's terms and these standard clauses.",
       "clausesHe": "Clauses in Hebrew",
       "clausesAr": "Clauses in Arabic",
       "clausesEn": "Clauses in English"
@@ -714,7 +720,18 @@
       "staleHint": "No successful backup in the last {{hours}} hours. Check the backup job.",
       "notConfigured": "Backup monitoring is not set up on this server",
       "notConfiguredHint": "The backup job writes a status file that the server reads. Ask whoever installed the system to set it up.",
-      "loadError": "Could not load the backup status"
+      "loadError": "Could not load the backup status",
+      "offsite": "Off-site copy",
+      "offsiteYes": "Yes",
+      "offsiteNo": "No — on this server only",
+      "offsiteUnknown": "Unknown",
+      "localOnly": "Local backups only",
+      "localOnlyHint": "Local backups only — not protected against server loss. The last backup succeeded but is kept on this server only; ask whoever installed the system to set up the off-site backup storage."
+    },
+    "account": {
+      "description": "The signed-in user, and changing its password.",
+      "name": "Name",
+      "role": "Role"
     }
   },
   "table": {
@@ -1115,7 +1132,19 @@
       "total": "Total",
       "empty": "No income recorded yet"
     },
-    "actionsMenu": "Licence actions"
+    "actionsMenu": "Licence actions",
+    "feePaid": {
+      "action": "Mark annual fee as paid",
+      "title": "Annual licence fee paid",
+      "paidAt": "Paid on",
+      "amount": "Amount paid",
+      "amountHelp": "Recorded as a licence-fee expense on {{plate}} (paid by us). May be left empty.",
+      "noVehicle": "No car is registered on this licence, so there is nowhere to record the amount as an expense: only the due date moves.",
+      "nextDue": "Next due date",
+      "submit": "Mark as paid",
+      "saved": "Annual fee marked as paid",
+      "savedWithExpense": "Annual fee marked as paid and recorded as an expense on the car"
+    }
   },
   "drivers": {
     "new": "New driver",
@@ -1229,7 +1258,7 @@
       "paymentDayHelp": "1 to 28, so the day exists in every month.",
       "penaltyHelp": "Months of rent charged if the driver leaves early.",
       "responsibilitiesHelp": "By default the driver pays everything except the car itself.",
-      "termsHelp": "Leave empty to use the standard clauses from the settings.",
+      "termsHelp": "Extra terms for this contract only. They are printed together with the standard clauses from the settings, not instead of them.",
       "depositHelp": "Received when the contract is activated."
     },
     "sections": {
@@ -1398,6 +1427,11 @@
       "hint": "The entry stays in the ledger, struck through, and no longer counts in the balance.",
       "reason": "Reason",
       "saved": "Entry voided"
+    },
+    "documents": {
+      "button": "Documents of this entry ({{n}})",
+      "title": "Documents",
+      "empty": "No documents"
     }
   },
   "fines": {
@@ -1631,7 +1665,11 @@
       "markDone": "Mark transferred",
       "markTitle": "Ownership transfer done",
       "transferred": "Ownership transfer recorded",
-      "doneNotice": "Ownership has been transferred to the buyer."
+      "doneNotice": "Ownership has been transferred to the buyer.",
+      "details": "Transfer details",
+      "feeHelp": "The fee paid when filing the transfer (at the post office or online).",
+      "saveDetails": "Save details",
+      "detailsSaved": "Transfer details saved"
     },
     "readOnlyCancelled": "This deal was cancelled and can no longer be changed."
   },
@@ -1940,6 +1978,8 @@
     "create": "Generate",
     "generated": "Document generated and saved under Documents",
     "popupBlocked": "The browser blocked the new tab: open the document from the Documents tab.",
-    "openDocument": "Open the document"
+    "openDocument": "Open the document",
+    "generatedRow": "Document generated: open it again with the paperclip on this row",
+    "popupBlockedRow": "The browser blocked the new tab: open the document with the paperclip on the row."
   }
 }

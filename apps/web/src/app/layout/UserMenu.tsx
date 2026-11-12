@@ -1,4 +1,4 @@
-import { LogoutOutlined, UserOutlined } from '@ant-design/icons';
+import { KeyOutlined, LogoutOutlined, UserOutlined } from '@ant-design/icons';
 import { Avatar, Button, Dropdown, Typography, type MenuProps } from 'antd';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router';
@@ -7,8 +7,8 @@ import { useAuth } from '../providers/AuthProvider';
 import { useUi } from '../providers/UiProvider';
 
 /**
- * Avatar menu: who is signed in, and log out. The theme has one switch, `ThemeToggle` in the
- * top bar.
+ * Avatar menu: who is signed in, the account page (change password), and log out. The theme has
+ * one switch, `ThemeToggle` in the top bar.
  */
 export function UserMenu({ compact = false }: { compact?: boolean }) {
   const { t } = useTranslation();
@@ -35,10 +35,15 @@ export function UserMenu({ compact = false }: { compact?: boolean }) {
       ),
     },
     { type: 'divider' },
+    { key: 'account', icon: <KeyOutlined />, label: t('settings.nav.account') },
     { key: 'logout', icon: <LogoutOutlined className="rm-flip-rtl" />, label: t('auth.logout') },
   ];
 
   const onClick: MenuProps['onClick'] = async ({ key }) => {
+    if (key === 'account') {
+      navigate('/settings/account');
+      return;
+    }
     if (key === 'logout') {
       await logout();
       navigate('/login', { replace: true });
