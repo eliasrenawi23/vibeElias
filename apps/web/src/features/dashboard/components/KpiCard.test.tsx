@@ -26,8 +26,20 @@ describe('KpiCard', () => {
     renderWithProviders(
       <>
         <KpiCard title="Cars" value={1284} icon={<CarOutlined />} data-testid="count" />
-        <KpiCard title="Owed" value={18500} format="money" icon={<CarOutlined />} data-testid="money" />
-        <KpiCard title="Big" value={1250000} format="money" icon={<CarOutlined />} data-testid="big" />
+        <KpiCard
+          title="Owed"
+          value={18500}
+          format="money"
+          icon={<CarOutlined />}
+          data-testid="money"
+        />
+        <KpiCard
+          title="Big"
+          value={1250000}
+          format="money"
+          icon={<CarOutlined />}
+          data-testid="big"
+        />
       </>,
     );
     expect(screen.getByTestId('count')).toHaveTextContent('1,284');
@@ -46,7 +58,14 @@ describe('KpiCard', () => {
           trend={{ direction: 'down', label: 'Down ₪800 from last month', tone: 'error' }}
           data-testid="profit"
         />
-        <KpiCard title="Late" value={2} alert sub="2 due soon" icon={<CarOutlined />} data-testid="late" />
+        <KpiCard
+          title="Late"
+          value={2}
+          alert
+          sub="2 due soon"
+          icon={<CarOutlined />}
+          data-testid="late"
+        />
         <KpiCard title="None late" value={0} alert icon={<CarOutlined />} data-testid="none" />
       </>,
     );

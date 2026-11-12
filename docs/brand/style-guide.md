@@ -358,6 +358,48 @@ float.
 - **Timelines** (vehicle cycles): AntD `Timeline` with tone dots from the registry, the dates in
   their own secondary column from `md` up (above the event on phones), then the event, who it
   was with, and the terms. The current item is success with a soft ring, finished ones neutral.
+- **Reminders bell** (`RemindersBell`, top bar, before the language menu): a bell with a red
+  count badge of the overdue + due-soon items of the reminders feed (no badge at zero); its
+  accessible name says the count ("Reminders: 3 need attention"). It opens a popover on desktop
+  and a bottom drawer on phones: the overdue and due items grouped under severity headings,
+  each with its kind icon on a tile in the severity tone (overdue `error`, due `warning`,
+  upcoming `info`), the record as a link, the kind and detail, the due date and a days-left
+  tag ("3 days overdue", "Due today", "In 12 days"); manual reminders get "Mark done". "See all
+  reminders" leads to `/reminders`. The feed is polled every 5 minutes and on window focus.
+  The same item rows are used by the dashboard's "Expiring soon" card.
+- **KPI tiles** (dashboard): a grid of `repeat(auto-fit, minmax(200px, 1fr))` cards. Each tile:
+  the label with an info button (tooltip on hover and focus saying what the number means), the
+  value in semibold proportional figures (counts in full, amounts in full below ₪100,000 and
+  compact from it: `₪1.3M`), an optional trend line (arrow + "Up ₪2,500 from last month" in
+  the success / error / neutral tone) and an optional secondary line ("₪5,200 overdue" in the
+  error tone). A missing value is "—" with the reason under it, never a fake 0. Counts that need
+  action (transfers overdue, expiries overdue) turn red above zero; the month profit is green /
+  grey / red like every profit. The header says "Last updated HH:mm" next to a Refresh button.
+- **Charts** (`shared/charts`, method from the dataviz skill): every chart sits in a
+  `ChartCard` (title, one-line subtitle, legend for two or more series, a chart / table toggle
+  so every value is reachable without hovering, a "View report" link) and keeps its previous
+  render dimmed while refetching. Categorical colours come from `shared/charts/palette.ts`
+  (brand yellow, licence green, blue, magenta, in that order, validated in light and dark);
+  status colours never become a series. Columns are at most 24 px wide with a 4 px rounded
+  data end, square at the baseline; lines are 2 px; gridlines are solid hairlines; only the
+  latest or largest value is labelled; tooltips lead with the value. Time runs left to right
+  in every language (the plot is an LTR island) and every number uses Latin digits. Ordered
+  buckets (receivables ageing) use the one-hue ramp, older = darker; one whole split into parts
+  (inventory) is a 28 px segmented bar with 2 px gaps and the share printed where it fits.
+- **Period presets** (`FilterBar` `dateRange` with `presets`): quick chips before the range
+  picker (This month, Last month, Year to date, Last year, Last 30 days; computed in
+  Asia/Jerusalem) and the same list in the picker's panel. The chip whose dates match the
+  current range is checked (ink text on yellow); a hand-picked range checks none, and clicking
+  the checked chip clears the range. Selections that are not among a filter's options are
+  dropped from the URL. The filter bar stays visible when the result is empty or failed.
+- **Report tables** (`ReportTable`): built from the API's column list. Money as `Money`, dates
+  as `DateText`, plates as `PlateNo`, enum values translated, yes / no for booleans, numbers
+  end-aligned with Latin digits, the period in words ("November 2026"). A missing value is the
+  muted word "n/a", never 0. A semibold totals row with a hairline above closes the table (a
+  "Total" card under the list on phones). Above the table: the report's parameter bar, the
+  effective period under the title, and "Export CSV" / "Export Excel" download links carrying
+  the same parameters and the UI language. The trade book carries a note that it is the ספר
+  סחר for the accountant.
 - **Unsaved changes**: full-page forms use `useUnsavedChangesGuard` (in-app navigation, tab
   close or reload, and the form's own Cancel ask "Discard unsaved changes?"); dialogs pass
   `dirty` to `FormDialog`, which asks before closing. The prompt is `ConfirmDialog` with a red

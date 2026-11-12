@@ -1,4 +1,11 @@
-import { addDays, addPeriods, periodEnd, periodOf, periodStart, todayInBusinessTz } from '@renawi/shared';
+import {
+  addDays,
+  addPeriods,
+  periodEnd,
+  periodOf,
+  periodStart,
+  todayInBusinessTz,
+} from '@renawi/shared';
 import type { TKey } from './i18n';
 
 /**
@@ -6,7 +13,13 @@ import type { TKey } from './i18n';
  * closed range of calendar dates computed from today in the business time zone
  * (Asia/Jerusalem), so the office and the server agree on what "this month" is.
  */
-export const DATE_PRESETS = ['thisMonth', 'lastMonth', 'yearToDate', 'lastYear', 'last30Days'] as const;
+export const DATE_PRESETS = [
+  'thisMonth',
+  'lastMonth',
+  'yearToDate',
+  'lastYear',
+  'last30Days',
+] as const;
 export type DatePreset = (typeof DATE_PRESETS)[number];
 
 /** Label key of a preset. */
@@ -20,7 +33,10 @@ export function datePresetLabelKey(preset: DatePreset): TKey {
  * to today; last year = the whole previous calendar year; last 30 days = today and the 29 days
  * before it.
  */
-export function presetRange(preset: DatePreset, today: string = todayInBusinessTz()): [string, string] {
+export function presetRange(
+  preset: DatePreset,
+  today: string = todayInBusinessTz(),
+): [string, string] {
   const month = periodOf(today);
   const year = Number(today.slice(0, 4));
   switch (preset) {

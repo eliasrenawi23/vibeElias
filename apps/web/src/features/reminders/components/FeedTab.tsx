@@ -38,11 +38,11 @@ export function FeedTab() {
   const { page, pageSize, searchParams, setTableParams } = useListParams();
 
   const query = useMemo<FeedQuery>(() => {
-    const kinds = readListParam(searchParams, 'kinds').filter((k): k is FeedKind =>
-      FeedKind.safeParse(k).success,
+    const kinds = readListParam(searchParams, 'kinds').filter(
+      (k): k is FeedKind => FeedKind.safeParse(k).success,
     );
-    const severity = readListParam(searchParams, 'severity').filter((s): s is FeedSeverity =>
-      FeedSeverity.safeParse(s).success,
+    const severity = readListParam(searchParams, 'severity').filter(
+      (s): s is FeedSeverity => FeedSeverity.safeParse(s).success,
     );
     return {
       days: horizonParam(searchParams.get('days')),
@@ -125,7 +125,9 @@ export function FeedTab() {
         {counts && (
           <>
             {' '}
-            <Ltr className="rm-chip-count-value">{formatCount(counts[s], i18n.resolvedLanguage)}</Ltr>
+            <Ltr className="rm-chip-count-value">
+              {formatCount(counts[s], i18n.resolvedLanguage)}
+            </Ltr>
           </>
         )}
       </span>

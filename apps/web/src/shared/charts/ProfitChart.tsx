@@ -15,9 +15,10 @@ import { formatAmount } from '../lib/money';
 import { DataTable } from '../ui/DataTable';
 import { Money } from '../ui/Money';
 import { ChartTooltipBox } from './ChartTooltip';
-import { formatAxisTick, formatChartAmount, formatPeriodLabel } from './format';
+import { formatAxisTick, formatChartAmount } from './format';
 import { useChartPalette } from './palette';
 import { RoundedBar, type BarShapeInput } from './RoundedBar';
+import { usePeriodLabel } from './usePeriodLabel';
 import type { LegendItem } from './ChartCard';
 
 /** One period of the profit chart (dashboard months, or the profit report's groups). */
@@ -31,16 +32,6 @@ export interface ProfitPoint {
 
 /** Chart height (the axis band included; the card grows with it). */
 export const PROFIT_CHART_HEIGHT = 280;
-
-/** Period label in the UI language (`Nov 26`, `Q4 2026`, `2026`). */
-export function usePeriodLabel(): (period: string, style?: 'short' | 'long') => string {
-  const { t, i18n } = useTranslation();
-  return (period, style = 'short') =>
-    formatPeriodLabel(period, i18n.resolvedLanguage, {
-      style,
-      quarter: (q, year) => t('charts.quarter', { q, year }),
-    });
-}
 
 /** Legend of the profit chart: profit bars (slot 1), lease income line (slot 3). */
 export function useProfitLegend(): LegendItem[] {

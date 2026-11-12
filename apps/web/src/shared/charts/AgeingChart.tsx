@@ -71,7 +71,11 @@ export function AgeingChart({ ageing }: { ageing: AgeingBuckets }) {
   return (
     <div dir="ltr" className="rm-chart-plot" data-testid="ageing-chart">
       <ResponsiveContainer width="100%" height={AGEING_CHART_HEIGHT}>
-        <BarChart data={rows} margin={{ top: 24, right: 8, bottom: 4, left: 4 }} barCategoryGap="30%">
+        <BarChart
+          data={rows}
+          margin={{ top: 24, right: 8, bottom: 4, left: 4 }}
+          barCategoryGap="30%"
+        >
           <CartesianGrid vertical={false} stroke={palette.grid} />
           <XAxis
             dataKey="label"
@@ -166,7 +170,12 @@ export function AgeingTable({ ageing }: { ageing: AgeingBuckets }) {
       data={rows}
       data-testid="ageing-table"
       columns={[
-        { key: 'bucket', title: t('charts.period'), mobile: 'title', render: (r) => r.label },
+        {
+          key: 'bucket',
+          title: t('charts.ageing.bucket'),
+          mobile: 'title',
+          render: (r) => r.label,
+        },
         {
           key: 'amount',
           title: t('charts.amount'),

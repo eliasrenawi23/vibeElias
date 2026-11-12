@@ -1,4 +1,9 @@
-import { ArrowDownOutlined, ArrowUpOutlined, InfoCircleOutlined, MinusOutlined } from '@ant-design/icons';
+import {
+  ArrowDownOutlined,
+  ArrowUpOutlined,
+  InfoCircleOutlined,
+  MinusOutlined,
+} from '@ant-design/icons';
 import { Button, Card, Statistic, Tooltip } from 'antd';
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';

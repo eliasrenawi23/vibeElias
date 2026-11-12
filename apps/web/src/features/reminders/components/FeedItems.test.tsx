@@ -16,7 +16,13 @@ afterEach(() => {
 });
 
 const ITEMS = [
-  feedItem({ id: 'o1', severity: 'overdue', daysLeft: -4, title: 'Overdue car', dueAt: '2026-11-08' }),
+  feedItem({
+    id: 'o1',
+    severity: 'overdue',
+    daysLeft: -4,
+    title: 'Overdue car',
+    dueAt: '2026-11-08',
+  }),
   feedItem({
     id: 'd1',
     kind: 'insurance',
@@ -47,7 +53,11 @@ describe('FeedItemList', () => {
       </MemoryRouter>,
     );
     const groups = screen.getAllByRole('region');
-    expect(groups.map((g) => g.getAttribute('data-severity'))).toEqual(['overdue', 'due', 'upcoming']);
+    expect(groups.map((g) => g.getAttribute('data-severity'))).toEqual([
+      'overdue',
+      'due',
+      'upcoming',
+    ]);
     expect(groups.map((g) => within(g).getByRole('heading').textContent)).toEqual([
       'Overdue',
       'Due soon',

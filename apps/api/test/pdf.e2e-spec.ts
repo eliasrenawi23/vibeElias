@@ -37,6 +37,8 @@ interface Case {
   owner: () => [keyof DocumentBody, string];
   /** Plate printed in the document (isolated as LTR). */
   plate: (() => string) | null;
+  /** The document prints amounts (handover / return checklists do not). */
+  money?: false;
 }
 
 const LANGS: Locale[] = ['he', 'ar', 'en'];
@@ -237,6 +239,7 @@ describe('PDF generation (e2e)', () => {
       kind: 'HANDOVER',
       owner: () => ['contractId', lease.id],
       plate: leasePlate,
+      money: false,
     },
     {
       template: 'return',
@@ -244,6 +247,7 @@ describe('PDF generation (e2e)', () => {
       kind: 'HANDOVER',
       owner: () => ['contractId', lease.id],
       plate: leasePlate,
+      money: false,
     },
     {
       template: 'deposit-receipt',
@@ -320,7 +324,7 @@ describe('PDF generation (e2e)', () => {
       const html = res.text;
       expect(html).toContain(`<html lang="${lang}" dir="${lang === 'en' ? 'ltr' : 'rtl'}">`);
       expect(html).toContain(BUSINESS_NAME[lang]);
-      expect(html).toMatch(/<bdi dir="ltr">₪[\d,]+\.\d{2}<\/bdi>/);
+      if (c.money !== false) expect(html).toMatch(/<bdi dir="ltr">₪[\d,]+\.\d{2}<\/bdi>/);
       if (c.plate) expect(html).toContain(`<bdi dir="ltr">${formatPlate(c.plate())}</bdi>`);
       expect(html).toContain('@font-face');
       if (lang !== 'he') expect(html).toContain('class="notice"');

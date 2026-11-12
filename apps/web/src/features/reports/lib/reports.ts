@@ -26,7 +26,10 @@ export interface ReportDef {
 
 const camel = (name: ReportName) => name.replace(/-([a-z])/g, (_, c: string) => c.toUpperCase());
 
-function def(name: ReportName, rest: Omit<ReportDef, 'name' | 'titleKey' | 'descriptionKey'>): ReportDef {
+function def(
+  name: ReportName,
+  rest: Omit<ReportDef, 'name' | 'titleKey' | 'descriptionKey'>,
+): ReportDef {
   return {
     name,
     titleKey: REPORT_TITLE_KEYS[name] as TKey,

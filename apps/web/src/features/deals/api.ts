@@ -21,7 +21,10 @@ export function fetchDeals(
 }
 
 /** List filters a status summary honours: everything except status, paging and sorting. */
-export type DealSummaryQuery = Omit<DealListQuery, 'status' | 'page' | 'pageSize' | 'sort' | 'order'>;
+export type DealSummaryQuery = Omit<
+  DealListQuery,
+  'status' | 'page' | 'pageSize' | 'sort' | 'order'
+>;
 
 /** `GET /api/deals/summary?type&from&to&vehicleId&counterpartyId&q`: count per status. */
 export function fetchDealSummary(

@@ -1,4 +1,4 @@
-import { Controller, Get, Header, HttpCode, HttpStatus, Param, Post, Query } from '@nestjs/common';
+import { Controller, Get, HttpCode, HttpStatus, Param, Post, Query, Res } from '@nestjs/common';
 import {
   ApiConflictResponse,
   ApiCookieAuth,
@@ -10,6 +10,7 @@ import {
 } from '@nestjs/swagger';
 import { PdfQuerySchema, PdfTemplate } from '@renawi/shared';
 import { createZodDto } from 'nestjs-zod';
+import type { Response } from 'express';
 import type { AuthenticatedUser } from '../auth/auth.types';
 import { CurrentUser } from '../auth/decorators';
 import { Audited } from '../common/audit/audit.decorator';
@@ -67,8 +68,6 @@ export class PdfController {
   }
 
   @Get(':template/:id/preview')
-  @Header('Content-Type', 'text/html; charset=utf-8')
-  @Header('Cache-Control', 'no-store')
   @ApiParam(TEMPLATE_PARAM)
   @ApiProduces('text/html')
   @ApiOperation({
@@ -78,12 +77,16 @@ export class PdfController {
   })
   @ApiNotFoundResponse({ description: 'errors.notFound' })
   @ApiConflictResponse({ description: 'errors.pdfNotApplicable' })
-  preview(
+  async preview(
     @Param('template') template: string,
     @Param('id') id: string,
     @Query() query: PdfQueryDto,
+    @Res({ passthrough: true }) res: Response,
     @CurrentUser() user?: AuthenticatedUser,
   ): Promise<string> {
-    return this.pdf.preview(template, id, query.lang, requester(user));
+    const html = await this.pdf.preview(template, id, query.lang, requester(user));
+    // Set only on success: errors keep the JSON error body.
+    res.type('html').setHeader('Cache-Control', 'no-store');
+    return html;
   }
 }

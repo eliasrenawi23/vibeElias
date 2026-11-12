@@ -13,7 +13,10 @@ export function fetchFines(
 }
 
 /** List filters a status summary honours: everything except status, paging and sorting. */
-export type FineSummaryQuery = Omit<FineListQuery, 'status' | 'page' | 'pageSize' | 'sort' | 'order'>;
+export type FineSummaryQuery = Omit<
+  FineListQuery,
+  'status' | 'page' | 'pageSize' | 'sort' | 'order'
+>;
 
 /** `GET /api/fines/summary?vehicleId&driverId`: count per status. */
 export function fetchFineSummary(

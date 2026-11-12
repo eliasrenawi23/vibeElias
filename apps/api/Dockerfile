@@ -60,11 +60,6 @@ FROM base AS runtime
 ENV NODE_ENV=production \
     PORT=3000
 
-# TODO(milestone 6 - PDFs): install Playwright Chromium and the self-hosted Rubik / Noto fonts
-# for Hebrew/Arabic PDF rendering, e.g.
-#   RUN npx playwright install --with-deps chromium
-# (pin the playwright version from apps/api/package.json; run as root before `USER node`).
-
 COPY --from=prod-deps --chown=node:node /app/package.json ./package.json
 COPY --from=prod-deps --chown=node:node /app/node_modules ./node_modules
 COPY --from=prod-deps --chown=node:node /app/apps/api/node_modules ./apps/api/node_modules
@@ -75,6 +70,17 @@ COPY --from=build --chown=node:node /app/packages/shared/src/locales ./packages/
 COPY --from=build --chown=node:node /app/apps/api/package.json ./apps/api/package.json
 COPY --from=build --chown=node:node /app/apps/api/prisma ./apps/api/prisma
 COPY --from=build --chown=node:node /app/apps/api/dist ./apps/api/dist
+# Self-hosted Rubik font and the concept-B logo embedded in the generated PDFs
+# (the API finds them at /app/packages/brand from dist/pdf).
+COPY --chown=node:node packages/brand/fonts ./packages/brand/fonts
+COPY --chown=node:node packages/brand/logo ./packages/brand/logo
+
+# Chromium for the PDF renderer (Playwright, version from apps/api/package.json), with its
+# system libraries and fonts. Installed as root into a shared folder the node user can read.
+ENV PLAYWRIGHT_BROWSERS_PATH=/ms-playwright
+RUN npx --no-install playwright install --with-deps --only-shell chromium \
+ && chmod -R a+rX /ms-playwright \
+ && rm -rf /var/lib/apt/lists/* /root/.cache /tmp/*
 
 # Uploaded documents (milestone 2) live here; mount a volume in production.
 RUN mkdir -p /data/uploads && chown node:node /data/uploads

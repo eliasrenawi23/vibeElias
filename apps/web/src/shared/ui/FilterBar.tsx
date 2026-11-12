@@ -315,7 +315,9 @@ export function FilterBar({
             value={[isoToDayjs(from), isoToDayjs(to)]}
             presets={presets.flatMap((p) => {
               const [pf, pt] = presetRange(p).map(isoToDayjs);
-              return pf && pt ? [{ label: t(datePresetLabelKey(p)), value: [pf, pt] as const }] : [];
+              return pf && pt
+                ? [{ label: t(datePresetLabelKey(p)), value: [pf, pt] as const }]
+                : [];
             })}
             onChange={(range) =>
               update({

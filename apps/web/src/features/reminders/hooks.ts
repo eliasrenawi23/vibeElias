@@ -26,7 +26,9 @@ export function useToggleReminderDone() {
       done ? markReminderDone(id) : markReminderUndone(id),
     onSuccess: (_saved, { done }) => {
       refresh();
-      void message.success(done ? t('reminders.manual.markedDone') : t('reminders.manual.markedUndone'));
+      void message.success(
+        done ? t('reminders.manual.markedDone') : t('reminders.manual.markedUndone'),
+      );
     },
     onError: (error) => void message.error(errorMessage(error)),
   });

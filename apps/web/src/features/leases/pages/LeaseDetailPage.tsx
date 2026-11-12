@@ -58,15 +58,7 @@ import { leaseKeys } from '../queryKeys';
 import type { LeaseDetail } from '../types';
 
 type LeaseActionKey =
-  | 'edit'
-  | 'activate'
-  | 'delete'
-  | 'payment'
-  | 'segment'
-  | 'deposit'
-  | 'renew'
-  | 'end'
-  | 'reminder';
+  'edit' | 'activate' | 'delete' | 'payment' | 'segment' | 'deposit' | 'renew' | 'end' | 'reminder';
 
 type Dialog = LeaseActionKey | 'checklist-handover' | 'checklist-return' | null;
 

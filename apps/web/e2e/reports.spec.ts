@@ -121,8 +121,17 @@ function months(): Json[] {
   return Array.from({ length: 12 }, (_, i) => {
     const d = new Date(Date.UTC(y, m - 1 - (11 - i), 1));
     const period = `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, '0')}`;
-    const profit = [8200, 12400, -3100, 15800, 9600, 21000, 18800, 7300, 11200, 16900, 12100, 14600][i];
-    return { period, sales: 60000, leaseIncome: 12000 + i * 250, commission: 0, costs: 50000, profit };
+    const profit = [
+      8200, 12400, -3100, 15800, 9600, 21000, 18800, 7300, 11200, 16900, 12100, 14600,
+    ][i];
+    return {
+      period,
+      sales: 60000,
+      leaseIncome: 12000 + i * 250,
+      commission: 0,
+      costs: 50000,
+      profit,
+    };
   });
 }
 
@@ -317,7 +326,9 @@ test('dashboard, bell, reminders, profit report and lead days', async ({ page })
     'profit',
   );
   // Trend from the charts' last two months (12,100 -> 14,600).
-  await expect(kpis.getByTestId('kpi-monthProfit')).toContainText(/Up \u2066?₪2,500\u2069? from last month/);
+  await expect(kpis.getByTestId('kpi-monthProfit')).toContainText(
+    /Up \u2066?₪2,500\u2069? from last month/,
+  );
   await expect(kpis.getByTestId('kpi-expiring')).toContainText('1');
   await expect(kpis.getByTestId('kpi-expiring-sub')).toContainText('1 due soon');
   await expect(kpis.getByTestId('kpi-expiring')).toHaveClass(/rm-kpi-alert/);
@@ -327,7 +338,10 @@ test('dashboard, bell, reminders, profit report and lead days', async ({ page })
   // Expiring soon: grouped by severity, a link per record.
   const expiring = page.getByTestId('dashboard-expiring');
   await expect(expiring.getByTestId('feed-item')).toHaveCount(3);
-  await expect(expiring.locator('[data-severity]').first()).toHaveAttribute('data-severity', 'overdue');
+  await expect(expiring.locator('[data-severity]').first()).toHaveAttribute(
+    'data-severity',
+    'overdue',
+  );
   await expect(expiring.getByRole('link', { name: '12-345-67 Toyota Corolla' })).toHaveAttribute(
     'href',
     '/vehicles/veh_1',
@@ -335,7 +349,8 @@ test('dashboard, bell, reminders, profit report and lead days', async ({ page })
   await expect(expiring.getByText(/4\u2069? days overdue/)).toBeVisible();
   expect(
     api.calls.some(
-      (c) => c.path === '/api/reminders/feed' && new URLSearchParams(c.search).get('pageSize') === '8',
+      (c) =>
+        c.path === '/api/reminders/feed' && new URLSearchParams(c.search).get('pageSize') === '8',
     ),
   ).toBe(true);
 
@@ -437,7 +452,9 @@ test('dashboard, bell, reminders, profit report and lead days', async ({ page })
   // A missing commission is "n/a", never 0.
   await expect(report.locator('tbody [data-na]')).toHaveCount(1);
   await expect(page.getByTestId('report-totals')).toContainText('Total');
-  await expect(page.getByTestId('report-profit-chart').locator('svg.recharts-surface')).toBeVisible();
+  await expect(
+    page.getByTestId('report-profit-chart').locator('svg.recharts-surface'),
+  ).toBeVisible();
   const csv = new URL(
     (await page.getByTestId('report-export-csv').getAttribute('href')) ?? '',
     'http://localhost',

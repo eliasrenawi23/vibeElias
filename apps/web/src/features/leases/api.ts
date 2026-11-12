@@ -25,7 +25,10 @@ export function fetchLeases(
 }
 
 /** List filters a status summary honours: everything except status, paging and sorting. */
-export type LeaseSummaryQuery = Omit<LeaseListQuery, 'status' | 'page' | 'pageSize' | 'sort' | 'order'>;
+export type LeaseSummaryQuery = Omit<
+  LeaseListQuery,
+  'status' | 'page' | 'pageSize' | 'sort' | 'order'
+>;
 
 /** `GET /api/leases/summary?q&driverId&taxiLicenseId&vehicleId`: count per status. */
 export function fetchLeaseSummary(

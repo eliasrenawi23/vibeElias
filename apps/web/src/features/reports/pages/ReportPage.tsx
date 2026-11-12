@@ -61,7 +61,10 @@ function profitPoints(result: ReportResult): ProfitPoint[] {
     period: String(row.period ?? ''),
     profit: num(row.profit),
     leaseIncome: num(row.leaseIncome),
-    sales: row.salesRevenue === null || row.salesRevenue === undefined ? undefined : num(row.salesRevenue),
+    sales:
+      row.salesRevenue === null || row.salesRevenue === undefined
+        ? undefined
+        : num(row.salesRevenue),
   }));
 }
 
@@ -98,7 +101,10 @@ function ReportView({ report }: { report: ReportDef }) {
             key: 'groupBy',
             label: t('reports.params.groupBy'),
             width: 160,
-            options: report.groupBy.map((g) => ({ value: g, label: dynamicT(`reports.groupBy.${g}`) })),
+            options: report.groupBy.map((g) => ({
+              value: g,
+              label: dynamicT(`reports.groupBy.${g}`),
+            })),
           },
         ]
       : []),
@@ -179,7 +185,12 @@ function ReportView({ report }: { report: ReportDef }) {
         defaults={report.groupBy?.[0] ? { groupBy: report.groupBy[0] } : undefined}
       />
       {report.name === 'trade-book' && (
-        <Alert type="info" showIcon title={t('reports.tradeBookNote')} data-testid="trade-book-note" />
+        <Alert
+          type="info"
+          showIcon
+          title={t('reports.tradeBookNote')}
+          data-testid="trade-book-note"
+        />
       )}
       {result.isError ? (
         <LoadError
@@ -246,7 +257,11 @@ function ReportView({ report }: { report: ReportDef }) {
             />
           )}
           {data && (
-            <Typography.Text type="secondary" className="rm-small-text" data-testid="report-row-count">
+            <Typography.Text
+              type="secondary"
+              className="rm-small-text"
+              data-testid="report-row-count"
+            >
               {t('reports.rowCount', { count: data.rows.length })}
             </Typography.Text>
           )}

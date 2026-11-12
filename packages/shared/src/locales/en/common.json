@@ -587,7 +587,7 @@
       "empty": "No recent changes",
       "error": "Could not load the recent activity",
       "system": "System",
-      "fieldsChanged": "{{count}} fields changed",
+      "fieldsChanged": "Fields changed: {{count}}",
       "entities": {
         "Vehicle": "Vehicle",
         "TaxiLicense": "Taxi licence",
@@ -1649,7 +1649,8 @@
       "d1_30": "1–30 days",
       "d31_60": "31–60 days",
       "d61_90": "61–90 days",
-      "d90_plus": "Over 90 days"
+      "d90_plus": "Over 90 days",
+      "bucket": "Days past due"
     },
     "inventory": {
       "inStock": "In stock",
@@ -1851,7 +1852,7 @@
     },
     "periodText": "{{from}} – {{to}}",
     "asOfText": "As of {{date}}",
-    "rowCount": "{{count}} rows",
+    "rowCount": "Rows: {{count}}",
     "tradeBookNote": "This is the trade book (ספר סחר) to hand to the accountant: every car bought or sold in the period, with the seller and buyer, their ID numbers, the prices and the repairs.",
     "ageBuckets": {
       "title": "Cars by days in stock",

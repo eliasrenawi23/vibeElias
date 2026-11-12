@@ -1,6 +1,12 @@
 import { describe, expect, it } from 'vitest';
 import { feedItem } from '../../../test/fixtures';
-import { attentionCount, daysLeftLabel, groupFeedBySeverity, isManualItem, safeFeedLink } from './feed';
+import {
+  attentionCount,
+  daysLeftLabel,
+  groupFeedBySeverity,
+  isManualItem,
+  safeFeedLink,
+} from './feed';
 
 describe('feed helpers', () => {
   it('groups by severity, most urgent first, keeping the API order and dropping empty groups', () => {

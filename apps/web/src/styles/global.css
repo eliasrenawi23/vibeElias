@@ -1484,3 +1484,12 @@ body {
 .rm-report-na {
   font-size: var(--rm-text-small-size);
 }
+
+/*
+ * Checked chips (filter chips, period presets) sit on the yellow primary: ink text, never white
+ * (white on yellow is 1.6:1).
+ */
+.ant-tag.ant-tag-checkable-checked,
+.ant-tag.ant-tag-checkable-checked:hover {
+  color: var(--rm-color-on-primary);
+}

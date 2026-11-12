@@ -55,7 +55,8 @@ export function DashboardPage() {
     queryFn: ({ signal }) => fetchCharts(CHART_MONTHS, signal),
   });
   const fetching =
-    useIsFetching({ queryKey: dashboardKeys.all }) + useIsFetching({ queryKey: reminderKeys.feeds() });
+    useIsFetching({ queryKey: dashboardKeys.all }) +
+    useIsFetching({ queryKey: reminderKeys.feeds() });
   const profitLegend = useProfitLegend();
   const inventoryLegend = useInventoryLegend(
     charts.data?.inventory ?? { inStock: 0, reserved: 0, leased: 0, consigned: 0 },
@@ -73,7 +74,8 @@ export function DashboardPage() {
   const profitTrend: KpiTrend | null = change
     ? {
         direction: change.direction,
-        tone: change.direction === 'up' ? 'success' : change.direction === 'down' ? 'error' : 'neutral',
+        tone:
+          change.direction === 'up' ? 'success' : change.direction === 'down' ? 'error' : 'neutral',
         label:
           change.direction === 'flat'
             ? t('dashboard.trend.flat')
@@ -192,9 +194,7 @@ export function DashboardPage() {
             icon={<CalendarOutlined />}
             alert
             sub={
-              k?.expiring
-                ? t('dashboard.kpiSub.expiringDue', { count: k.expiring.due })
-                : undefined
+              k?.expiring ? t('dashboard.kpiSub.expiringDue', { count: k.expiring.due }) : undefined
             }
             subTone={k?.expiring && k.expiring.due > 0 ? 'warning' : undefined}
             loading={loading}

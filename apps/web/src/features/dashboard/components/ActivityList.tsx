@@ -56,10 +56,7 @@ export function ActivityList() {
             <span className="rm-activity-action">{enumLabel('AuditAction', item.action)}</span>{' '}
             <span>{entity}</span>
             {name && (
-              <>
-                {' '}
-                {link && item.action !== 'DELETE' ? <Link to={link}>{name}</Link> : name}
-              </>
+              <> {link && item.action !== 'DELETE' ? <Link to={link}>{name}</Link> : name}</>
             )}
           </div>
           <Typography.Text type="secondary" className="rm-feed-meta">

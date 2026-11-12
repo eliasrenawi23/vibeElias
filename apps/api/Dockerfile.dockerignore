@@ -22,6 +22,9 @@ apps/web/*
 !apps/web/package.json
 packages/brand/*
 !packages/brand/package.json
+# PDF assets (font + logo) are copied into the API image.
+!packages/brand/fonts
+!packages/brand/logo
 
 # API files not needed in the image.
 apps/api/test

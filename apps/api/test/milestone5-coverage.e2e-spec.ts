@@ -212,7 +212,11 @@ describe('Milestone 5 coverage: feed kinds, reminders, exports, backup (e2e)', (
       const [context, data] = wb.worksheets;
       if (!context || !data) throw new Error('two sheets expected');
       const contextRows = new Map<string, unknown>();
-      context.eachRow((row) => contextRows.set(String(row.getCell(1).value), row.getCell(2).value));
+      context.eachRow((row) => {
+        // First occurrence: the column list below repeats some labels.
+        const key = String(row.getCell(1).value);
+        if (!contextRows.has(key)) contextRows.set(key, row.getCell(2).value);
+      });
       expect(contextRows.get(he('reports.context.report'))).toBe(
         he(REPORT_TITLE_KEYS['trade-book']),
       );
@@ -449,9 +453,10 @@ describe('Milestone 5 coverage: feed kinds, reminders, exports, backup (e2e)', (
     it('profit groupBy and fines status filters are listed; an empty period says "no data"', async () => {
       const profit = await workbook(`/api/reports/profit?groupBy=quarter&format=xlsx&lang=he`);
       const values = new Map<string, unknown>();
-      profit.worksheets[0]?.eachRow((row) =>
-        values.set(String(row.getCell(1).value), row.getCell(2).value),
-      );
+      profit.worksheets[0]?.eachRow((row) => {
+        const key = String(row.getCell(1).value);
+        if (!values.has(key)) values.set(key, row.getCell(2).value);
+      });
       expect(values.get(he('reports.params.groupBy'))).toBe(he('reports.groupBy.quarter'));
 
       const fines = await workbook(
@@ -459,7 +464,11 @@ describe('Milestone 5 coverage: feed kinds, reminders, exports, backup (e2e)', (
       );
       const [context, data] = fines.worksheets;
       const filters = new Map<string, unknown>();
-      context?.eachRow((row) => filters.set(String(row.getCell(1).value), row.getCell(2).value));
+      context?.eachRow((row) => {
+        // First occurrence: the column list below repeats some labels.
+        const key = String(row.getCell(1).value);
+        if (!filters.has(key)) filters.set(key, row.getCell(2).value);
+      });
       expect(filters.get(he('reports.params.status'))).toBe(
         `${he('enums.FineStatus.NEW')}, ${he('enums.FineStatus.PAID_BY_US')}`,
       );

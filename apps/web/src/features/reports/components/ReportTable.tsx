@@ -1,6 +1,7 @@
 import type { ReportCell, ReportColumn, ReportResult } from '@renawi/shared';
 import { Card, Grid, Table, Typography } from 'antd';
 import { useTranslation } from 'react-i18next';
+import { usePeriodLabel } from '../../../shared/charts/usePeriodLabel';
 import { AutoDir, Ltr } from '../../../shared/lib/bidi';
 import { useDynamicT } from '../../../shared/lib/i18n';
 import { formatCount } from '../../../shared/lib/money';
@@ -20,9 +21,16 @@ const NUMERIC_TYPES: ReadonlySet<ReportColumn['type']> = new Set(['money', 'int'
  * with Latin digits, text in its own direction. A missing value (`null`) is the translated
  * "n/a", never 0.
  */
-export function ReportCellView({ column, value }: { column: ReportColumn; value: ReportCell | undefined }) {
+export function ReportCellView({
+  column,
+  value,
+}: {
+  column: ReportColumn;
+  value: ReportCell | undefined;
+}) {
   const { t, i18n } = useTranslation();
   const dynamicT = useDynamicT();
+  const periodLabel = usePeriodLabel();
   if (value === null || value === undefined || value === '') {
     return (
       <span className="rm-empty-value rm-report-na" data-na>
@@ -42,7 +50,11 @@ export function ReportCellView({ column, value }: { column: ReportColumn; value:
     case 'plate':
       return <PlateNo value={String(value)} />;
     case 'bool':
-      return <span>{value === true || value === 'true' ? t('reports.bool.true') : t('reports.bool.false')}</span>;
+      return (
+        <span>
+          {value === true || value === 'true' ? t('reports.bool.true') : t('reports.bool.false')}
+        </span>
+      );
     case 'enum':
       return (
         <span data-enum={column.enum}>
@@ -50,6 +62,10 @@ export function ReportCellView({ column, value }: { column: ReportColumn; value:
         </span>
       );
     default:
+      // The period of a grouped report (`2026-11`, `2026-Q4`, `2026`) in words.
+      if (column.key === 'period' && typeof value === 'string') {
+        return <span data-period={value}>{periodLabel(value, 'long')}</span>;
+      }
       return <AutoDir>{String(value)}</AutoDir>;
   }
 }
@@ -60,7 +76,7 @@ interface Row {
 }
 
 /** Column header: the label is an i18n key (`reports.columns.<key>`); unknown keys show the key. */
-export function useColumnTitle(): (column: ReportColumn) => string {
+function useColumnTitle(): (column: ReportColumn) => string {
   const { i18n } = useTranslation();
   const dynamicT = useDynamicT();
   return (column) => (i18n.exists(column.label) ? dynamicT(column.label) : column.key);
@@ -84,7 +100,9 @@ export function ReportTable({ result, label, loading = false }: ReportTableProps
   const columnTitle = useColumnTitle();
   const rows: Row[] = result.rows.map((cells, i) => ({ __key: String(i), cells }));
   const totals = result.totals;
-  const hasTotals = Boolean(totals && Object.values(totals).some((v) => v !== null && v !== undefined));
+  const hasTotals = Boolean(
+    totals && Object.values(totals).some((v) => v !== null && v !== undefined),
+  );
 
   const columns: DataTableColumn<Row>[] = result.columns.map((column, i) => ({
     key: column.key,
@@ -96,7 +114,8 @@ export function ReportTable({ result, label, loading = false }: ReportTableProps
 
   const totalCell = (column: ReportColumn, index: number) => {
     const value = totals?.[column.key];
-    if (value !== null && value !== undefined) return <ReportCellView column={column} value={value} />;
+    if (value !== null && value !== undefined)
+      return <ReportCellView column={column} value={value} />;
     return index === 0 ? <strong>{t('reports.total')}</strong> : null;
   };
 
@@ -121,7 +140,9 @@ export function ReportTable({ result, label, loading = false }: ReportTableProps
                         key={column.key}
                         index={i}
                         align={NUMERIC_TYPES.has(column.type) ? 'right' : undefined}
-                        className={NUMERIC_TYPES.has(column.type) ? 'rm-report-total-num' : undefined}
+                        className={
+                          NUMERIC_TYPES.has(column.type) ? 'rm-report-total-num' : undefined
+                        }
                       >
                         {totalCell(column, i)}
                       </Table.Summary.Cell>
@@ -133,7 +154,12 @@ export function ReportTable({ result, label, loading = false }: ReportTableProps
         }
       />
       {isMobile && hasTotals && rows.length > 0 && (
-        <Card size="small" variant="borderless" className="rm-report-totals-card" data-testid="report-totals">
+        <Card
+          size="small"
+          variant="borderless"
+          className="rm-report-totals-card"
+          data-testid="report-totals"
+        >
           <Typography.Text strong>{t('reports.total')}</Typography.Text>
           <dl className="rm-data-card-fields">
             {result.columns

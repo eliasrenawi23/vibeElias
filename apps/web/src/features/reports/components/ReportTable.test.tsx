@@ -152,7 +152,9 @@ describe('report links', () => {
       groupBy: 'quarter',
     });
     const receivables = reportDef('receivables')!;
-    expect(reportQuery(receivables, new URLSearchParams('asOf=2026-10-31&from=2026-01-01'))).toEqual({
+    expect(
+      reportQuery(receivables, new URLSearchParams('asOf=2026-10-31&from=2026-01-01')),
+    ).toEqual({
       asOf: '2026-10-31',
     });
     expect(reportQuery(reportDef('fines')!, new URLSearchParams('status=NEW,PAID_BY_US'))).toEqual({

@@ -215,7 +215,8 @@ async function mockApi(page: Page) {
           0,
         ]),
       );
-      for (const v of vehicles.values()) counts[String(v.status)] = (counts[String(v.status)] ?? 0) + 1;
+      for (const v of vehicles.values())
+        counts[String(v.status)] = (counts[String(v.status)] ?? 0) + 1;
       counts.SOLD = (counts.SOLD ?? 0) + 3;
       return json(route, 200, { counts });
     }
@@ -294,6 +295,15 @@ async function mockApi(page: Page) {
     }
     if (/^\/api\/documents\/doc_1\/(file|thumb)$/.test(path)) {
       return route.fulfill({ status: 200, contentType: 'image/png', body: PNG });
+    }
+    if (path === '/api/reminders' && method === 'POST') {
+      return json(route, 201, {
+        id: 'rem_9',
+        doneAt: null,
+        createdAt: '2026-11-12T08:00:00.000Z',
+        link: '/vehicles/veh_1',
+        ...(body as Json),
+      });
     }
     if (path === '/api/contacts')
       return json(route, 200, { items: [], total: 0, page: 1, pageSize: 20 });
@@ -546,6 +556,31 @@ test('status cards filter the list; breadcrumb and side nav come back to the fil
   await page.getByTestId('side-nav').getByRole('menuitem', { name: 'Vehicles' }).click();
   await expect(page).toHaveURL(/\/vehicles$/);
 
+  expect(problems).toEqual([]);
+});
+
+test('a reminder added from the vehicle page is linked to the vehicle', async ({ page }) => {
+  const api = await mockApi(page);
+  const problems = watchConsole(page);
+  await page.goto('/vehicles/veh_1');
+  await expect(page.getByRole('heading', { level: 2 })).toContainText('Toyota Corolla');
+  await page.getByTestId('vehicle-action-reminder').click();
+  const dialog = page.getByRole('dialog', { name: 'New reminder' });
+  await expect(dialog).toBeVisible();
+  await expect(dialog.getByTestId('reminder-linked')).toContainText('Vehicle');
+  await dialog.getByLabel('Title').fill('Book the annual test');
+  await dialog.getByRole('button', { name: 'Save' }).click();
+  await expect(page.getByText('Reminder added')).toBeVisible();
+  const post = [...api.calls]
+    .reverse()
+    .find((c) => c.method === 'POST' && c.path === '/api/reminders');
+  expect(post?.body).toEqual({
+    title: 'Book the annual test',
+    dueAt: TODAY,
+    entityType: 'VEHICLE',
+    entityId: 'veh_1',
+    notes: null,
+  });
   expect(problems).toEqual([]);
 });
 
