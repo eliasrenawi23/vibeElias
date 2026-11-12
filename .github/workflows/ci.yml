@@ -1,5 +1,5 @@
 # Continuous integration: every pull request and every push to main.
-# A green run on main triggers .github/workflows/deploy.yml (build images, deploy).
+# Deploy is a separate, manually started workflow (.github/workflows/deploy.yml).
 name: CI
 
 on:
