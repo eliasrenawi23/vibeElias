@@ -3,6 +3,7 @@ import {
   DashboardOutlined,
   DollarOutlined,
   EditOutlined,
+  FilePdfOutlined,
   PlusOutlined,
   RollbackOutlined,
   SafetyCertificateOutlined,
@@ -17,6 +18,8 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useParams } from 'react-router';
 import { AutoDir } from '../../../shared/lib/bidi';
+import { GeneratePdfDialog, usePdfTemplateName } from '../../documents/components/GeneratePdf';
+import { consignmentPdfChoice } from '../../documents/pdf';
 import { ReminderDialog } from '../../reminders/dialogs/ReminderDialog';
 import type { ActionDef } from '../../../shared/ui/ActionBar';
 import { AlertTags } from '../../../shared/ui/AlertTags';
@@ -58,6 +61,7 @@ export type VehicleActionKey =
   | 'return'
   | 'expense'
   | 'odometer'
+  | 'consignmentPdf'
   | 'reminder';
 
 /** `/vehicles/:id`: header with actions, and the vehicle file in tabs. */
@@ -72,6 +76,7 @@ function VehicleView({ id }: { id: string }) {
   const { t } = useTranslation();
   const { message } = App.useApp();
   const queryClient = useQueryClient();
+  const templateName = usePdfTemplateName();
   const [editing, setEditing] = useState(false);
   const [dialog, setDialog] = useState<Dialog>(null);
 
@@ -134,6 +139,7 @@ function VehicleView({ id }: { id: string }) {
   const vehicle = query.data;
   const v = vehicle;
   const returnCycle = returnableCycle(vehicle);
+  const consignmentPdf = consignmentPdfChoice(vehicle.openCycle);
 
   const actions: ActionDef<VehicleActionKey>[] = [
     { key: 'edit', label: t('actions.edit'), icon: <EditOutlined /> },
@@ -158,6 +164,16 @@ function VehicleView({ id }: { id: string }) {
       : []),
     { key: 'expense', label: t('vehicles.actions.addExpense'), icon: <PlusOutlined /> },
     { key: 'odometer', label: t('vehicles.actions.addOdometer'), icon: <DashboardOutlined /> },
+    // The consignment agreement of the open consignment cycle.
+    ...(consignmentPdf
+      ? [
+          {
+            key: 'consignmentPdf' as const,
+            label: templateName(consignmentPdf.template),
+            icon: <FilePdfOutlined />,
+          },
+        ]
+      : []),
     { key: 'reminder', label: t('reminders.manual.add'), icon: <BellOutlined /> },
   ];
 
@@ -355,6 +371,13 @@ function VehicleView({ id }: { id: string }) {
           vehicleId={vehicle.id}
           onClose={() => setDialog(null)}
           onSaved={() => saved(t('vehicles.expenses.added'))}
+        />
+      )}
+      {dialog === 'consignmentPdf' && consignmentPdf && (
+        <GeneratePdfDialog
+          choices={[consignmentPdf]}
+          onClose={() => setDialog(null)}
+          onGenerated={() => void refresh()}
         />
       )}
       {dialog === 'reminder' && (

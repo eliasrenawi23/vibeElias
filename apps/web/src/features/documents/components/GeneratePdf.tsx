@@ -93,9 +93,7 @@ export function GeneratePdfDialog({
       width={480}
     >
       <Flex vertical gap={12} data-testid="pdf-dialog">
-        {mutation.isError && (
-          <Alert type="error" showIcon title={errorMessage(mutation.error)} />
-        )}
+        {mutation.isError && <Alert type="error" showIcon title={errorMessage(mutation.error)} />}
         <Form layout="vertical" component={false}>
           <Form.Item label={t('pdf.template')}>
             {choices.length > 1 ? (

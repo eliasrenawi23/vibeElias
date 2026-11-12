@@ -28,8 +28,7 @@ export interface PdfChoice {
   id: string;
 }
 
-const pdfPath = (template: PdfTemplate, id: string) =>
-  `/pdf/${template}/${encodeURIComponent(id)}`;
+const pdfPath = (template: PdfTemplate, id: string) => `/pdf/${template}/${encodeURIComponent(id)}`;
 
 /** `POST /api/pdf/:template/:id?lang=`: the stored document (`url` opens the file). */
 export function generatePdf(

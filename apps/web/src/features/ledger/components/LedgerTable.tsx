@@ -12,6 +12,8 @@ import { Money } from '../../../shared/ui/Money';
 import { MonthText } from '../../../shared/ui/MonthText';
 import { StatusTag } from '../../../shared/ui/StatusTag';
 import { ToneTag } from '../../../shared/ui/ToneTag';
+import { PdfRowButton } from '../../documents/components/GeneratePdf';
+import { ledgerPdfChoice } from '../../documents/pdf';
 import { isDeposit, openAmount, withRunningBalance, type StatementRow } from '../lib/ledger';
 import type { LedgerEntry } from '../types';
 
@@ -23,6 +25,8 @@ export interface LedgerTableProps {
   opening?: number;
   /** Shows a "void" action on rows that are not voided yet. */
   onVoid?: (entry: LedgerEntry) => void;
+  /** Deposit confirmation / payment confirmation PDFs on deposit and payment rows. */
+  pdfActions?: boolean;
   empty?: ReactNode;
   label?: string;
   'data-testid'?: string;
@@ -48,6 +52,7 @@ export function LedgerTable({
   loading = false,
   opening = 0,
   onVoid,
+  pdfActions = false,
   empty,
   label,
   'data-testid': testId = 'ledger-table',
@@ -71,7 +76,11 @@ export function LedgerTable({
       render: (e) => (
         <Flex gap={4} wrap>
           <LedgerTypeTag entry={e} />
-          {e.voidedAt && <ToneTag tone="neutral" data-testid="ledger-voided-tag">{t('ledger.voided')}</ToneTag>}
+          {e.voidedAt && (
+            <ToneTag tone="neutral" data-testid="ledger-voided-tag">
+              {t('ledger.voided')}
+            </ToneTag>
+          )}
         </Flex>
       ),
     },
@@ -156,26 +165,34 @@ export function LedgerTable({
         );
       },
     },
-    ...(onVoid
+    ...(onVoid || pdfActions
       ? [
           {
             key: 'actions',
             title: t('common.actions'),
             align: 'end' as const,
-            render: (e: StatementRow) =>
-              e.voidedAt ? null : (
-                <Tooltip title={t('ledger.void.action')}>
-                  <Button
-                    type="text"
-                    size="small"
-                    danger
-                    icon={<StopOutlined />}
-                    aria-label={t('ledger.void.action')}
-                    onClick={() => onVoid(e)}
-                    data-testid="ledger-void"
-                  />
-                </Tooltip>
-              ),
+            render: (e: StatementRow) => {
+              const pdf = pdfActions ? ledgerPdfChoice(e) : null;
+              if (e.voidedAt && !pdf) return null;
+              return (
+                <Flex gap={2} justify="flex-end">
+                  {pdf && <PdfRowButton choice={pdf} />}
+                  {onVoid && !e.voidedAt && (
+                    <Tooltip title={t('ledger.void.action')}>
+                      <Button
+                        type="text"
+                        size="small"
+                        danger
+                        icon={<StopOutlined />}
+                        aria-label={t('ledger.void.action')}
+                        onClick={() => onVoid(e)}
+                        data-testid="ledger-void"
+                      />
+                    </Tooltip>
+                  )}
+                </Flex>
+              );
+            },
           },
         ]
       : []),

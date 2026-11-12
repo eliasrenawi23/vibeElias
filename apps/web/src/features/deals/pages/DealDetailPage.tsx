@@ -4,6 +4,7 @@ import {
   DollarOutlined,
   EditOutlined,
   FileDoneOutlined,
+  FilePdfOutlined,
   StopOutlined,
   SwapOutlined,
   UserOutlined,
@@ -25,6 +26,8 @@ import { ContactLink } from '../../contacts/components/ContactLink';
 import { contactKeys } from '../../contacts/queryKeys';
 import { dashboardKeys } from '../../dashboard/queryKeys';
 import { EntityDocuments } from '../../documents/components/EntityDocuments';
+import { GeneratePdfDialog, usePdfTemplateName } from '../../documents/components/GeneratePdf';
+import { dealAgreementChoice, dealDisclosureChoice } from '../../documents/pdf';
 import { vehicleKeys } from '../../vehicles/queryKeys';
 import { fetchDeal } from '../api';
 import { DealNo, DealTypeTag, DealVehicleCell, TransferCell } from '../components/DealBits';
@@ -42,7 +45,14 @@ import { counterpartyLabelKey, hasTransfer, isOpenDeal, needsDisclosure } from '
 import { dealKeys } from '../queryKeys';
 import type { DealDetail } from '../types';
 
-type DealActionKey = 'edit' | 'disclosure' | 'complete' | 'cancel' | 'payment';
+type DealActionKey =
+  | 'edit'
+  | 'disclosure'
+  | 'complete'
+  | 'cancel'
+  | 'payment'
+  | 'agreementPdf'
+  | 'disclosurePdf';
 
 /** `/deals/:id`: the deal with its actions by status, summary, payments, transfer and documents. */
 export function DealDetailPage() {
@@ -54,6 +64,7 @@ function DealView({ id }: { id: string }) {
   const { t } = useTranslation();
   const { message } = App.useApp();
   const queryClient = useQueryClient();
+  const templateName = usePdfTemplateName();
   const [dialog, setDialog] = useState<DealActionKey | null>(null);
 
   const query = useQuery({
@@ -139,6 +150,29 @@ function DealView({ id }: { id: string }) {
       { key: 'edit', label: t('actions.edit'), icon: <EditOutlined /> },
     );
   }
+  // Printable agreement (sale or purchase) and, for sales, the disclosure form next to
+  // "Record disclosure" (none for a cancelled deal).
+  const agreementPdf = dealAgreementChoice(deal);
+  const disclosurePdf = dealDisclosureChoice(deal);
+  if (agreementPdf) {
+    actions.push({
+      key: 'agreementPdf',
+      label: templateName(agreementPdf.template),
+      icon: <FilePdfOutlined />,
+    });
+  }
+  if (disclosurePdf) {
+    const pdfAction = {
+      key: 'disclosurePdf' as const,
+      label: templateName(disclosurePdf.template),
+      icon: <FilePdfOutlined />,
+    };
+    const after = actions.findIndex((a) => a.key === 'disclosure');
+    if (after >= 0) actions.splice(after + 1, 0, pdfAction);
+    else actions.push(pdfAction);
+  }
+  const refreshDocuments = () =>
+    void queryClient.invalidateQueries({ queryKey: dealKeys.detail(id) });
 
   return (
     <DetailPageLayout
@@ -287,6 +321,20 @@ function DealView({ id }: { id: string }) {
           deal={deal}
           onClose={() => setDialog(null)}
           onSaved={(d) => applyDeal(d, t('deals.cancel.done'))}
+        />
+      )}
+      {dialog === 'agreementPdf' && agreementPdf && (
+        <GeneratePdfDialog
+          choices={[agreementPdf]}
+          onClose={() => setDialog(null)}
+          onGenerated={refreshDocuments}
+        />
+      )}
+      {dialog === 'disclosurePdf' && disclosurePdf && (
+        <GeneratePdfDialog
+          choices={[disclosurePdf]}
+          onClose={() => setDialog(null)}
+          onGenerated={refreshDocuments}
         />
       )}
       {dialog === 'payment' && (

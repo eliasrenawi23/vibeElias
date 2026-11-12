@@ -1,5 +1,6 @@
 import {
   BellOutlined,
+  FilePdfOutlined,
   CarOutlined,
   CheckCircleOutlined,
   DeleteOutlined,
@@ -18,6 +19,8 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useNavigate, useParams } from 'react-router';
 import { AutoDir } from '../../../shared/lib/bidi';
+import { GeneratePdfDialog } from '../../documents/components/GeneratePdf';
+import { leasePdfChoices } from '../../documents/pdf';
 import { ReminderDialog } from '../../reminders/dialogs/ReminderDialog';
 import { useErrorMessage } from '../../../shared/lib/i18n';
 import type { ActionDef } from '../../../shared/ui/ActionBar';
@@ -58,7 +61,16 @@ import { leaseKeys } from '../queryKeys';
 import type { LeaseDetail } from '../types';
 
 type LeaseActionKey =
-  'edit' | 'activate' | 'delete' | 'payment' | 'segment' | 'deposit' | 'renew' | 'end' | 'reminder';
+  | 'edit'
+  | 'activate'
+  | 'delete'
+  | 'payment'
+  | 'segment'
+  | 'deposit'
+  | 'renew'
+  | 'end'
+  | 'pdf'
+  | 'reminder';
 
 type Dialog = LeaseActionKey | 'checklist-handover' | 'checklist-return' | null;
 
@@ -172,6 +184,8 @@ function LeaseView({ id }: { id: string }) {
     );
   }
   // Any contract can carry a manual reminder (call the driver, collect a cheque...).
+  // Contract, handover and return reports, as far as they apply to this contract.
+  actions.push({ key: 'pdf', label: t('pdf.generate'), icon: <FilePdfOutlined /> });
   actions.push({ key: 'reminder', label: t('reminders.manual.add'), icon: <BellOutlined /> });
 
   return (
@@ -337,6 +351,15 @@ function LeaseView({ id }: { id: string }) {
             applyLease(renewed, t('leases.renew.done'));
             navigate(leasePath(renewed.id));
           }}
+        />
+      )}
+      {dialog === 'pdf' && (
+        <GeneratePdfDialog
+          choices={leasePdfChoices(lease)}
+          onClose={() => setDialog(null)}
+          onGenerated={() =>
+            void queryClient.invalidateQueries({ queryKey: leaseKeys.detail(lease.id) })
+          }
         />
       )}
       {dialog === 'reminder' && (

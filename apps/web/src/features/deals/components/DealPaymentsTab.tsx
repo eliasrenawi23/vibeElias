@@ -15,6 +15,8 @@ import { Money } from '../../../shared/ui/Money';
 import { StatCard } from '../../../shared/ui/StatCard';
 import { ToneTag } from '../../../shared/ui/ToneTag';
 import { ContactLink } from '../../contacts/components/ContactLink';
+import { PdfRowButton } from '../../documents/components/GeneratePdf';
+import { dealPaymentPdfChoice } from '../../documents/pdf';
 import { deleteDealPayment } from '../api';
 import { isSystemPayment } from '../lib/dealRules';
 import type { DealDetail, DealPayment } from '../types';
@@ -119,20 +121,27 @@ export function DealPaymentsTab({ deal, canAdd, onAdd, onChanged }: DealPayments
       key: 'actions',
       title: t('common.actions'),
       align: 'end',
-      render: (p) =>
-        isSystemPayment(p) ? null : (
-          <Tooltip title={t('actions.delete')}>
-            <Button
-              type="text"
-              size="small"
-              danger
-              icon={<DeleteOutlined />}
-              aria-label={t('actions.delete')}
-              onClick={() => setDeleting(p)}
-              data-testid="payment-delete"
-            />
-          </Tooltip>
-        ),
+      render: (p) => {
+        const pdf = dealPaymentPdfChoice(p, deal.status);
+        return (
+          <Flex gap={2} justify="flex-end">
+            {pdf && <PdfRowButton choice={pdf} />}
+            {!isSystemPayment(p) && (
+              <Tooltip title={t('actions.delete')}>
+                <Button
+                  type="text"
+                  size="small"
+                  danger
+                  icon={<DeleteOutlined />}
+                  aria-label={t('actions.delete')}
+                  onClick={() => setDeleting(p)}
+                  data-testid="payment-delete"
+                />
+              </Tooltip>
+            )}
+          </Flex>
+        );
+      },
     },
   ];
 
