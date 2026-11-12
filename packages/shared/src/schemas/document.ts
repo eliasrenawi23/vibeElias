@@ -99,3 +99,85 @@ export const DocumentQuerySchema = pagination
     path: ['vehicleId'],
   });
 export type DocumentQuery = z.infer<typeof DocumentQuerySchema>;
+
+/* ------------------------------------------------------------------------------------------ */
+/* Generated PDFs (milestone 6)                                                               */
+/* ------------------------------------------------------------------------------------------ */
+
+/**
+ * Printable documents rendered by `POST /pdf/:template/:id?lang=` (stored as a Document) and
+ * previewed as HTML by `GET /pdf/:template/:id/preview?lang=`. The `:id` per template:
+ * - lease-contract, handover, return: lease contract id (`return` uses `returnChecklist`)
+ * - deposit-receipt: ledger entry id of a DEPOSIT_IN / DEPOSIT_OUT
+ * - payment-confirmation: ledger entry id of a PAYMENT, or a deal payment id
+ * - sale-agreement: SALE / CONSIGNMENT_SALE deal id; purchase-agreement: PURCHASE deal id
+ * - consignment-agreement: CONSIGNED inventory cycle id
+ * - disclosure-form: SALE / CONSIGNMENT_SALE deal id
+ */
+export const PdfTemplate = z.enum([
+  'lease-contract',
+  'handover',
+  'return',
+  'deposit-receipt',
+  'payment-confirmation',
+  'sale-agreement',
+  'purchase-agreement',
+  'consignment-agreement',
+  'disclosure-form',
+]);
+export type PdfTemplate = z.infer<typeof PdfTemplate>;
+
+/** `Document.kind` of the stored PDF per template. */
+export const PDF_TEMPLATE_DOC_KINDS: Readonly<Record<PdfTemplate, DocKind>> = Object.freeze({
+  'lease-contract': 'CONTRACT',
+  handover: 'HANDOVER',
+  return: 'HANDOVER',
+  'deposit-receipt': 'RECEIPT',
+  'payment-confirmation': 'RECEIPT',
+  'sale-agreement': 'AGREEMENT',
+  'purchase-agreement': 'AGREEMENT',
+  'consignment-agreement': 'AGREEMENT',
+  'disclosure-form': 'DISCLOSURE_FORM',
+});
+
+/**
+ * Owner foreign key of the stored PDF per template (`payment-confirmation` of a deal payment
+ * hangs on its deal: `dealId`).
+ */
+export const PDF_TEMPLATE_OWNERS: Readonly<Record<PdfTemplate, readonly DocumentOwnerKey[]>> =
+  Object.freeze({
+    'lease-contract': ['contractId'],
+    handover: ['contractId'],
+    return: ['contractId'],
+    'deposit-receipt': ['ledgerEntryId'],
+    'payment-confirmation': ['ledgerEntryId', 'dealId'],
+    'sale-agreement': ['dealId'],
+    'purchase-agreement': ['dealId'],
+    'consignment-agreement': ['vehicleId'],
+    'disclosure-form': ['dealId'],
+  });
+
+/** i18n keys (namespace `common`, web) of the template display names: `pdf.templates.<key>`. */
+export const PDF_TEMPLATE_TITLE_KEYS: Readonly<Record<PdfTemplate, string>> = Object.freeze({
+  'lease-contract': 'pdf.templates.leaseContract',
+  handover: 'pdf.templates.handover',
+  return: 'pdf.templates.return',
+  'deposit-receipt': 'pdf.templates.depositReceipt',
+  'payment-confirmation': 'pdf.templates.paymentConfirmation',
+  'sale-agreement': 'pdf.templates.saleAgreement',
+  'purchase-agreement': 'pdf.templates.purchaseAgreement',
+  'consignment-agreement': 'pdf.templates.consignmentAgreement',
+  'disclosure-form': 'pdf.templates.disclosureForm',
+});
+
+/** i18n key of the 409 returned when a template does not fit the entity. */
+export const PDF_NOT_APPLICABLE = 'errors.pdfNotApplicable';
+
+/**
+ * `POST /pdf/:template/:id` and `GET /pdf/:template/:id/preview`: document language (default:
+ * the counterparty's `preferredLang`, else the user's locale).
+ */
+export const PdfQuerySchema = z.object({
+  lang: Locale.optional(),
+});
+export type PdfQuery = z.infer<typeof PdfQuerySchema>;

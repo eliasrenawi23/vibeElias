@@ -15,6 +15,7 @@ import { LeaseDetailPage } from '../features/leases/pages/LeaseDetailPage';
 import { LeaseNewPage } from '../features/leases/pages/LeaseNewPage';
 import { LeasesPage } from '../features/leases/pages/LeasesPage';
 import { RemindersPage } from '../features/reminders/pages/RemindersPage';
+import { ReportPage } from '../features/reports/pages/ReportPage';
 import { ReportsPage } from '../features/reports/pages/ReportsPage';
 import { BusinessSettingsPage } from '../features/settings/pages/BusinessSettingsPage';
 import {
@@ -114,6 +115,7 @@ export const routes: RouteObject[] = [
           },
           { path: 'reminders', element: <RemindersPage />, handle: handle('nav.reminders') },
           { path: 'reports', element: <ReportsPage />, handle: handle('nav.reports') },
+          { path: 'reports/:name', element: <ReportPage />, handle: handle('nav.reports') },
           {
             path: 'settings',
             handle: handle('nav.settings'),

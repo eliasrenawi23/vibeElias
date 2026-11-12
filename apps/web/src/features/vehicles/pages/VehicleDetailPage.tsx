@@ -1,4 +1,5 @@
 import {
+  BellOutlined,
   DashboardOutlined,
   DollarOutlined,
   EditOutlined,
@@ -16,6 +17,7 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useParams } from 'react-router';
 import { AutoDir } from '../../../shared/lib/bidi';
+import { ReminderDialog } from '../../reminders/dialogs/ReminderDialog';
 import type { ActionDef } from '../../../shared/ui/ActionBar';
 import { AlertTags } from '../../../shared/ui/AlertTags';
 import { DetailPageLayout } from '../../../shared/ui/DetailPageLayout';
@@ -49,7 +51,14 @@ import { canConsign, returnableCycle } from '../lib/vehicleRules';
 import { vehicleKeys } from '../queryKeys';
 import type { VehicleDetail } from '../types';
 
-export type VehicleActionKey = 'edit' | 'status' | 'consign' | 'return' | 'expense' | 'odometer';
+export type VehicleActionKey =
+  | 'edit'
+  | 'status'
+  | 'consign'
+  | 'return'
+  | 'expense'
+  | 'odometer'
+  | 'reminder';
 
 /** `/vehicles/:id`: header with actions, and the vehicle file in tabs. */
 export function VehicleDetailPage() {
@@ -149,6 +158,7 @@ function VehicleView({ id }: { id: string }) {
       : []),
     { key: 'expense', label: t('vehicles.actions.addExpense'), icon: <PlusOutlined /> },
     { key: 'odometer', label: t('vehicles.actions.addOdometer'), icon: <DashboardOutlined /> },
+    { key: 'reminder', label: t('reminders.manual.add'), icon: <BellOutlined /> },
   ];
 
   const onAction = (key: VehicleActionKey) => {
@@ -345,6 +355,13 @@ function VehicleView({ id }: { id: string }) {
           vehicleId={vehicle.id}
           onClose={() => setDialog(null)}
           onSaved={() => saved(t('vehicles.expenses.added'))}
+        />
+      )}
+      {dialog === 'reminder' && (
+        <ReminderDialog
+          entityType="VEHICLE"
+          entityId={vehicle.id}
+          onClose={() => setDialog(null)}
         />
       )}
       {dialog === 'odometer' && (

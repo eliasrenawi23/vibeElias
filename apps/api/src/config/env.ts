@@ -42,6 +42,10 @@ export const EnvSchema = z.object({
   MAX_UPLOAD_MB: z.coerce.number().positive().max(200).default(20),
   /** JSON status file written by the backup sidecar after each successful run. */
   BACKUP_STATUS_FILE: z.string().min(1).default('./data/backup/last-success.json'),
+  /** PDF renders running at the same time in the shared Chromium (others wait in a queue). */
+  PDF_CONCURRENCY: z.coerce.number().int().min(1).max(8).default(1),
+  /** Upper limit of one PDF render (page load + print), in milliseconds. */
+  PDF_TIMEOUT_MS: z.coerce.number().int().min(1000).max(300_000).default(60_000),
 });
 export type Env = z.infer<typeof EnvSchema>;
 

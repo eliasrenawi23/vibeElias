@@ -1,7 +1,8 @@
-/** TanStack Query keys for reports (the list/detail queries arrive in milestone 5). */
+import type { ReportName } from '@renawi/shared';
+
+/** TanStack Query keys for reports (one JSON result per report and parameter set). */
 export const reportKeys = {
   all: ['reports'] as const,
-  lists: () => [...reportKeys.all, 'list'] as const,
-  list: (filters: Record<string, unknown>) => [...reportKeys.lists(), filters] as const,
-  detail: (id: string) => [...reportKeys.all, 'detail', id] as const,
+  result: (name: ReportName, query: Readonly<Record<string, string>>) =>
+    [...reportKeys.all, name, query] as const,
 };

@@ -43,6 +43,8 @@ export const ErrorKey = {
   dealHasPayments: 'errors.dealHasPayments',
   systemPayment: 'errors.systemPayment',
   noDriverMatched: 'errors.noDriverMatched',
+  // Milestone 6: generated PDFs.
+  pdfNotApplicable: 'errors.pdfNotApplicable',
   invalidCredentials: 'auth.invalidCredentials',
   sessionExpired: 'auth.sessionExpired',
   tooManyAttempts: 'auth.tooManyAttempts',

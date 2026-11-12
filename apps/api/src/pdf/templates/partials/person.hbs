@@ -1,0 +1,10 @@
+<div class="party">
+  <div class="role">{{role}}</div>
+  <div class="who">{{auto p.name}}</div>
+  {{#if p.idNumber}}<div class="line"><span class="lbl">{{t "common.idNumber"}}:</span> {{ltr p.idNumber}}</div>{{/if}}
+  {{#if p.address}}<div class="line"><span class="lbl">{{t "common.address"}}:</span> {{auto p.address}}</div>{{/if}}
+  {{#if p.phone}}<div class="line"><span class="lbl">{{t "common.phone"}}:</span> {{phone p.phone}}</div>{{/if}}
+  {{#if p.licenseNo}}<div class="line"><span class="lbl">{{t "party.driverLicense"}}:</span> {{ltr p.licenseNo}}</div>{{/if}}
+  {{#if p.taxiPermitNo}}<div class="line"><span class="lbl">{{t "party.taxiPermit"}}:</span> {{ltr p.taxiPermitNo}}</div>{{/if}}
+  {{#if suffix}}<div class="line muted">{{suffix}}</div>{{/if}}
+</div>

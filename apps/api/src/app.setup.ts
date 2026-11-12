@@ -72,6 +72,13 @@ export const SWAGGER_TAGS: readonly { name: string; description: string }[] = [
       'Uploads (pdf / jpeg / png / webp, sniffed), thumbnails and authenticated file streaming',
   },
   {
+    name: 'pdf',
+    description:
+      'Printable PDFs in he / ar / en (lease contract, handover / return, deposit receipt, ' +
+      'payment confirmation, sale / purchase / consignment agreements, disclosure form): ' +
+      'render + store as a Document, or preview the HTML',
+  },
+  {
     name: 'reminders',
     description:
       'Reminders feed (expiries, deadlines, follow-ups with lead days) and manual reminders',

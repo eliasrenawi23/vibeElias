@@ -1,0 +1,137 @@
+{{#> layout}}
+{{#with data}}
+<p class="made-on">{{t "lease.contractNo"}} {{ltr contractNo}} · {{t "common.madeOn" date=(date signedOn)}}</p>
+
+<div class="parties">
+  {{> dealer role=(concat (t "common.between") " " (t "party.lessor")) suffix=(t "common.hereinafter" role=(t "party.lessor"))}}
+  {{> person role=(concat (t "common.and") " " (t "party.lessee")) p=lessee suffix=(t "common.hereinafter" role=(t "party.lessee"))}}
+</div>
+
+<ol class="recitals">
+  <li>{{t "lease.recital1" license=(ltr licenseNo)}}</li>
+  {{#if carAndNumber}}<li>{{t "lease.recital2"}}</li>{{/if}}
+  <li>{{t "lease.recital3"}}</li>
+  <li>{{t "lease.recital4"}}</li>
+</ol>
+<p><strong>{{t "common.therefore"}}</strong></p>
+
+<ol class="clauses">
+  <li>
+    <h3>{{t "lease.objectTitle"}}</h3>
+    <p>{{t (concat "lease.object." type) license=(ltr licenseNo)}}</p>
+    {{#if vehicle}}
+      {{#unless carAndNumber}}<p class="muted small">{{t "lease.driverCar"}}:</p>{{/unless}}
+      {{> vehicle v=vehicle short=(not carAndNumber)}}
+    {{else}}
+      <p class="muted">{{t "lease.driverCarMissing"}}</p>
+    {{/if}}
+    {{#if carAndNumber}}<p>{{t "lease.objectCondition"}}</p>{{/if}}
+  </li>
+
+  <li>
+    <h3>{{t "lease.termTitle"}}</h3>
+    <p>{{t "lease.term" start=(date startDate) end=(date endDate)}}</p>
+  </li>
+
+  <li>
+    <h3>{{t "lease.rentTitle"}}</h3>
+    <ol class="sub">
+      <li>{{t "lease.rent" rent=(money monthlyRent) vat=(t (concat "lease." (pick rentIncludesVat "rentInclVat" "rentPlusVat")) rate=(ltr vatRate))}}</li>
+      <li>{{t "lease.rentPayment" day=(ltr paymentDay)}}</li>
+      <li>{{t "lease.rentLate"}}</li>
+    </ol>
+  </li>
+
+  <li>
+    <h3>{{t "lease.depositTitle"}}</h3>
+    {{#if deposit}}
+    <ol class="sub">
+      <li>{{t "lease.deposit" amount=(money deposit.amount) kind=(enum "DepositKind" deposit.kind)}}</li>
+      <li>{{t "lease.depositOffset"}}</li>
+      <li>{{t "lease.depositReturn" object=(t (concat "lease.objectWord." type))}}</li>
+    </ol>
+    {{else}}
+    <p>{{t "lease.noDeposit"}}</p>
+    {{/if}}
+  </li>
+
+  <li class="keep">
+    <h3>{{t "lease.costsTitle"}}</h3>
+    <p>{{t "lease.costsIntro"}}</p>
+    <table class="grid">
+      <thead><tr><th>{{t "common.item"}}</th><th class="center">{{t "common.responsible"}}</th></tr></thead>
+      <tbody>
+        {{#each responsibilities}}
+        <tr><td>{{t (concat "lease.costs." this.key)}}</td><td class="center"><strong>{{t (concat "enums.ResponsibleParty." this.party)}}</strong></td></tr>
+        {{/each}}
+      </tbody>
+    </table>
+    <p>{{t "lease.costsOther"}}</p>
+  </li>
+
+  <li>
+    <h3>{{t "lease.finesTitle"}}</h3>
+    <ol class="sub">
+      <li>{{t "lease.fines1" object=(t (concat "lease.useWord." type))}}</li>
+      <li>{{t "lease.fines2"}}</li>
+      <li>{{t "lease.fines3"}}</li>
+    </ol>
+  </li>
+
+  <li>
+    <h3>{{t "lease.useTitle"}}</h3>
+    <ol class="sub">
+      <li>{{t "lease.use1" object=(t (concat "lease.useWord." type))}}</li>
+      <li>{{t "lease.use2" object=(t (concat "lease.useWord." type))}}</li>
+      <li>{{t "lease.use3"}}</li>
+      <li>{{t "lease.use4"}}</li>
+    </ol>
+  </li>
+
+  <li>
+    <h3>{{t "lease.independentTitle"}}</h3>
+    <ol class="sub">
+      <li>{{t "lease.independent1"}}</li>
+      <li>{{t "lease.independent2"}}</li>
+      <li>{{t "lease.independent3"}}</li>
+    </ol>
+  </li>
+
+  <li>
+    <h3>{{t "lease.endTitle"}}</h3>
+    <ol class="sub">
+      <li>{{t "lease.end1"}}</li>
+      <li>{{#if (gt penaltyMonths 0)}}{{t "lease.end2" months=(ltr penaltyMonths) amount=(money penaltyAmount)}}{{else}}{{t "lease.end2None"}}{{/if}}</li>
+      <li>{{t "lease.end3" object=(t (concat "lease.useWord." type))}}</li>
+    </ol>
+  </li>
+
+  <li>
+    <h3>{{t "lease.returnTitle"}}</h3>
+    <p>{{t (concat "lease.return." type)}}</p>
+  </li>
+
+  {{#if (or terms clauses)}}
+  <li>
+    <h3>{{t "lease.extraTitle"}}</h3>
+    {{#if terms}}
+      <p class="muted small">{{t "lease.contractTerms"}}</p>
+      <div class="terms">{{text terms}}</div>
+    {{/if}}
+    {{#if clauses}}
+      <p class="muted small">{{t "lease.standardTerms"}}</p>
+      <div class="terms free" dir="{{clauses.dir}}">{{clauses.text}}</div>
+    {{/if}}
+  </li>
+  {{/if}}
+
+  {{> general party=(t "party.lessor")}}
+</ol>
+
+<p class="keep"><strong>{{t "common.witness"}}</strong></p>
+<div class="signatures">
+  {{> sig role=(t "party.lessor") name=@root.business.name caption=(t "common.signatureStamp")}}
+  {{> sig role=(t "party.lessee") name=lessee.name id=lessee.idNumber}}
+</div>
+{{/with}}
+{{/layout}}

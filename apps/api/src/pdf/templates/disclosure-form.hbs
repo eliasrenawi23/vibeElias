@@ -1,0 +1,86 @@
+{{#> layout}}
+{{#with data}}
+<p class="subtitle">{{t "disclosure.subtitle"}}</p>
+<p class="made-on">{{t "receipt.deal"}} {{ltr dealNo}} · {{t "common.date"}} {{date date}}</p>
+
+<ol class="clauses">
+  <li class="keep">
+    <h3>{{t "disclosure.dealerTitle"}}</h3>
+    <table class="kv">
+      <tr>
+        <th>{{t "common.name"}}</th><td>{{auto @root.business.name}}</td>
+        <th>{{t "common.legalId"}}</th><td>{{ltr @root.business.legalId}}</td>
+      </tr>
+      <tr>
+        <th>{{t "common.dealerLicense"}}</th><td>{{ltr @root.business.dealerLicenseNo}}</td>
+        <th>{{t "common.phone"}}</th><td>{{phone @root.business.phone}}</td>
+      </tr>
+      <tr><th>{{t "common.address"}}</th><td colspan="3">{{auto @root.business.address}}</td></tr>
+    </table>
+    <p><strong>{{#if consignment}}{{t "disclosure.dealerStatusConsignment"}}{{else}}{{t "disclosure.dealerStatus"}}{{/if}}</strong></p>
+  </li>
+
+  <li class="keep">
+    <h3>{{t "disclosure.ownerTitle"}}</h3>
+    <table class="kv">
+      <tr>
+        <th>{{t "common.name"}}</th><td>{{auto registeredOwner.name}}</td>
+        <th>{{t "common.idNumber"}}</th><td>{{ltr registeredOwner.idNumber}}</td>
+      </tr>
+    </table>
+    {{#if registeredOwner.isDealer}}<p class="muted small">{{t "disclosure.ownerIsDealer"}}</p>{{/if}}
+  </li>
+
+  <li>
+    <h3>{{t "vehicle.title"}}</h3>
+    {{> vehicle v=vehicle}}
+  </li>
+
+  <li class="keep">
+    <h3>{{t "disclosure.historyTitle"}}</h3>
+    <table class="kv">
+      <tr>
+        <th>{{t "disclosure.hands"}}</th><td>{{#if hands}}{{ltr hands}}{{else}}________{{/if}}</td>
+        <th>{{t "disclosure.previousOwner"}}</th>
+        <td>{{#if previousOwner}}{{auto previousOwner.name}} <span class="muted small">({{#if previousOwner.isCompany}}{{t "disclosure.company"}}{{else}}{{t "disclosure.privatePerson"}}{{/if}})</span>{{else}}________________{{/if}}</td>
+      </tr>
+    </table>
+    <p>{{t "disclosure.usage"}}:</p>
+    <div class="choices">
+      <span class="choice">{{box history.leasing}}{{t "history.leasing"}}</span>
+      <span class="choice">{{box history.rental}}{{t "history.rental"}}</span>
+      <span class="choice">{{box history.taxi}}{{t "history.taxi"}}</span>
+      <span class="choice">{{box history.school}}{{t "history.school"}}</span>
+      <span class="choice">{{box false}}{{t "history.private"}}</span>
+    </div>
+  </li>
+
+  <li class="keep">
+    <h3>{{t "disclosure.damageTitle"}}</h3>
+    <p>{{t "disclosure.damage"}}</p>
+    <div class="blank-lines"><div></div><div></div><div></div><div></div></div>
+  </li>
+
+  <li class="keep">
+    <h3>{{t "disclosure.kmTitle"}}</h3>
+    <p>{{#if km}}{{t "disclosure.km" km=(num km (t "common.kmUnit"))}}{{else}}{{t "disclosure.kmUnknown"}}{{/if}}</p>
+  </li>
+
+  <li class="keep">
+    <h3>{{t "disclosure.priceTitle"}}</h3>
+    <p>{{t "disclosure.price" price=(money price)}}</p>
+  </li>
+
+  <li class="keep">
+    <h3>{{t "disclosure.buyerTitle"}}</h3>
+    <p>{{t "disclosure.buyerDeclaration"}}</p>
+    {{#if signedOn}}<p class="muted small">{{t "disclosure.signedOn" date=(date signedOn)}}</p>{{/if}}
+  </li>
+</ol>
+
+<div class="signatures">
+  {{> sig role=(t "party.buyer") name=buyer.name id=buyer.idNumber date=signedOn}}
+  {{> sig role=(t "sale.dealerSignature") name=@root.business.name license=@root.business.dealerLicenseNo caption=(t "common.signatureStamp") date=signedOn}}
+</div>
+{{/with}}
+{{/layout}}

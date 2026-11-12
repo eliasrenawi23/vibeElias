@@ -551,10 +551,74 @@
       "receivables": "חובות נהגים",
       "monthProfit": "רווח החודש",
       "openDeals": "עסקאות פתוחות",
-      "transfersOverdue": "העברות בעלות באיחור"
+      "transfersOverdue": "העברות בעלות באיחור",
+      "expiring": "תוקפים באיחור",
+      "finesOpen": "קנסות פתוחים"
     },
     "expiringSoon": "פג תוקף בקרוב",
-    "expiringEmpty": "אין פריטים שתוקפם פג ב-{{days}} הימים הקרובים"
+    "expiringEmpty": "אין פריטים שתוקפם פג ב-{{days}} הימים הקרובים",
+    "lastUpdated": "עודכן לאחרונה {{time}}",
+    "kpiInfoLabel": "מה המספר הזה אומר",
+    "kpiInfo": {
+      "vehiclesInStock": "רכבים שנמצאים כרגע במלאי (סטטוס במלאי).",
+      "activeLeases": "חוזי השכרה שפעילים היום.",
+      "receivables": "כמה הנהגים חייבים לנו: סכום היתרות החיוביות של הנהגים.",
+      "monthProfit": "הרווח מהרכבים שנמכרו החודש ועוד הכנסות ההשכרה של החודש, אחרי מחיר הרכישה, ההוצאות והמע״מ.",
+      "openDeals": "עסקאות שעדיין בטיוטה או ממתינות.",
+      "transfersOverdue": "מכירות שהושלמו ושהעברת הבעלות שלהן עברה את המועד.",
+      "expiring": "תוקפים ומועדים שכבר עברו; השורה שמתחת סופרת את אלה שמגיעים בתוך זמן ההתראה שלהם.",
+      "finesOpen": "קנסות שעדיין צריך לטפל בהם: חדשים, או שהוגשה להם בקשת הסבה."
+    },
+    "kpiSub": {
+      "receivablesOverdue": "{{amount}} באיחור",
+      "receivablesNoneOverdue": "אין חובות באיחור",
+      "expiringDue": "{{count}} בקרוב",
+      "notAvailable": "השרת עדיין לא מדווח על הנתון"
+    },
+    "trend": {
+      "up": "עלייה של {{value}} מהחודש שעבר",
+      "down": "ירידה של {{value}} מהחודש שעבר",
+      "flat": "כמו בחודש שעבר"
+    },
+    "expiringViewAll": "הצגת הכול",
+    "expiringError": "לא ניתן לטעון את התוקפים",
+    "activity": {
+      "title": "פעילות אחרונה",
+      "empty": "אין שינויים אחרונים",
+      "error": "לא ניתן לטעון את הפעילות האחרונה",
+      "system": "מערכת",
+      "fieldsChanged": "{{count}} שדות שונו",
+      "entities": {
+        "Vehicle": "רכב",
+        "TaxiLicense": "רישיון מונית",
+        "Driver": "נהג",
+        "Contact": "איש קשר",
+        "LeaseContract": "חוזה השכרה",
+        "LeaseSegment": "תקופת השכרה",
+        "Deal": "עסקה",
+        "DealPayment": "תשלום עסקה",
+        "TrafficFine": "קנס",
+        "LedgerEntry": "תנועה בכרטסת",
+        "VehicleExpense": "הוצאה",
+        "InsurancePolicy": "פוליסת ביטוח",
+        "Document": "מסמך",
+        "Reminder": "תזכורת",
+        "Settings": "הגדרות",
+        "InventoryCycle": "מחזור מלאי",
+        "OdometerReading": "קריאת מד אוץ",
+        "User": "משתמש"
+      }
+    },
+    "charts": {
+      "profitTitle": "רווח לפי חודש",
+      "profitSubtitle": "12 החודשים האחרונים: הרווח בעמודות, הכנסות ההשכרה בקו",
+      "ageingTitle": "גיול חובות",
+      "ageingSubtitle": "חיובי נהגים פתוחים לפי ימי איחור",
+      "inventoryTitle": "מלאי",
+      "inventorySubtitle": "הרכבים שלנו לפי סטטוס, ורכבי קונסיגנציה במלאי",
+      "viewReport": "לדוח",
+      "error": "לא ניתן לטעון את הגרפים"
+    }
   },
   "placeholder": {
     "title": "החלק הזה בדרך",
@@ -589,6 +653,67 @@
       "dealerLicenseNo": "מספר רישיון סוחר רכב",
       "vatRateHelp": "משמש לעסקאות חדשות; עסקאות קיימות שומרות על השיעור שלהן.",
       "loadError": "לא ניתן לטעון את ההגדרות"
+    },
+    "reminders": {
+      "description": "כמה ימים לפני תוקף או מועד הוא יופיע כ״בקרוב״ ברשימת התזכורות ובפעמון.",
+      "fields": {
+        "registration": "רישיון רכב (טסט שנתי)",
+        "insurance": "סיום פוליסת ביטוח",
+        "driverLicense": "רישיון נהיגה",
+        "taxiPermit": "היתר נהג מונית",
+        "medical": "אישור רפואי",
+        "taxiLicense": "אגרה וחידוש רישיון מונית",
+        "lease": "סיום חוזה השכרה",
+        "document": "תוקף מסמך",
+        "dealerRegistration": "רישום על שם הסוחר (עד 12 חודשים)",
+        "transfer": "העברת בעלות אחרי מכירה",
+        "fine": "מועד אחרון להסבת קנס",
+        "taxiAge": "מועדי גיל המונית"
+      },
+      "help": {
+        "registration": "תוקף רישיון הרכב והטסט השנתי.",
+        "insurance": "תאריך הסיום של כל פוליסה, של רכב או של העסק.",
+        "driverLicense": "רישיון הנהיגה D1 של הנהג.",
+        "taxiPermit": "היתר נהג המונית של הנהג.",
+        "medical": "האישור הרפואי של הנהג.",
+        "taxiLicense": "האגרה השנתית של הרישיון ומועד החידוש שלו.",
+        "lease": "תאריך הסיום המתוכנן של חוזה השכרה פעיל.",
+        "document": "תאריך התוקף שהוגדר למסמך שהועלה.",
+        "dealerRegistration": "רכב שרשום על שם הסוחר צריך להימכר או להירשם מחדש בתוך 12 חודשים.",
+        "transfer": "העברת הבעלות צריכה להיעשות בתוך 6 ימי עבודה מהמכירה.",
+        "fine": "אפשר להסב קנס לנהג עד 90 יום מקבלתו.",
+        "taxiAge": "משטר הטסט החצי שנתי מגיל 10 והמגבלה של 12 שנים למונית."
+      },
+      "sections": {
+        "vehicles": "רכבים",
+        "drivers": "נהגים",
+        "licenses": "רישיונות מונית וחוזים",
+        "deals": "עסקאות, קנסות ומסמכים"
+      }
+    },
+    "contracts": {
+      "description": "ברירות המחדל לחוזי השכרה חדשים: מי משלם על מה, והסעיפים הקבועים שמודפסים על החוזה.",
+      "responsibilities": "חלוקת אחריות כברירת מחדל",
+      "responsibilitiesHelp": "חוזים חדשים מתחילים כך; בכל חוזה אפשר לשנות.",
+      "clauses": "סעיפים קבועים",
+      "clausesHelp": "מודפסים על חוזה ההשכרה בשפת החוזה.",
+      "clausesHe": "סעיפים בעברית",
+      "clausesAr": "סעיפים בערבית",
+      "clausesEn": "סעיפים באנגלית"
+    },
+    "backup": {
+      "description": "הגיבוי הלילי של בסיס הנתונים והמסמכים.",
+      "lastSuccess": "הגיבוי המוצלח האחרון",
+      "lastFile": "קובץ הגיבוי",
+      "status": "מצב",
+      "ok": "עדכני",
+      "stale": "לא עדכני",
+      "never": "עוד לא בוצע גיבוי",
+      "okHint": "גיבוי הצליח ב־{{hours}} השעות האחרונות.",
+      "staleHint": "אין גיבוי מוצלח ב־{{hours}} השעות האחרונות. כדאי לבדוק את תהליך הגיבוי.",
+      "notConfigured": "מעקב הגיבוי לא הוגדר בשרת הזה",
+      "notConfiguredHint": "תהליך הגיבוי כותב קובץ מצב שהשרת קורא. כדאי לבקש ממי שהתקין את המערכת להגדיר אותו.",
+      "loadError": "לא ניתן לטעון את מצב הגיבוי"
     }
   },
   "table": {
@@ -1512,7 +1637,34 @@
   "charts": {
     "showChart": "הצגה כתרשים",
     "showTable": "הצגה כטבלה",
-    "noData": "אין נתונים לתקופה הזו"
+    "noData": "אין נתונים לתקופה הזו",
+    "series": {
+      "profit": "רווח",
+      "leaseIncome": "הכנסות מהשכרה",
+      "sales": "מכירות",
+      "costs": "עלויות"
+    },
+    "ageing": {
+      "current": "טרם הגיע מועדו",
+      "d1_30": "1–30 ימים",
+      "d31_60": "31–60 ימים",
+      "d61_90": "61–90 ימים",
+      "d90_plus": "מעל 90 ימים"
+    },
+    "inventory": {
+      "inStock": "במלאי",
+      "reserved": "שמור",
+      "leased": "מושכר",
+      "consigned": "קונסיגנציה"
+    },
+    "period": "תקופה",
+    "amount": "סכום",
+    "cars": "רכבים",
+    "share": "חלק",
+    "total": "סה״כ",
+    "quarter": "רבעון {{q}} {{year}}",
+    "inventoryLabel": "{{total}} רכבים: {{parts}}",
+    "barLabel": "{{name}}: {{value}}"
   },
   "breadcrumbs": {
     "label": "נתיב ניווט",
@@ -1534,5 +1686,237 @@
   },
   "summary": {
     "label": "סינון מהיר לפי סטטוס"
+  },
+  "filters": {
+    "presetsLabel": "תקופות מהירות",
+    "presets": {
+      "thisMonth": "החודש",
+      "lastMonth": "החודש שעבר",
+      "yearToDate": "מתחילת השנה",
+      "lastYear": "השנה שעברה",
+      "last30Days": "30 הימים האחרונים"
+    }
+  },
+  "reminders": {
+    "kinds": {
+      "vehicleRegistration": "רישיון רכב (טסט)",
+      "insurance": "ביטוח",
+      "driverLicense": "רישיון נהיגה",
+      "taxiPermit": "היתר נהג מונית",
+      "medical": "אישור רפואי",
+      "taxiLicenseFee": "אגרה שנתית לרישיון",
+      "taxiLicenseRenewal": "חידוש רישיון",
+      "leaseEnd": "סיום חוזה",
+      "document": "תוקף מסמך",
+      "contactFollowUp": "מעקב אחר איש קשר",
+      "fineReassign": "הסבת קנס",
+      "dealTransfer": "העברת בעלות",
+      "dealerRegistration": "רישום על שם הסוחר (12 חודשים)",
+      "taxiAge": "גיל מונית מרבי",
+      "taxiSemiAnnual": "טסט חצי שנתי למונית",
+      "manual": "תזכורת"
+    },
+    "severity": {
+      "overdue": "באיחור",
+      "due": "בקרוב",
+      "upcoming": "בהמשך"
+    },
+    "daysLeft": {
+      "overdue": "באיחור של {{days}} ימים",
+      "yesterday": "באיחור של יום",
+      "today": "היום",
+      "tomorrow": "מחר",
+      "left": "בעוד {{days}} ימים"
+    },
+    "bell": {
+      "label": "תזכורות",
+      "badge": "תזכורות: {{count}} דורשות טיפול",
+      "title": "דורש טיפול",
+      "empty": "אין פריטים באיחור או בקרוב",
+      "seeAll": "לכל התזכורות",
+      "loadError": "לא ניתן לטעון את התזכורות"
+    },
+    "tabs": {
+      "feed": "כל התוקפים",
+      "manual": "תזכורות ידניות"
+    },
+    "feed": {
+      "horizon": "טווח",
+      "horizonDays": "{{days}} הימים הקרובים",
+      "kinds": "סוג",
+      "severity": "דחיפות",
+      "empty": "אין תוקפים בטווח הזה",
+      "label": "תוקפים ומועדים"
+    },
+    "fields": {
+      "severity": "דחיפות",
+      "kind": "סוג",
+      "item": "פריט",
+      "title": "כותרת",
+      "dueAt": "תאריך יעד",
+      "daysLeft": "ימים שנותרו",
+      "linkedTo": "מקושר אל",
+      "done": "בוצע"
+    },
+    "open": "פתיחה",
+    "manual": {
+      "add": "הוספת תזכורת",
+      "addTitle": "תזכורת חדשה",
+      "editTitle": "עריכת תזכורת",
+      "showDone": "הצגת תזכורות שבוצעו",
+      "markDone": "סימון כבוצע",
+      "markUndone": "ביטול הסימון",
+      "empty": "אין עדיין תזכורות",
+      "emptyHint": "אפשר להוסיף תזכורת לכל דבר שיש לו תאריך: לחזור ללקוח, תשלום, ביקור.",
+      "added": "התזכורת נוספה",
+      "saved": "התזכורת נשמרה",
+      "deleted": "התזכורת נמחקה",
+      "deleteTitle": "למחוק את התזכורת?",
+      "deleteConfirm": "התזכורת תימחק לצמיתות.",
+      "markedDone": "סומן כבוצע",
+      "markedUndone": "הסימון בוטל",
+      "linkedHint": "מקושרת לרשומה הזו ({{entity}})",
+      "label": "תזכורות ידניות"
+    }
+  },
+  "reports": {
+    "indexSubtitle": "כל דוח אפשר לייצא לאקסל או ל־CSV עבור רואה החשבון.",
+    "open": "פתיחת הדוח",
+    "loadError": "לא ניתן לטעון את הדוח",
+    "notFound": "אין דוח כזה",
+    "names": {
+      "profit": "רווח",
+      "inventoryAgeing": "גיול מלאי",
+      "receivables": "חובות נהגים",
+      "expenses": "הוצאות",
+      "leaseIncome": "הכנסות מהשכרה",
+      "tradeBook": "ספר סחר",
+      "fines": "קנסות"
+    },
+    "descriptions": {
+      "profit": "הרווח מהרכבים שנמכרו והכנסות ההשכרה, לפי חודש, רבעון או שנה.",
+      "inventoryAgeing": "הרכבים במלאי עם העלות שלהם וכמה זמן הם ממתינים.",
+      "receivables": "כמה כל נהג חייב, הפיקדון המוחזק וכמה החוב באיחור.",
+      "expenses": "הוצאות הרכבים לפי קטגוריה, רכב או חודש, עם המע״מ לקיזוז.",
+      "leaseIncome": "שכירות וחיובי נהגים אחרים, זיכויים ותשלומים.",
+      "tradeBook": "כל רכב שנקנה או נמכר בתקופה, עבור רואה החשבון.",
+      "fines": "פנקס הקנסות: שהתקבלו, הוסבו, שולמו וחויבו."
+    },
+    "context": {
+      "sheetName": "פרטי הדוח",
+      "report": "דוח",
+      "exportedAt": "יוצא בתאריך",
+      "period": "תקופה",
+      "asOf": "נכון לתאריך",
+      "language": "שפה",
+      "rows": "שורות",
+      "column": "עמודה",
+      "type": "סוג"
+    },
+    "params": {
+      "groupBy": "קיבוץ לפי",
+      "status": "סטטוס",
+      "period": "תקופה",
+      "asOf": "נכון לתאריך"
+    },
+    "groupBy": {
+      "month": "חודש",
+      "quarter": "רבעון",
+      "year": "שנה",
+      "category": "קטגוריה",
+      "vehicle": "רכב",
+      "license": "רישיון",
+      "driver": "נהג"
+    },
+    "columnTypes": {
+      "text": "טקסט",
+      "money": "סכום (₪)",
+      "int": "מספר",
+      "date": "תאריך",
+      "datetime": "תאריך ושעה",
+      "bool": "כן / לא",
+      "enum": "ערך מרשימה",
+      "plate": "מספר רישוי"
+    },
+    "na": "לא זמין",
+    "noData": "אין נתונים לפרמטרים האלה",
+    "total": "סה״כ",
+    "bool": {
+      "true": "כן",
+      "false": "לא"
+    },
+    "export": {
+      "csv": "ייצוא CSV",
+      "xlsx": "ייצוא לאקסל"
+    },
+    "periodText": "{{from}} – {{to}}",
+    "asOfText": "נכון ל־{{date}}",
+    "rowCount": "{{count}} שורות",
+    "tradeBookNote": "זהו ספר הסחר למסירה לרואה החשבון: כל רכב שנקנה או נמכר בתקופה, עם המוכר והקונה, מספרי הזהות שלהם, המחירים והתיקונים.",
+    "ageBuckets": {
+      "title": "רכבים לפי ימים במלאי",
+      "b0_30": "0–30 ימים",
+      "b31_60": "31–60 ימים",
+      "b61_90": "61–90 ימים",
+      "b90_plus": "מעל 90 ימים"
+    },
+    "ageingTitle": "יתרות לפי ימי איחור",
+    "columns": {
+      "period": "תקופה",
+      "salesRevenue": "הכנסות ממכירות",
+      "purchaseCost": "עלות רכישה",
+      "expenses": "הוצאות",
+      "vatOnMargin": "מע״מ על הרווח",
+      "commission": "עמלה",
+      "leaseIncome": "הכנסות מהשכרה",
+      "profit": "רווח",
+      "plateNo": "מספר רישוי",
+      "vehicle": "רכב",
+      "ownership": "בעלות",
+      "status": "סטטוס",
+      "purchaseDate": "תאריך רכישה",
+      "purchasePrice": "מחיר רכישה",
+      "totalCost": "עלות כוללת",
+      "listingPrice": "מחיר מבוקש",
+      "daysInStock": "ימים במלאי",
+      "ageBucket": "קבוצת גיל",
+      "driver": "נהג",
+      "phone": "טלפון",
+      "contractNo": "מס׳ חוזה",
+      "balance": "יתרה",
+      "depositHeld": "פיקדון מוחזק",
+      "current": "טרם הגיע מועדו",
+      "d1_30": "1–30 ימים",
+      "d31_60": "31–60 ימים",
+      "d61_90": "61–90 ימים",
+      "d90_plus": "מעל 90 ימים",
+      "overdue": "באיחור",
+      "category": "קטגוריה",
+      "count": "כמות",
+      "amount": "סכום",
+      "paidByUs": "שולם על ידינו",
+      "vatReclaimable": "מע״מ לקיזוז",
+      "netCost": "עלות נטו",
+      "licenseNo": "מס׳ רישיון",
+      "rentCharged": "שכירות שחויבה",
+      "otherCharges": "חיובים אחרים",
+      "credits": "זיכויים",
+      "net": "נטו",
+      "paymentsReceived": "תשלומים שהתקבלו",
+      "consignment": "קונסיגנציה",
+      "sellerName": "מוכר",
+      "sellerIdNumber": "ת״ז מוכר",
+      "repairsTotal": "תיקונים",
+      "saleDate": "תאריך מכירה",
+      "buyerName": "קונה",
+      "buyerIdNumber": "ת״ז קונה",
+      "salePrice": "מחיר מכירה",
+      "fineNo": "מספר הקנס",
+      "offenceAt": "תאריך העבירה",
+      "receivedAt": "תאריך קבלה",
+      "authority": "גורם מנפיק",
+      "reassignDeadline": "להסב עד",
+      "rebilled": "חויב לנהג"
+    }
   }
 }

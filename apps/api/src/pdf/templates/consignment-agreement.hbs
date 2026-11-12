@@ -1,0 +1,70 @@
+{{#> layout}}
+{{#with data}}
+<p class="made-on">{{t "common.madeOn" date=(date startedAt)}}</p>
+
+<div class="parties">
+  {{> person role=(concat (t "common.between") " " (t "party.owner")) p=owner suffix=(t "common.hereinafter" role=(t "party.owner"))}}
+  {{> dealer role=(concat (t "common.and") " " (t "party.dealer")) suffix=(t "common.hereinafter" role=(t "party.dealer"))}}
+</div>
+<ol class="recitals">
+  <li>{{t "consignment.recital1"}}</li>
+  <li>{{t "consignment.recital2"}}</li>
+</ol>
+<p><strong>{{t "common.therefore"}}</strong></p>
+
+<ol class="clauses">
+  <li>
+    <h3>{{t "vehicle.title"}}</h3>
+    {{> vehicle v=vehicle}}
+  </li>
+
+  <li>
+    <h3>{{t "consignment.ownershipTitle"}}</h3>
+    <ol class="sub">
+      <li>{{t "consignment.own1"}}</li>
+      <li>{{t "consignment.own2"}}</li>
+      <li>{{t "consignment.own3"}}</li>
+    </ol>
+  </li>
+
+  <li>
+    <h3>{{t "consignment.priceTitle"}}</h3>
+    <ol class="sub">
+      <li>{{#if askingPrice}}{{t "consignment.asking" price=(money askingPrice)}}{{else}}{{t "consignment.askingNone"}}{{/if}}</li>
+      {{#if minNet}}<li>{{t "consignment.minNet" amount=(money minNet)}}</li>{{/if}}
+      <li>{{#if commissionMode}}{{#if (eq commissionMode "PERCENT")}}{{t "consignment.commission.PERCENT" value=(ltr commissionValue)}}{{else}}{{t (concat "consignment.commission." commissionMode) value=(money commissionValue)}}{{/if}}{{else}}{{t "consignment.commission.NONE"}}{{/if}}</li>
+      <li>{{t "consignment.payout"}}</li>
+    </ol>
+  </li>
+
+  <li>
+    <h3>{{t "consignment.periodTitle"}}</h3>
+    <ol class="sub">
+      <li>{{#if agreementEndsAt}}{{t "consignment.period" start=(date startedAt) end=(date agreementEndsAt)}}{{else}}{{t "consignment.periodOpen" start=(date startedAt)}}{{/if}}</li>
+      <li>{{t "consignment.period2"}}</li>
+    </ol>
+  </li>
+
+  <li>
+    <h3>{{t "consignment.liabilityTitle"}}</h3>
+    <ol class="sub">
+      <li>{{t "consignment.liability1"}}</li>
+      <li>{{t "consignment.liability2"}}</li>
+    </ol>
+  </li>
+
+  <li>
+    <h3>{{t "consignment.testDriveTitle"}}</h3>
+    <p>{{t "consignment.testDrive"}}</p>
+  </li>
+
+  {{> general party=(t "party.dealer")}}
+</ol>
+
+<p class="keep"><strong>{{t "common.witness"}}</strong></p>
+<div class="signatures">
+  {{> sig role=(t "party.owner") name=owner.name id=owner.idNumber}}
+  {{> sig role=(t "sale.dealerSignature") name=@root.business.name license=@root.business.dealerLicenseNo caption=(t "common.signatureStamp")}}
+</div>
+{{/with}}
+{{/layout}}

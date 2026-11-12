@@ -1,0 +1,6 @@
+<div class="sig">
+  <div class="role">{{role}}</div>
+  <div class="who">{{#if name}}{{auto name}}{{/if}}{{#if id}} · {{t "common.idNumber"}} {{ltr id}}{{/if}}{{#if license}} · {{t "common.dealerLicense"}} {{ltr license}}{{/if}}</div>
+  <div class="space"></div>
+  <div class="caption">{{#if caption}}{{caption}}{{else}}{{t "common.signature"}}{{/if}} · {{t "common.date"}}: {{#if date}}{{date date}}{{else}}____/____/________{{/if}}</div>
+</div>

@@ -1,0 +1,75 @@
+{{#> layout}}
+{{#with data}}
+<p class="made-on">{{t "receipt.deal"}} {{ltr dealNo}} · {{t "common.madeOn" date=(date date)}}</p>
+
+<div class="parties">
+  {{> dealer role=(concat (t "common.between") " " (t "party.dealer")) suffix=(t "common.hereinafter" role=(t "party.dealer"))}}
+  {{> person role=(concat (t "common.and") " " (t "party.buyer")) p=buyer suffix=(t "common.hereinafter" role=(t "party.buyer"))}}
+</div>
+{{#if consignment}}<p class="notice">{{t "sale.consignmentNote" owner=(auto consignor.name) id=(ltr consignor.idNumber)}}</p>{{/if}}
+<p><strong>{{t "common.therefore"}}</strong></p>
+
+<ol class="clauses">
+  <li>
+    <h3>{{t "vehicle.title"}}</h3>
+    {{> vehicle v=vehicle}}
+  </li>
+
+  <li>
+    <h3>{{t "sale.priceTitle"}}</h3>
+    <ol class="sub">
+      <li>{{t "sale.price" price=(money price)}}</li>
+      <li>{{t "sale.paymentsIntro"}}
+        {{> payments rows=payments paid=paid balance=balance tradeIn=tradeInValue}}
+      </li>
+      <li>{{t "sale.balanceTerms"}}</li>
+      {{#if depositCap.applies}}<li>{{t "sale.depositCap" threshold=(money depositCap.threshold) percent=(ltr depositCap.percent) max=(money depositCap.maxAmount)}}</li>{{/if}}
+    </ol>
+  </li>
+
+  {{#if tradeIn}}
+  <li class="keep">
+    <h3>{{t "sale.tradeInTitle"}}</h3>
+    <p>{{t "sale.tradeIn" value=(money tradeIn.value)}}</p>
+    {{> vehicle v=tradeIn.vehicle short=true}}
+  </li>
+  {{/if}}
+
+  <li>
+    <h3>{{t "sale.deliveryTitle"}}</h3>
+    <ol class="sub">
+      <li>{{t "sale.delivery1" date=(date date)}}</li>
+      <li>{{t "sale.delivery2"}}</li>
+    </ol>
+  </li>
+
+  <li>
+    <h3>{{t "sale.disclosureTitle"}}</h3>
+    <p>{{#if disclosureSignedOn}}{{t "sale.disclosureSigned" date=(date disclosureSignedOn)}}{{else}}{{t "sale.disclosurePending"}}{{/if}}</p>
+  </li>
+
+  <li class="keep">
+    <h3>{{t "sale.warrantyTitle"}}</h3>
+    <p>{{t "sale.warrantyIntro"}}</p>
+    <div class="hebrew-block" dir="rtl" lang="he">{{warrantyText}}</div>
+    {{#if @root.translated}}<p class="muted small">{{t "sale.warrantyTranslation"}}</p>{{/if}}
+  </li>
+
+  <li>
+    <h3>{{t "sale.transferTitle"}}</h3>
+    <ol class="sub">
+      <li>{{t "sale.transfer1" date=(date transferDueAt)}}</li>
+      <li>{{t "sale.transfer2"}}</li>
+    </ol>
+  </li>
+
+  {{> general party=(t "party.dealer")}}
+</ol>
+
+<p class="keep"><strong>{{t "common.witness"}}</strong></p>
+<div class="signatures">
+  {{> sig role=(t "sale.dealerSignature") name=@root.business.name license=@root.business.dealerLicenseNo caption=(t "common.signatureStamp")}}
+  {{> sig role=(t "party.buyer") name=buyer.name id=buyer.idNumber}}
+</div>
+{{/with}}
+{{/layout}}

@@ -23,6 +23,7 @@ import { HealthModule } from './health/health.module';
 import { JobsModule } from './jobs/jobs.module';
 import { LeasesModule } from './leases/leases.module';
 import { LedgerModule } from './ledger/ledger.module';
+import { PdfModule } from './pdf/pdf.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { RemindersModule } from './reminders/reminders.module';
 import { ReportsModule } from './reports/reports.module';
@@ -69,6 +70,7 @@ import { VehiclesModule } from './vehicles/vehicles.module';
     ReportsModule,
     DashboardModule,
     DocumentsModule,
+    PdfModule,
     HealthModule,
     JobsModule,
   ],

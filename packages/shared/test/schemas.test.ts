@@ -330,3 +330,22 @@ describe('checklists', () => {
     expect(isTransferChecklistComplete(null, false)).toBe(false);
   });
 });
+
+describe('PDF templates', () => {
+  it('every template has a document kind, owners and a title key', async () => {
+    const {
+      PdfTemplate,
+      PDF_TEMPLATE_DOC_KINDS,
+      PDF_TEMPLATE_OWNERS,
+      PDF_TEMPLATE_TITLE_KEYS,
+      PdfQuerySchema,
+    } = await import('../src/index.js');
+    for (const t of PdfTemplate.options) {
+      expect(PDF_TEMPLATE_DOC_KINDS[t]).toBeTruthy();
+      expect(PDF_TEMPLATE_OWNERS[t].length).toBeGreaterThan(0);
+      expect(PDF_TEMPLATE_TITLE_KEYS[t]).toMatch(/^pdf\.templates\.[a-zA-Z]+$/);
+    }
+    expect(PdfQuerySchema.parse({ lang: 'ar' })).toEqual({ lang: 'ar' });
+    expect(PdfQuerySchema.safeParse({ lang: 'fr' }).success).toBe(false);
+  });
+});

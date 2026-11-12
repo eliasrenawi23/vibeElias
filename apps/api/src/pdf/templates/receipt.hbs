@@ -1,0 +1,48 @@
+{{#> layout}}
+{{#with data}}
+<p class="notice strong">{{t "receipt.notTaxInvoice"}}</p>
+
+<div class="parties">
+  {{> dealer role=(pick (or (eq kind "dealPaymentOut") (eq kind "depositOut")) (t "receipt.payer") (t "receipt.recipient"))}}
+  {{> person role=(pick (or (eq kind "dealPaymentOut") (eq kind "depositOut")) (t "receipt.paidTo") (t "receipt.receivedFrom")) p=party}}
+</div>
+
+<p>
+{{#if (eq kind "depositIn")}}{{#if contractNo}}{{t "receipt.depositIn" amount=(money amount) contractNo=(ltr contractNo)}}{{else}}{{t "receipt.depositInNoContract" amount=(money amount)}}{{/if}}{{/if}}
+{{#if (eq kind "depositOut")}}{{#if contractNo}}{{t "receipt.depositOut" amount=(money amount) contractNo=(ltr contractNo)}}{{else}}{{t "receipt.depositOutNoContract" amount=(money amount)}}{{/if}}{{/if}}
+{{#if (eq kind "payment")}}{{t "receipt.payment" name=(auto party.name) amount=(money amount)}}{{/if}}
+{{#if (eq kind "dealPaymentIn")}}{{t "receipt.dealPaymentIn" name=(auto party.name) amount=(money amount) dealNo=(ltr dealNo)}}{{/if}}
+{{#if (eq kind "dealPaymentOut")}}{{t "receipt.dealPaymentOut" name=(auto party.name) amount=(money amount) dealNo=(ltr dealNo)}}{{/if}}
+</p>
+
+<div class="amount-box keep">
+  <span>{{t "common.amount"}}</span>
+  <span class="value">{{money amount}}</span>
+</div>
+
+<h2>{{t "receipt.details"}}</h2>
+<table class="kv">
+  <tr>
+    <th>{{t "common.date"}}</th><td>{{date date}}</td>
+    <th>{{t "common.method"}}</th><td>{{#if method}}{{enum method.enumName method.value}}{{else}}—{{/if}}</td>
+  </tr>
+  <tr>
+    <th>{{t "common.reference"}}</th><td>{{ltr reference}}</td>
+    {{#if dealNo}}<th>{{t "receipt.deal"}}</th><td>{{ltr dealNo}}</td>{{else}}<th>{{t "receipt.contract"}}</th><td>{{ltr contractNo}}</td>{{/if}}
+  </tr>
+  {{#if (or licenseNo plateNo)}}
+  <tr>
+    <th>{{t "receipt.license"}}</th><td>{{ltr licenseNo}}</td>
+    <th>{{t "receipt.vehicle"}}</th><td>{{plate plateNo}}{{#if vehicle}} <span class="muted">{{auto (concat vehicle.make " " vehicle.model " " vehicle.year)}}</span>{{/if}}</td>
+  </tr>
+  {{/if}}
+  {{#if rentPeriod}}<tr><th>{{t "receipt.rentPeriod"}}</th><td colspan="3">{{ltr rentPeriod}}</td></tr>{{/if}}
+  {{#if description}}<tr><th>{{t "receipt.description"}}</th><td colspan="3">{{text description}}</td></tr>{{/if}}
+</table>
+
+<div class="signatures">
+  {{> sig role=(t "receipt.forBusiness") name=@root.business.name caption=(t "common.signatureStamp") date=date}}
+  {{> sig role=(pick (or (eq kind "dealPaymentOut") (eq kind "depositOut")) (t "receipt.recipient") (t "receipt.payer")) name=party.name id=party.idNumber}}
+</div>
+{{/with}}
+{{/layout}}

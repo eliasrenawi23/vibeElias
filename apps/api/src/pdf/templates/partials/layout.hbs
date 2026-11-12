@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="{{lang}}" dir="{{dir}}">
+<head>
+<meta charset="utf-8">
+<title>{{title}} {{number}}</title>
+<style>
+{{{assets.fontCss}}}
+:root {
+  --ink: #0f0f10;
+  --muted: #5d5d66;
+  --line: #d4d4da;
+  --soft: #f4f4f6;
+  --accent: #f5c518;
+}
+@page { size: A4; }
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; background: #fff; }
+body {
+  font-family: {{{assets.fontFamily}}};
+  font-size: 9.6pt;
+  line-height: 1.5;
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+  text-align: start;
+}
+bdi { unicode-bidi: isolate; }
+.letterhead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12pt;
+  padding-bottom: 8pt;
+  border-bottom: 2.5pt solid var(--accent);
+  margin-bottom: 10pt;
+}
+.brand { display: flex; align-items: center; gap: 9pt; min-width: 0; }
+.brand .logo svg { display: block; width: 46pt; height: auto; }
+.biz-name { font-size: 15pt; font-weight: 700; line-height: 1.2; }
+.biz-meta { font-size: 7.8pt; color: var(--muted); line-height: 1.45; }
+.biz-meta span + span::before { content: "·"; margin: 0 4pt; color: var(--line); }
+.doc-meta { text-align: end; font-size: 8pt; color: var(--muted); white-space: nowrap; }
+.doc-meta strong { color: var(--ink); font-weight: 600; }
+h1.title { font-size: 15pt; margin: 2pt 0 2pt; text-align: center; font-weight: 700; }
+.subtitle { text-align: center; color: var(--muted); font-size: 8.6pt; margin: 0 0 6pt; }
+.made-on { text-align: center; margin: 0 0 8pt; font-size: 9pt; }
+.notice {
+  border: 1pt solid var(--line);
+  background: var(--soft);
+  border-radius: 4pt;
+  padding: 5pt 8pt;
+  font-size: 8.4pt;
+  margin: 0 0 8pt;
+}
+.notice.strong { border-color: var(--ink); background: #fff8d6; font-weight: 600; font-size: 9.4pt; text-align: center; }
+h2 {
+  font-size: 10.5pt;
+  margin: 10pt 0 4pt;
+  padding-bottom: 2pt;
+  border-bottom: 0.75pt solid var(--line);
+  break-after: avoid;
+}
+p { margin: 0 0 5pt; }
+.parties { display: grid; grid-template-columns: 1fr 1fr; gap: 8pt; margin: 4pt 0 8pt; }
+.party { border: 0.75pt solid var(--line); border-radius: 4pt; padding: 6pt 8pt; break-inside: avoid; }
+.party .role { font-size: 8pt; color: var(--muted); margin-bottom: 1pt; }
+.party .who { font-weight: 700; font-size: 10.5pt; }
+.party .line { font-size: 8.6pt; }
+.party .line .lbl { color: var(--muted); }
+table { width: 100%; border-collapse: collapse; margin: 3pt 0 7pt; break-inside: auto; }
+tr { break-inside: avoid; }
+th, td { text-align: start; vertical-align: top; padding: 3pt 6pt; border: 0.75pt solid var(--line); }
+table.kv th { width: 19%; background: var(--soft); font-weight: 500; color: #33333a; font-size: 8.4pt; }
+table.kv td { width: 31%; }
+table.grid thead th { background: var(--soft); font-weight: 600; font-size: 8.4pt; }
+table.grid td.num, table.grid th.num { text-align: end; white-space: nowrap; }
+table.grid tfoot td { font-weight: 700; }
+table.grid td.center, table.grid th.center { text-align: center; width: 13%; }
+ol.recitals { list-style: none; margin: 0 0 6pt; padding: 0; }
+ol.recitals li { margin: 0 0 3pt; }
+ol.clauses { list-style: none; counter-reset: clause; margin: 0; padding: 0; }
+ol.clauses > li { counter-increment: clause; position: relative; padding-inline-start: 22pt; margin: 0 0 6pt; }
+ol.clauses > li::before {
+  content: counter(clause) ".";
+  position: absolute;
+  inset-inline-start: 0;
+  top: 0;
+  font-weight: 700;
+}
+ol.clauses > li > h3 { font-size: 10pt; margin: 0 0 2pt; break-after: avoid; }
+ol.sub { list-style: none; counter-reset: sub; margin: 0; padding: 0; }
+ol.sub > li { counter-increment: sub; position: relative; padding-inline-start: 26pt; margin: 0 0 3pt; }
+ol.sub > li::before {
+  content: counter(clause) "." counter(sub);
+  position: absolute;
+  inset-inline-start: 0;
+  top: 0;
+  color: var(--muted);
+}
+.free { white-space: pre-line; }
+.terms { border-inline-start: 2pt solid var(--line); padding-inline-start: 7pt; margin: 2pt 0 5pt; }
+.hebrew-block {
+  border: 1pt solid var(--ink);
+  border-radius: 4pt;
+  padding: 6pt 9pt;
+  margin: 3pt 0 4pt;
+  white-space: pre-line;
+  font-family: {{{assets.fontFamily}}};
+}
+.muted { color: var(--muted); }
+.small { font-size: 8pt; }
+.mark, .box { display: inline-block; width: 10pt; height: 10pt; vertical-align: -1.5pt; }
+.mark.yes { color: #1b7f3b; }
+.mark.no { color: #b42318; }
+.choices { display: flex; flex-wrap: wrap; gap: 4pt 14pt; margin: 2pt 0 5pt; }
+.choice { white-space: nowrap; }
+.choice .box { margin-inline-end: 3pt; }
+.blank-lines { margin: 2pt 0 6pt; }
+.blank-lines div { border-bottom: 0.75pt solid #9a9aa3; height: 17pt; }
+.amount-box {
+  display: flex; justify-content: space-between; align-items: center;
+  border: 1.25pt solid var(--ink); border-radius: 4pt; padding: 7pt 10pt; margin: 6pt 0 8pt;
+  font-size: 11pt;
+}
+.amount-box .value { font-size: 16pt; font-weight: 700; }
+.signatures { display: grid; grid-template-columns: 1fr 1fr; gap: 18pt; margin-top: 14pt; break-inside: avoid; }
+.signatures.three { grid-template-columns: 1fr 1fr 1fr; }
+.sig .role { font-weight: 700; margin-bottom: 1pt; }
+.sig .who { font-size: 8.6pt; min-height: 12pt; }
+.sig .space { height: 34pt; border-bottom: 0.9pt solid var(--ink); }
+.sig .caption { font-size: 7.6pt; color: var(--muted); margin-top: 2pt; }
+.keep { break-inside: avoid; }
+</style>
+</head>
+<body class="doc doc-{{template}}">
+<header class="letterhead">
+  <div class="brand">
+    <span class="logo">{{{assets.logoSvg}}}</span>
+    <div>
+      <div class="biz-name">{{business.name}}</div>
+      <div class="biz-meta">
+        {{#if business.legalId}}<span>{{t "common.legalId"}} {{ltr business.legalId}}</span>{{/if}}
+        {{#if business.dealerLicenseNo}}<span>{{t "common.dealerLicense"}} {{ltr business.dealerLicenseNo}}</span>{{/if}}
+      </div>
+      <div class="biz-meta">
+        {{#if business.address}}<span>{{auto business.address}}</span>{{/if}}
+        {{#if business.phone}}<span>{{t "common.phone"}} {{phone business.phone}}</span>{{/if}}
+        {{#if business.email}}<span>{{ltr business.email}}</span>{{/if}}
+      </div>
+    </div>
+  </div>
+  <div class="doc-meta">
+    <div>{{t "common.documentNo"}} <strong>{{ltr number}}</strong></div>
+    <div>{{t "common.generatedOn"}} {{date generatedOn}}</div>
+  </div>
+</header>
+<h1 class="title">{{title}}</h1>
+{{#if translated}}<p class="notice">{{t "common.translationNotice"}}</p>{{/if}}
+{{> @partial-block}}
+</body>
+</html>

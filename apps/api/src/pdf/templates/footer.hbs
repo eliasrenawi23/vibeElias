@@ -1,0 +1,21 @@
+<style>
+{{{assets.footerFontCss}}}
+.pdf-footer {
+  font-family: 'Rubik', Arial, sans-serif;
+  font-size: 7.5pt;
+  color: #5d5d66;
+  width: 100%;
+  margin: 0 14mm;
+  padding-top: 3pt;
+  border-top: 0.5pt solid #d4d4da;
+  display: flex;
+  justify-content: space-between;
+  gap: 12pt;
+  -webkit-print-color-adjust: exact;
+}
+.pdf-footer bdi { unicode-bidi: isolate; }
+</style>
+<div class="pdf-footer" dir="{{dir}}" lang="{{lang}}">
+  <span>{{business.name}} · {{t "common.documentNo"}} {{ltr number}} · {{t "common.generatedOn"}} {{date generatedOn}}</span>
+  <span>{{t "common.page"}} <bdi dir="ltr" class="pageNumber"></bdi> {{t "common.of"}} <bdi dir="ltr" class="totalPages"></bdi></span>
+</div>

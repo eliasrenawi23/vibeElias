@@ -114,6 +114,26 @@ export function formatInstant(iso: string, language: string | undefined): string
   return stripBidiMarks(f.format(date));
 }
 
+const clockFormatCache = new Map<string, Intl.DateTimeFormat>();
+
+/** Wall-clock time (`14:05`, 24 h) of an instant in the business time zone, Latin digits. */
+export function formatClockTime(instant: Date | number, language: string | undefined): string {
+  const date = typeof instant === 'number' ? new Date(instant) : instant;
+  if (Number.isNaN(date.getTime())) return '';
+  const tag = INTL_LOCALE_TAGS[toLocale(language)];
+  let f = clockFormatCache.get(tag);
+  if (!f) {
+    f = new Intl.DateTimeFormat(tag, {
+      timeZone: DEFAULT_BUSINESS_TZ,
+      hour: '2-digit',
+      minute: '2-digit',
+      hourCycle: 'h23',
+    });
+    clockFormatCache.set(tag, f);
+  }
+  return stripBidiMarks(f.format(date));
+}
+
 /** Display format for date-time pickers. */
 export const DISPLAY_DATE_TIME_FORMAT = `${DISPLAY_DATE_FORMAT} HH:mm`;
 

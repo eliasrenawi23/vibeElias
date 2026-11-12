@@ -1,0 +1,33 @@
+{{#if rows.length}}
+<table class="grid">
+  <thead>
+    <tr>
+      <th>{{t "common.date"}}</th>
+      <th>{{t "common.method"}}</th>
+      <th>{{t "common.reference"}}</th>
+      <th class="num">{{t "common.amount"}}</th>
+    </tr>
+  </thead>
+  <tbody>
+    {{#each rows}}
+    <tr>
+      <td>{{date this.date}}</td>
+      <td>{{enum "PaymentMethod" this.method}}</td>
+      <td>{{ltr this.reference}}</td>
+      <td class="num">{{money this.amount}}</td>
+    </tr>
+    {{/each}}
+  </tbody>
+</table>
+{{else}}
+<p class="muted">{{t "common.noPayments"}}</p>
+{{/if}}
+<table class="kv">
+  <tr>
+    <th>{{t "common.paid"}}</th><td>{{money paid}}</td>
+    <th>{{t "common.balance"}}</th><td><strong>{{money balance}}</strong></td>
+  </tr>
+  {{#if (gt tradeIn 0)}}
+  <tr><th>{{t "common.tradeInCredit"}}</th><td colspan="3">{{money tradeIn}}</td></tr>
+  {{/if}}
+</table>

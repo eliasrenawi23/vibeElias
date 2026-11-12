@@ -1,4 +1,5 @@
 import {
+  BellOutlined,
   CarOutlined,
   CheckCircleOutlined,
   DeleteOutlined,
@@ -17,6 +18,7 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useNavigate, useParams } from 'react-router';
 import { AutoDir } from '../../../shared/lib/bidi';
+import { ReminderDialog } from '../../reminders/dialogs/ReminderDialog';
 import { useErrorMessage } from '../../../shared/lib/i18n';
 import type { ActionDef } from '../../../shared/ui/ActionBar';
 import { AlertTags } from '../../../shared/ui/AlertTags';
@@ -56,7 +58,15 @@ import { leaseKeys } from '../queryKeys';
 import type { LeaseDetail } from '../types';
 
 type LeaseActionKey =
-  'edit' | 'activate' | 'delete' | 'payment' | 'segment' | 'deposit' | 'renew' | 'end';
+  | 'edit'
+  | 'activate'
+  | 'delete'
+  | 'payment'
+  | 'segment'
+  | 'deposit'
+  | 'renew'
+  | 'end'
+  | 'reminder';
 
 type Dialog = LeaseActionKey | 'checklist-handover' | 'checklist-return' | null;
 
@@ -169,6 +179,8 @@ function LeaseView({ id }: { id: string }) {
       { key: 'deposit', label: t('leases.deposit.action'), icon: <WalletOutlined /> },
     );
   }
+  // Any contract can carry a manual reminder (call the driver, collect a cheque...).
+  actions.push({ key: 'reminder', label: t('reminders.manual.add'), icon: <BellOutlined /> });
 
   return (
     <DetailPageLayout
@@ -334,6 +346,9 @@ function LeaseView({ id }: { id: string }) {
             navigate(leasePath(renewed.id));
           }}
         />
+      )}
+      {dialog === 'reminder' && (
+        <ReminderDialog entityType="LEASE" entityId={lease.id} onClose={() => setDialog(null)} />
       )}
       {dialog === 'payment' && (
         <PaymentDialog

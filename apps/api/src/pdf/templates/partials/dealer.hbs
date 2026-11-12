@@ -1,0 +1,9 @@
+<div class="party">
+  <div class="role">{{role}}</div>
+  <div class="who">{{auto @root.business.name}}</div>
+  {{#if @root.business.legalId}}<div class="line"><span class="lbl">{{t "common.legalId"}}:</span> {{ltr @root.business.legalId}}</div>{{/if}}
+  {{#if @root.business.dealerLicenseNo}}<div class="line"><span class="lbl">{{t "common.dealerLicense"}}:</span> {{ltr @root.business.dealerLicenseNo}}</div>{{/if}}
+  {{#if @root.business.address}}<div class="line"><span class="lbl">{{t "common.address"}}:</span> {{auto @root.business.address}}</div>{{/if}}
+  {{#if @root.business.phone}}<div class="line"><span class="lbl">{{t "common.phone"}}:</span> {{phone @root.business.phone}}</div>{{/if}}
+  {{#if suffix}}<div class="line muted">{{suffix}}</div>{{/if}}
+</div>

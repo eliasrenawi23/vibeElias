@@ -1018,3 +1018,384 @@ body {
 .rm-deal-vehicle {
   color: inherit;
 }
+
+/* ---- Dashboard (features/dashboard) ---------------------------------------------------------- */
+
+/* KPI tiles: as many 200 px+ columns as fit. */
+.rm-kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+}
+
+.rm-kpi-card .ant-card-body {
+  padding-inline-end: 64px;
+}
+
+.rm-kpi-title {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.rm-kpi-info.ant-btn {
+  width: 22px;
+  min-width: 22px;
+  height: 22px;
+  color: var(--rm-color-text-tertiary);
+}
+
+/* A standalone stat value uses proportional figures (tabular digits look loose at this size). */
+.rm-kpi-card .ant-statistic-content,
+.rm-kpi-card .rm-kpi-number {
+  font-variant-numeric: normal;
+  font-weight: var(--rm-font-weight-semibold);
+}
+
+.rm-kpi-missing {
+  color: var(--rm-color-text-tertiary);
+}
+
+.rm-kpi-trend,
+.rm-kpi-sub {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 4px;
+  font-size: var(--rm-text-small-size);
+  line-height: var(--rm-text-small-line-height);
+  color: var(--rm-color-text-secondary);
+}
+
+.rm-kpi-trend.rm-tone,
+.rm-kpi-sub.rm-tone {
+  color: var(--rm-tone-text);
+}
+
+.rm-dashboard-updated {
+  font-size: var(--rm-text-small-size);
+}
+
+/* Section rows: the list and the wide chart side by side from lg up, stacked below. */
+.rm-dashboard-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 16px;
+  align-items: start;
+}
+
+@media (min-width: 992px) {
+  .rm-dashboard-row {
+    grid-template-columns: minmax(0, 2fr) minmax(0, 3fr);
+  }
+
+  .rm-dashboard-row.rm-dashboard-row-even {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.rm-section-card-title {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* ---- Reminders feed lists (bell, dashboard, reminders page) --------------------------------- */
+
+.rm-feed-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.rm-feed-item,
+.rm-activity-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--rm-color-divider);
+}
+
+.rm-feed-list > li:last-child {
+  border-bottom: 0;
+}
+
+.rm-feed-icon {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: 1px solid var(--rm-tone-border);
+  border-radius: var(--rm-radius-md);
+  background: var(--rm-tone-bg);
+  color: var(--rm-tone-text);
+  font-size: 16px;
+}
+
+.rm-feed-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.rm-feed-title {
+  font-weight: var(--rm-font-weight-medium);
+  overflow-wrap: anywhere;
+}
+
+.rm-feed-meta {
+  display: block;
+  font-size: var(--rm-text-small-size);
+  line-height: var(--rm-text-small-line-height);
+}
+
+.rm-feed-when {
+  display: flex;
+  flex: none;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+  font-size: var(--rm-text-small-size);
+}
+
+.rm-feed-when .ant-tag {
+  margin-inline-end: 0;
+}
+
+.rm-feed-group + .rm-feed-group {
+  margin-top: 12px;
+}
+
+.rm-feed-group-title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0 0 2px;
+  color: var(--rm-color-text-secondary);
+  font-size: var(--rm-text-small-size);
+  font-weight: var(--rm-font-weight-semibold);
+}
+
+.rm-feed-group-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--rm-tone-text);
+}
+
+.rm-chip-count-value {
+  font-weight: var(--rm-font-weight-semibold);
+}
+
+.rm-reminder-done {
+  text-decoration: line-through;
+  color: var(--rm-color-text-tertiary);
+}
+
+/* Reminders bell (features/reminders/components/RemindersBell.tsx). */
+.rm-bell-icon {
+  font-size: 18px;
+}
+
+.rm-bell-badge .ant-badge-count {
+  box-shadow: 0 0 0 1px var(--rm-color-bg-container);
+}
+
+.rm-bell-popover .ant-popover-inner {
+  width: min(420px, calc(100vw - 32px));
+}
+
+.rm-bell-panel {
+  max-height: min(70vh, 560px);
+  overflow-y: auto;
+}
+
+.rm-bell-see-all {
+  align-self: flex-start;
+  font-weight: var(--rm-font-weight-medium);
+}
+
+@media (max-width: 575px) {
+  .rm-feed-item {
+    flex-wrap: wrap;
+  }
+
+  .rm-feed-when {
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    width: 100%;
+    padding-inline-start: 42px;
+  }
+}
+
+/* ---- Charts (shared/charts) ---------------------------------------------------------------- */
+
+.rm-chart-card .ant-card-head-title {
+  white-space: normal;
+}
+
+.rm-chart-card-heading {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 4px 0;
+}
+
+.rm-chart-card-subtitle.ant-typography {
+  font-size: var(--rm-text-small-size);
+  font-weight: var(--rm-font-weight-regular, 400);
+}
+
+.rm-chart-figure {
+  margin: 0;
+  transition: opacity var(--rm-duration-base);
+}
+
+/* Refetch: keep the previous render, dimmed (no skeleton flash, no layout jump). */
+.rm-chart-figure.rm-chart-refetching {
+  opacity: 0.55;
+}
+
+.rm-chart-plot {
+  width: 100%;
+  min-width: 0;
+}
+
+.rm-chart-plot .recharts-surface:focus {
+  outline: none;
+}
+
+.rm-chart-plot .recharts-wrapper:focus-visible {
+  outline: 2px solid var(--rm-color-text);
+  outline-offset: 2px;
+}
+
+.rm-chart-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 16px;
+  margin: 0 0 8px;
+  padding: 0;
+  list-style: none;
+  color: var(--rm-color-text-secondary);
+  font-size: var(--rm-text-small-size);
+}
+
+.rm-chart-legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.rm-chart-swatch {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+}
+
+.rm-chart-swatch.rm-chart-swatch-line {
+  width: 14px;
+  height: 2px;
+  border-radius: 1px;
+}
+
+.rm-chart-tooltip {
+  min-width: 160px;
+  padding: 8px 10px;
+  border: 1px solid var(--rm-color-border);
+  border-radius: var(--rm-radius-md);
+  background: var(--rm-color-bg-elevated);
+  box-shadow: var(--rm-shadow-md);
+  color: var(--rm-color-text);
+  font-size: var(--rm-text-small-size);
+}
+
+.rm-chart-tooltip-heading {
+  margin-bottom: 4px;
+  color: var(--rm-color-text-secondary);
+}
+
+.rm-chart-tooltip-rows {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.rm-chart-tooltip-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.rm-chart-key {
+  display: inline-block;
+  width: 12px;
+  height: 2px;
+  border-radius: 1px;
+}
+
+.rm-chart-tooltip-value {
+  font-weight: var(--rm-font-weight-semibold);
+  font-variant-numeric: tabular-nums;
+}
+
+.rm-chart-tooltip-name {
+  color: var(--rm-color-text-secondary);
+}
+
+.rm-chart-bar {
+  transition: fill-opacity var(--rm-duration-fast);
+}
+
+.rm-chart-value-label {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Tall segmented bar (shared/charts/InventoryBar.tsx): 28 px, 2 px surface gaps, 4 px corners. */
+.rm-inventory-total {
+  margin-bottom: 8px;
+}
+
+.rm-inventory-total-value {
+  font-size: var(--rm-text-h2-size);
+  font-weight: var(--rm-font-weight-semibold);
+  line-height: var(--rm-text-h2-line-height);
+}
+
+.rm-inventory-total-label {
+  color: var(--rm-color-text-secondary);
+}
+
+.rm-segmented-bar {
+  display: flex;
+  gap: 2px;
+  height: 28px;
+}
+
+.rm-segment {
+  display: flex;
+  align-items: center;
+  min-width: 4px;
+  padding-inline-start: 8px;
+  border-radius: 4px;
+  overflow: visible;
+  white-space: nowrap;
+  font-size: var(--rm-text-small-size);
+  font-weight: var(--rm-font-weight-semibold);
+  cursor: default;
+}
+
+.rm-segment:focus-visible {
+  outline: 2px solid var(--rm-color-text);
+  outline-offset: 2px;
+}
+
+@media (forced-colors: active) {
+  .rm-segment {
+    border: 1px solid CanvasText;
+  }
+}

@@ -1,0 +1,67 @@
+{{#> layout}}
+{{#with data}}
+<p class="made-on">{{t "receipt.deal"}} {{ltr dealNo}} · {{t "common.madeOn" date=(date date)}}</p>
+
+<div class="parties">
+  {{> person role=(concat (t "common.between") " " (t "party.seller")) p=seller suffix=(t "common.hereinafter" role=(t "party.seller"))}}
+  {{> dealer role=(concat (t "common.and") " " (t "party.dealer")) suffix=(t "common.hereinafter" role=(t "party.dealer"))}}
+</div>
+<p><strong>{{t "common.therefore"}}</strong></p>
+
+<ol class="clauses">
+  <li>
+    <h3>{{t "vehicle.title"}}</h3>
+    {{> vehicle v=vehicle}}
+  </li>
+
+  <li>
+    <h3>{{t "purchase.priceTitle"}}</h3>
+    <ol class="sub">
+      <li>{{#if sellerIsVatBusiness}}{{t "purchase.priceVat" price=(money price)}}{{else}}{{t "purchase.price" price=(money price)}}{{/if}}</li>
+      {{#if tradeInForDealNo}}<li>{{t "purchase.tradeIn" dealNo=(ltr tradeInForDealNo)}}</li>{{/if}}
+      <li>{{t "purchase.paymentsIntro"}}
+        {{> payments rows=payments paid=paid balance=balance tradeIn=tradeInValue}}
+      </li>
+      <li>{{t "purchase.balanceTerms"}}</li>
+    </ol>
+  </li>
+
+  <li>
+    <h3>{{t "purchase.declarationsTitle"}}</h3>
+    <ol class="sub">
+      <li>{{t "purchase.decl1"}}</li>
+      <li>{{t "purchase.decl2"}}</li>
+      <li>{{#if vehicle.km}}{{t "purchase.decl3" km=(num vehicle.km (t "common.kmUnit"))}}{{else}}{{t "purchase.decl3Unknown"}}{{/if}}</li>
+      <li>{{t "purchase.decl4"}}<div class="blank-lines"><div></div><div></div></div></li>
+      <li>{{t "purchase.decl5"}}
+        <div class="choices">
+          <span class="choice">{{box false}}{{t "history.leasing"}}</span>
+          <span class="choice">{{box false}}{{t "history.rental"}}</span>
+          <span class="choice">{{box vehicle.isTaxi}}{{t "history.taxi"}}</span>
+          <span class="choice">{{box false}}{{t "history.school"}}</span>
+          <span class="choice">{{box false}}{{t "history.private"}}</span>
+        </div>
+      </li>
+      <li>{{t "purchase.decl6"}}</li>
+      <li>{{t "purchase.decl7"}}</li>
+    </ol>
+  </li>
+
+  <li>
+    <h3>{{t "purchase.transferTitle"}}</h3>
+    <ol class="sub">
+      <li>{{t "purchase.transfer1"}}</li>
+      <li>{{t "purchase.transfer2"}}</li>
+    </ol>
+  </li>
+
+  {{> general party=(t "party.dealer")}}
+</ol>
+
+<p class="keep"><strong>{{t "common.witness"}}</strong></p>
+<div class="signatures">
+  {{> sig role=(t "party.seller") name=seller.name id=seller.idNumber}}
+  {{> sig role=(t "purchase.dealerSignature") name=@root.business.name license=@root.business.dealerLicenseNo caption=(t "common.signatureStamp")}}
+</div>
+{{/with}}
+{{/layout}}

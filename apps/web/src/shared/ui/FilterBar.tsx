@@ -14,6 +14,13 @@ import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useSearchParams } from 'react-router';
 import { freeTextInputProps } from '../lib/bidi';
+import {
+  activePreset,
+  DATE_PRESETS,
+  datePresetLabelKey,
+  presetRange,
+  type DatePreset,
+} from '../lib/datePresets';
 import { DATE_INPUT_FORMATS, dayjsToIso, isoToDayjs } from '../lib/dates';
 import { clearListMemory, isListPath, sectionOf } from '../lib/listMemory';
 import { readListParam, setOrDelete } from '../lib/listParams';
@@ -49,7 +56,18 @@ export type FilterDef =
       min?: number;
       max?: number;
     }
-  | { type: 'dateRange'; keys: [string, string]; label: string }
+  | {
+      type: 'dateRange';
+      keys: [string, string];
+      label: string;
+      /**
+       * Period presets (this month, last month, year to date, last year, last 30 days; computed
+       * in the business time zone): in the picker's panel and as quick chips beside it, the one
+       * matching the current dates highlighted. `true` = all of them.
+       */
+      presets?: boolean | readonly DatePreset[];
+    }
+  | { type: 'date'; key: string; label: string }
   | { type: 'autocomplete'; key: string; label: string; options: string[]; width?: number }
   | {
       /** Any control (e.g. a server-search picker) bound to one URL param. */
@@ -80,6 +98,25 @@ const DATE_FORMATS = [...DATE_INPUT_FORMATS];
 /** Every URL param a filter definition owns. */
 function filterKeys(filters: FilterDef[]): string[] {
   return filters.flatMap((f) => ('keys' in f ? [...f.keys] : [f.key]));
+}
+
+/**
+ * Params of select / chips filters holding values that are not (or no longer) among the options,
+ * with what is left of them (null = nothing). Filters without options are not checked.
+ */
+export function staleFilterValues(
+  filters: readonly FilterDef[],
+  params: URLSearchParams,
+): Record<string, string | null> {
+  const out: Record<string, string | null> = {};
+  for (const f of filters) {
+    if ((f.type !== 'select' && f.type !== 'chips') || f.options.length === 0) continue;
+    const known = new Set(f.options.map((o) => o.value));
+    const values = readListParam(params, f.key);
+    const kept = values.filter((v) => known.has(v));
+    if (kept.length !== values.length) out[f.key] = kept.length > 0 ? kept.join(',') : null;
+  }
+  return out;
 }
 
 /**
@@ -140,6 +177,21 @@ export function FilterBar({
     return () => window.clearTimeout(timer);
   }, [text, searchKey, debounceMs, setParams]);
 
+  // Selections that dropped out of the options (an old bookmark, a renamed value) are cleared.
+  const staleKey = JSON.stringify(staleFilterValues(filters, params));
+  useEffect(() => {
+    const changes = JSON.parse(staleKey) as Record<string, string | null>;
+    if (Object.keys(changes).length === 0) return;
+    setParams(
+      (prev) => {
+        const next = new URLSearchParams(prev);
+        for (const [key, value] of Object.entries(changes)) setOrDelete(next, key, value);
+        return next;
+      },
+      { replace: true },
+    );
+  }, [staleKey, setParams]);
+
   const owned = [...(searchKey ? [searchKey] : []), ...filterKeys(filters)];
   const active = owned.some((k) => {
     const value = params.get(k);
@@ -149,7 +201,10 @@ export function FilterBar({
   const renderFilter = (f: FilterDef) => {
     switch (f.type) {
       case 'select': {
-        const value = f.multiple ? readListParam(params, f.key) : (params.get(f.key) ?? undefined);
+        const fallback = defaults?.[f.key];
+        const value = f.multiple
+          ? readListParam(params, f.key)
+          : (params.get(f.key) ?? fallback ?? undefined);
         return (
           <Select
             key={f.key}
@@ -157,13 +212,20 @@ export function FilterBar({
             placeholder={f.label}
             mode={f.multiple ? 'multiple' : undefined}
             maxTagCount="responsive"
-            allowClear
+            // A single select with a default has nothing to clear back to.
+            allowClear={f.multiple || fallback === undefined}
             value={value}
             options={f.options}
             style={{ minWidth: f.width ?? 160 }}
             showSearch={f.options.length > 8 ? { optionFilterProp: 'label' } : false}
             onChange={(v: string | string[] | undefined) =>
-              update({ [f.key]: Array.isArray(v) ? v.join(',') : (v ?? null) })
+              update({
+                [f.key]: Array.isArray(v)
+                  ? v.join(',')
+                  : v === undefined || v === fallback
+                    ? null
+                    : v,
+              })
             }
             data-testid={`filter-${f.key}`}
           />
@@ -238,20 +300,72 @@ export function FilterBar({
       }
       case 'dateRange': {
         const [fromKey, toKey] = f.keys;
-        return (
+        const presets: readonly DatePreset[] =
+          f.presets === true ? DATE_PRESETS : f.presets ? f.presets : [];
+        const from = params.get(fromKey);
+        const to = params.get(toKey);
+        const current = presets.length > 0 ? activePreset(from, to, undefined, presets) : null;
+        const picker = (
           <DatePicker.RangePicker
             key={fromKey}
             aria-label={f.label}
             format={DATE_FORMATS}
             allowEmpty={[true, true]}
             className="rm-tabular"
-            value={[isoToDayjs(params.get(fromKey)), isoToDayjs(params.get(toKey))]}
+            value={[isoToDayjs(from), isoToDayjs(to)]}
+            presets={presets.flatMap((p) => {
+              const [pf, pt] = presetRange(p).map(isoToDayjs);
+              return pf && pt ? [{ label: t(datePresetLabelKey(p)), value: [pf, pt] as const }] : [];
+            })}
             onChange={(range) =>
               update({
                 [fromKey]: dayjsToIso(range?.[0] ?? null),
                 [toKey]: dayjsToIso(range?.[1] ?? null),
               })
             }
+            data-testid={`filter-${fromKey}-${toKey}`}
+          />
+        );
+        if (presets.length === 0) return picker;
+        return (
+          <Flex key={fromKey} gap={8} wrap align="center" className="rm-filter-period">
+            <Flex
+              gap={4}
+              wrap
+              align="center"
+              role="group"
+              aria-label={t('filters.presetsLabel')}
+              className="rm-filter-presets"
+            >
+              {presets.map((p) => (
+                <Tag.CheckableTag
+                  key={p}
+                  checked={current === p}
+                  onChange={(on) => {
+                    const [pf, pt] = on ? presetRange(p) : [null, null];
+                    update({ [fromKey]: pf, [toKey]: pt });
+                  }}
+                  data-testid={`preset-${p}`}
+                >
+                  {t(datePresetLabelKey(p))}
+                </Tag.CheckableTag>
+              ))}
+            </Flex>
+            {picker}
+          </Flex>
+        );
+      }
+      case 'date': {
+        return (
+          <DatePicker
+            key={f.key}
+            aria-label={f.label}
+            placeholder={f.label}
+            format={DATE_FORMATS}
+            className="rm-tabular"
+            value={isoToDayjs(params.get(f.key))}
+            onChange={(d) => update({ [f.key]: dayjsToIso(d) })}
+            data-testid={`filter-${f.key}`}
           />
         );
       }

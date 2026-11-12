@@ -1,6 +1,7 @@
 import { MenuFoldOutlined, MenuOutlined, MenuUnfoldOutlined } from '@ant-design/icons';
 import { Button, Flex, Layout, Typography } from 'antd';
 import { useTranslation } from 'react-i18next';
+import { RemindersBell } from '../../features/reminders/components/RemindersBell';
 import { BrandLogo } from '../../shared/ui/BrandLogo';
 import { useUi } from '../providers/UiProvider';
 import { useRouteTitle } from '../routeTitle';
@@ -14,7 +15,7 @@ export interface TopBarProps {
   onToggleNav: () => void;
 }
 
-/** Page title (the page's `<h1>`) plus language, theme and user menus. */
+/** Page title (the page's `<h1>`) plus the reminders bell and the language, theme and user menus. */
 export function TopBar({ isMobile, collapsed, onToggleNav }: TopBarProps) {
   const { t } = useTranslation();
   const { themeMode } = useUi();
@@ -41,6 +42,7 @@ export function TopBar({ isMobile, collapsed, onToggleNav }: TopBarProps) {
         {title}
       </Typography.Title>
       <Flex gap={4} align="center" className="rm-topbar-actions">
+        <RemindersBell />
         <LangMenu compact={isMobile} />
         <ThemeToggle />
         <UserMenu compact={isMobile} />

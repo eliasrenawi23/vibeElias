@@ -1,0 +1,50 @@
+{{#> layout}}
+{{#with data}}
+<p class="made-on">{{#if (eq variant "handover")}}{{t "checklist.introHandover" contractNo=(ltr contractNo)}}{{else}}{{t "checklist.introReturn" contractNo=(ltr contractNo)}}{{/if}}</p>
+
+<h2>{{t "checklist.partiesTitle"}}</h2>
+<div class="parties">
+  {{> dealer role=(t "party.lessor")}}
+  {{> person role=(t "party.lessee") p=lessee}}
+</div>
+<table class="kv">
+  <tr><th>{{t "receipt.license"}}</th><td colspan="3">{{ltr licenseNo}}</td></tr>
+</table>
+{{> vehicle v=vehicle short=true}}
+
+<h2>{{t "checklist.inspectionTitle"}}</h2>
+{{#unless filled}}<p class="notice">{{t "checklist.notFilled"}}</p>{{/unless}}
+<table class="kv">
+  <tr>
+    <th>{{t "checklist.date"}}</th><td>{{#if date}}{{date date}}{{else}}____/____/________{{/if}}</td>
+    <th>{{t "checklist.km"}}</th><td>{{#if km}}{{num km (t "common.kmUnit")}}{{else}}__________ {{t "common.kmUnit"}}{{/if}}</td>
+  </tr>
+  <tr>
+    <th>{{t "checklist.fuel"}}</th>
+    <td colspan="3">{{#if fuelLevel}}{{t (concat "enums.FuelLevel." fuelLevel)}}{{else}}<span class="choices"><span class="choice">{{box false}}{{t "enums.FuelLevel.EMPTY"}}</span><span class="choice">{{box false}}{{ltr "1/4"}}</span><span class="choice">{{box false}}{{ltr "1/2"}}</span><span class="choice">{{box false}}{{ltr "3/4"}}</span><span class="choice">{{box false}}{{t "enums.FuelLevel.FULL"}}</span></span>{{/if}}</td>
+  </tr>
+</table>
+
+<h2>{{t "checklist.itemsTitle"}}</h2>
+<table class="grid">
+  <thead><tr><th>{{t "checklist.item"}}</th><th class="center">{{t "checklist.status"}}</th></tr></thead>
+  <tbody>
+    {{#each items}}
+    <tr><td>{{t (concat "checklist.items." this.key)}}</td><td class="center">{{check this.checked}}</td></tr>
+    {{/each}}
+  </tbody>
+</table>
+
+<h2>{{t "checklist.damages"}}</h2>
+{{#if damages}}<div class="terms">{{text damages}}</div>{{else}}<div class="blank-lines"><div></div><div></div><div></div></div>{{/if}}
+
+<h2>{{t "checklist.notes"}}</h2>
+{{#if notes}}<div class="terms">{{text notes}}</div>{{else}}<div class="blank-lines"><div></div><div></div></div>{{/if}}
+
+<p class="notice keep">{{#if (eq variant "handover")}}{{t "checklist.declarationHandover"}}{{else}}{{t "checklist.declarationReturn"}}{{/if}}</p>
+<div class="signatures">
+  {{> sig role=(t "checklist.lessorRep") name=@root.business.name date=date}}
+  {{> sig role=(t "party.lessee") name=lessee.name id=lessee.idNumber date=date}}
+</div>
+{{/with}}
+{{/layout}}

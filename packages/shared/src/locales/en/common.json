@@ -551,10 +551,74 @@
       "receivables": "Driver receivables",
       "monthProfit": "Profit this month",
       "openDeals": "Open deals",
-      "transfersOverdue": "Transfers overdue"
+      "transfersOverdue": "Transfers overdue",
+      "expiring": "Expiries overdue",
+      "finesOpen": "Open fines"
     },
     "expiringSoon": "Expiring soon",
-    "expiringEmpty": "Nothing expires in the next {{days}} days"
+    "expiringEmpty": "Nothing expires in the next {{days}} days",
+    "lastUpdated": "Last updated {{time}}",
+    "kpiInfoLabel": "What this number means",
+    "kpiInfo": {
+      "vehiclesInStock": "Cars in stock right now (status In stock).",
+      "activeLeases": "Lease contracts that are active today.",
+      "receivables": "What drivers owe us: the sum of the positive driver balances.",
+      "monthProfit": "Profit of the cars sold this month plus this month's lease income, after purchase price, expenses and VAT.",
+      "openDeals": "Deals still in draft or pending.",
+      "transfersOverdue": "Completed sales whose ownership transfer is past its due date.",
+      "expiring": "Expiries and deadlines that are already overdue; the line below counts the ones due within their reminder lead time.",
+      "finesOpen": "Fines still to handle: new, or reassignment submitted."
+    },
+    "kpiSub": {
+      "receivablesOverdue": "{{amount}} overdue",
+      "receivablesNoneOverdue": "Nothing overdue",
+      "expiringDue": "{{count}} due soon",
+      "notAvailable": "Not reported by the server yet"
+    },
+    "trend": {
+      "up": "Up {{value}} from last month",
+      "down": "Down {{value}} from last month",
+      "flat": "Same as last month"
+    },
+    "expiringViewAll": "View all",
+    "expiringError": "Could not load the expiries",
+    "activity": {
+      "title": "Recent activity",
+      "empty": "No recent changes",
+      "error": "Could not load the recent activity",
+      "system": "System",
+      "fieldsChanged": "{{count}} fields changed",
+      "entities": {
+        "Vehicle": "Vehicle",
+        "TaxiLicense": "Taxi licence",
+        "Driver": "Driver",
+        "Contact": "Contact",
+        "LeaseContract": "Lease contract",
+        "LeaseSegment": "Lease period",
+        "Deal": "Deal",
+        "DealPayment": "Deal payment",
+        "TrafficFine": "Fine",
+        "LedgerEntry": "Ledger entry",
+        "VehicleExpense": "Expense",
+        "InsurancePolicy": "Insurance policy",
+        "Document": "Document",
+        "Reminder": "Reminder",
+        "Settings": "Settings",
+        "InventoryCycle": "Inventory cycle",
+        "OdometerReading": "Odometer reading",
+        "User": "User"
+      }
+    },
+    "charts": {
+      "profitTitle": "Profit by month",
+      "profitSubtitle": "Last 12 months: profit as bars, lease income as a line",
+      "ageingTitle": "Receivables ageing",
+      "ageingSubtitle": "Open driver charges by days past due",
+      "inventoryTitle": "Inventory",
+      "inventorySubtitle": "Our cars by status, and consignment cars in stock",
+      "viewReport": "View report",
+      "error": "Could not load the charts"
+    }
   },
   "placeholder": {
     "title": "This section is on its way",
@@ -589,6 +653,67 @@
       "dealerLicenseNo": "Car dealer licence number",
       "vatRateHelp": "Used for new deals; existing deals keep their rate.",
       "loadError": "Could not load the settings"
+    },
+    "reminders": {
+      "description": "How many days before an expiry or deadline it shows as due in the reminders feed and the bell.",
+      "fields": {
+        "registration": "Vehicle licence (annual test)",
+        "insurance": "Insurance policy end",
+        "driverLicense": "Driving licence",
+        "taxiPermit": "Taxi driver permit",
+        "medical": "Medical certificate",
+        "taxiLicense": "Taxi licence fee and renewal",
+        "lease": "Lease contract end",
+        "document": "Document expiry",
+        "dealerRegistration": "Dealer registration (12-month cap)",
+        "transfer": "Ownership transfer after a sale",
+        "fine": "Fine reassignment deadline",
+        "taxiAge": "Taxi age dates"
+      },
+      "help": {
+        "registration": "The car's licence and annual test expiry.",
+        "insurance": "The end date of each car or business policy.",
+        "driverLicense": "The driver's D1 driving licence.",
+        "taxiPermit": "The driver's taxi permit.",
+        "medical": "The driver's medical certificate.",
+        "taxiLicense": "The licence's annual fee and its renewal date.",
+        "lease": "The planned end date of an active lease contract.",
+        "document": "The expiry date set on an uploaded document.",
+        "dealerRegistration": "A car registered to the dealership must be sold or re-registered within 12 months.",
+        "transfer": "The ownership transfer is due 6 working days after a sale.",
+        "fine": "A fine can be reassigned to the driver until 90 days after it is received.",
+        "taxiAge": "The 10-year semi-annual test regime and the 12-year limit of a taxi."
+      },
+      "sections": {
+        "vehicles": "Vehicles",
+        "drivers": "Drivers",
+        "licenses": "Taxi licences and leases",
+        "deals": "Deals, fines and documents"
+      }
+    },
+    "contracts": {
+      "description": "Defaults for new lease contracts: who pays what, and the standard clauses printed on the contract.",
+      "responsibilities": "Default responsibilities",
+      "responsibilitiesHelp": "New contracts start with these; each contract can change them.",
+      "clauses": "Standard clauses",
+      "clausesHelp": "Printed on the lease contract in the contract's language.",
+      "clausesHe": "Clauses in Hebrew",
+      "clausesAr": "Clauses in Arabic",
+      "clausesEn": "Clauses in English"
+    },
+    "backup": {
+      "description": "The nightly backup of the database and the documents.",
+      "lastSuccess": "Last successful backup",
+      "lastFile": "Backup file",
+      "status": "Status",
+      "ok": "Up to date",
+      "stale": "Out of date",
+      "never": "No backup has run yet",
+      "okHint": "A backup succeeded in the last {{hours}} hours.",
+      "staleHint": "No successful backup in the last {{hours}} hours. Check the backup job.",
+      "notConfigured": "Backup monitoring is not set up on this server",
+      "notConfiguredHint": "The backup job writes a status file that the server reads. Ask whoever installed the system to set it up.",
+      "loadError": "Could not load the backup status"
     }
   },
   "table": {
@@ -1512,7 +1637,34 @@
   "charts": {
     "showChart": "Show as chart",
     "showTable": "Show as table",
-    "noData": "No data for this period"
+    "noData": "No data for this period",
+    "series": {
+      "profit": "Profit",
+      "leaseIncome": "Lease income",
+      "sales": "Sales",
+      "costs": "Costs"
+    },
+    "ageing": {
+      "current": "Not yet due",
+      "d1_30": "1–30 days",
+      "d31_60": "31–60 days",
+      "d61_90": "61–90 days",
+      "d90_plus": "Over 90 days"
+    },
+    "inventory": {
+      "inStock": "In stock",
+      "reserved": "Reserved",
+      "leased": "Leased",
+      "consigned": "Consignment"
+    },
+    "period": "Period",
+    "amount": "Amount",
+    "cars": "Cars",
+    "share": "Share",
+    "total": "Total",
+    "quarter": "Q{{q}} {{year}}",
+    "inventoryLabel": "{{total}} cars: {{parts}}",
+    "barLabel": "{{name}}: {{value}}"
   },
   "breadcrumbs": {
     "label": "Breadcrumb",
@@ -1534,5 +1686,237 @@
   },
   "summary": {
     "label": "Quick filters by status"
+  },
+  "filters": {
+    "presetsLabel": "Quick periods",
+    "presets": {
+      "thisMonth": "This month",
+      "lastMonth": "Last month",
+      "yearToDate": "Year to date",
+      "lastYear": "Last year",
+      "last30Days": "Last 30 days"
+    }
+  },
+  "reminders": {
+    "kinds": {
+      "vehicleRegistration": "Vehicle licence (test)",
+      "insurance": "Insurance",
+      "driverLicense": "Driving licence",
+      "taxiPermit": "Taxi driver permit",
+      "medical": "Medical certificate",
+      "taxiLicenseFee": "Licence annual fee",
+      "taxiLicenseRenewal": "Licence renewal",
+      "leaseEnd": "Lease end",
+      "document": "Document expiry",
+      "contactFollowUp": "Contact follow-up",
+      "fineReassign": "Fine reassignment",
+      "dealTransfer": "Ownership transfer",
+      "dealerRegistration": "Dealer registration (12 months)",
+      "taxiAge": "Taxi age limit",
+      "taxiSemiAnnual": "Semi-annual taxi test",
+      "manual": "Reminder"
+    },
+    "severity": {
+      "overdue": "Overdue",
+      "due": "Due soon",
+      "upcoming": "Upcoming"
+    },
+    "daysLeft": {
+      "overdue": "{{days}} days overdue",
+      "yesterday": "1 day overdue",
+      "today": "Due today",
+      "tomorrow": "Tomorrow",
+      "left": "In {{days}} days"
+    },
+    "bell": {
+      "label": "Reminders",
+      "badge": "Reminders: {{count}} need attention",
+      "title": "Needs attention",
+      "empty": "Nothing is overdue or due soon",
+      "seeAll": "See all reminders",
+      "loadError": "Could not load the reminders"
+    },
+    "tabs": {
+      "feed": "All expiries",
+      "manual": "Manual reminders"
+    },
+    "feed": {
+      "horizon": "Horizon",
+      "horizonDays": "Next {{days}} days",
+      "kinds": "Kind",
+      "severity": "Urgency",
+      "empty": "Nothing expires in this period",
+      "label": "Expiries and deadlines"
+    },
+    "fields": {
+      "severity": "Urgency",
+      "kind": "Kind",
+      "item": "Item",
+      "title": "Title",
+      "dueAt": "Due date",
+      "daysLeft": "Days left",
+      "linkedTo": "Linked to",
+      "done": "Done"
+    },
+    "open": "Open",
+    "manual": {
+      "add": "Add reminder",
+      "addTitle": "New reminder",
+      "editTitle": "Edit reminder",
+      "showDone": "Show completed",
+      "markDone": "Mark done",
+      "markUndone": "Mark not done",
+      "empty": "No reminders yet",
+      "emptyHint": "Add a reminder for anything with a date: a call back, a payment, a visit.",
+      "added": "Reminder added",
+      "saved": "Reminder saved",
+      "deleted": "Reminder deleted",
+      "deleteTitle": "Delete this reminder?",
+      "deleteConfirm": "The reminder is removed for good.",
+      "markedDone": "Marked as done",
+      "markedUndone": "Marked as not done",
+      "linkedHint": "Linked to this record ({{entity}})",
+      "label": "Manual reminders"
+    }
+  },
+  "reports": {
+    "indexSubtitle": "Every report can be exported to Excel or CSV for the accountant.",
+    "open": "Open report",
+    "loadError": "Could not load the report",
+    "notFound": "No such report",
+    "names": {
+      "profit": "Profit",
+      "inventoryAgeing": "Inventory ageing",
+      "receivables": "Receivables",
+      "expenses": "Expenses",
+      "leaseIncome": "Lease income",
+      "tradeBook": "Trade book",
+      "fines": "Fines"
+    },
+    "descriptions": {
+      "profit": "Profit of the cars sold and lease income, by month, quarter or year.",
+      "inventoryAgeing": "Cars in stock with their cost and how long they have been waiting.",
+      "receivables": "What every driver owes, the deposit held and how overdue it is.",
+      "expenses": "Vehicle expenses by category, car or month, with VAT to reclaim.",
+      "leaseIncome": "Rent and other driver charges, credits and payments.",
+      "tradeBook": "Every car bought or sold in the period, for the accountant.",
+      "fines": "The fines register: received, reassigned, paid and charged on."
+    },
+    "context": {
+      "sheetName": "Report context",
+      "report": "Report",
+      "exportedAt": "Exported at",
+      "period": "Period",
+      "asOf": "As of",
+      "language": "Language",
+      "rows": "Rows",
+      "column": "Column",
+      "type": "Type"
+    },
+    "params": {
+      "groupBy": "Group by",
+      "status": "Status",
+      "period": "Period",
+      "asOf": "As of"
+    },
+    "groupBy": {
+      "month": "Month",
+      "quarter": "Quarter",
+      "year": "Year",
+      "category": "Category",
+      "vehicle": "Vehicle",
+      "license": "Licence",
+      "driver": "Driver"
+    },
+    "columnTypes": {
+      "text": "Text",
+      "money": "Amount (₪)",
+      "int": "Number",
+      "date": "Date",
+      "datetime": "Date and time",
+      "bool": "Yes / no",
+      "enum": "List value",
+      "plate": "Plate number"
+    },
+    "na": "n/a",
+    "noData": "No data for these parameters",
+    "total": "Total",
+    "bool": {
+      "true": "Yes",
+      "false": "No"
+    },
+    "export": {
+      "csv": "Export CSV",
+      "xlsx": "Export Excel"
+    },
+    "periodText": "{{from}} – {{to}}",
+    "asOfText": "As of {{date}}",
+    "rowCount": "{{count}} rows",
+    "tradeBookNote": "This is the trade book (ספר סחר) to hand to the accountant: every car bought or sold in the period, with the seller and buyer, their ID numbers, the prices and the repairs.",
+    "ageBuckets": {
+      "title": "Cars by days in stock",
+      "b0_30": "0–30 days",
+      "b31_60": "31–60 days",
+      "b61_90": "61–90 days",
+      "b90_plus": "Over 90 days"
+    },
+    "ageingTitle": "Balances by days past due",
+    "columns": {
+      "period": "Period",
+      "salesRevenue": "Sales revenue",
+      "purchaseCost": "Purchase cost",
+      "expenses": "Expenses",
+      "vatOnMargin": "VAT on margin",
+      "commission": "Commission",
+      "leaseIncome": "Lease income",
+      "profit": "Profit",
+      "plateNo": "Plate number",
+      "vehicle": "Vehicle",
+      "ownership": "Ownership",
+      "status": "Status",
+      "purchaseDate": "Purchase date",
+      "purchasePrice": "Purchase price",
+      "totalCost": "Total cost",
+      "listingPrice": "Listing price",
+      "daysInStock": "Days in stock",
+      "ageBucket": "Age group",
+      "driver": "Driver",
+      "phone": "Phone",
+      "contractNo": "Contract no.",
+      "balance": "Balance",
+      "depositHeld": "Deposit held",
+      "current": "Not yet due",
+      "d1_30": "1–30 days",
+      "d31_60": "31–60 days",
+      "d61_90": "61–90 days",
+      "d90_plus": "Over 90 days",
+      "overdue": "Overdue",
+      "category": "Category",
+      "count": "Count",
+      "amount": "Amount",
+      "paidByUs": "Paid by us",
+      "vatReclaimable": "VAT to reclaim",
+      "netCost": "Net cost",
+      "licenseNo": "Licence no.",
+      "rentCharged": "Rent charged",
+      "otherCharges": "Other charges",
+      "credits": "Credits",
+      "net": "Net",
+      "paymentsReceived": "Payments received",
+      "consignment": "Consignment",
+      "sellerName": "Seller",
+      "sellerIdNumber": "Seller ID no.",
+      "repairsTotal": "Repairs",
+      "saleDate": "Sale date",
+      "buyerName": "Buyer",
+      "buyerIdNumber": "Buyer ID no.",
+      "salePrice": "Sale price",
+      "fineNo": "Fine no.",
+      "offenceAt": "Offence date",
+      "receivedAt": "Received on",
+      "authority": "Issued by",
+      "reassignDeadline": "Reassign by",
+      "rebilled": "Charged to driver"
+    }
   }
 }

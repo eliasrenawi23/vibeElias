@@ -1,4 +1,5 @@
 import {
+  BellOutlined,
   DollarOutlined,
   EditOutlined,
   FileAddOutlined,
@@ -12,6 +13,7 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useNavigate, useParams } from 'react-router';
 import { AutoDir } from '../../../shared/lib/bidi';
+import { ReminderDialog } from '../../reminders/dialogs/ReminderDialog';
 import type { ActionDef } from '../../../shared/ui/ActionBar';
 import { AlertTags } from '../../../shared/ui/AlertTags';
 import { BalanceText } from '../../../shared/ui/BalanceText';
@@ -38,7 +40,7 @@ import { DriverEditDialog } from '../dialogs/DriverEditDialog';
 import { driverKeys } from '../queryKeys';
 import type { DriverDetail } from '../types';
 
-type DriverActionKey = 'edit' | 'lease' | 'payment';
+type DriverActionKey = 'edit' | 'lease' | 'payment' | 'reminder';
 
 /** `/drivers/:id`: profile, contracts, ledger statement and documents of a driver. */
 export function DriverDetailPage() {
@@ -51,7 +53,7 @@ function DriverView({ id }: { id: string }) {
   const { message } = App.useApp();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const [dialog, setDialog] = useState<'edit' | 'payment' | null>(null);
+  const [dialog, setDialog] = useState<'edit' | 'payment' | 'reminder' | null>(null);
 
   const query = useQuery({
     queryKey: driverKeys.detail(id),
@@ -108,6 +110,7 @@ function DriverView({ id }: { id: string }) {
       icon: <DollarOutlined />,
       primary: true,
     },
+    { key: 'reminder', label: t('reminders.manual.add'), icon: <BellOutlined /> },
   ];
   const onAction = (key: DriverActionKey) => {
     if (key === 'lease') navigate(`/leases/new?driverId=${encodeURIComponent(driver.id)}`);
@@ -221,6 +224,9 @@ function DriverView({ id }: { id: string }) {
             void message.success(t('common.saved'));
           }}
         />
+      )}
+      {dialog === 'reminder' && (
+        <ReminderDialog entityType="DRIVER" entityId={driver.id} onClose={() => setDialog(null)} />
       )}
       {dialog === 'payment' && (
         <PaymentDialog

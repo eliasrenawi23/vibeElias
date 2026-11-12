@@ -1,0 +1,24 @@
+<table class="kv">
+  <tr>
+    <th>{{t "vehicle.plate"}}</th><td>{{plate v.plateNo}}{{#if v.isTaxi}} <span class="muted small">({{t "vehicle.taxi"}})</span>{{/if}}</td>
+    <th>{{t "vehicle.makeModel"}}</th><td>{{auto (concat v.make " " v.model)}}{{#if v.trim}} <span class="muted">{{auto v.trim}}</span>{{/if}}</td>
+  </tr>
+  <tr>
+    <th>{{t "vehicle.year"}}</th><td>{{ltr v.year}}</td>
+    <th>{{t "vehicle.vin"}}</th><td>{{ltr v.vin}}</td>
+  </tr>
+  {{#unless short}}
+  <tr>
+    <th>{{t "vehicle.hand"}}</th><td>{{ltr v.hand}}</td>
+    <th>{{t "vehicle.km"}}</th><td>{{num v.km (t "common.kmUnit")}}</td>
+  </tr>
+  <tr>
+    <th>{{t "vehicle.color"}}</th><td>{{auto v.color}}</td>
+    <th>{{t "vehicle.testExpiry"}}</th><td>{{date v.testExpiry}}</td>
+  </tr>
+  <tr>
+    <th>{{t "vehicle.fuel"}}</th><td>{{enum "Fuel" v.fuel}}</td>
+    <th>{{t "vehicle.gearbox"}}</th><td>{{enum "Gearbox" v.gearbox}}{{#if v.engineCc}} · {{num v.engineCc}} <span class="muted small">cc</span>{{/if}}</td>
+  </tr>
+  {{/unless}}
+</table>
