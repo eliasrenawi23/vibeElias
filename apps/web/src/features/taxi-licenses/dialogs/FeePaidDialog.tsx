@@ -55,7 +55,11 @@ export function FeePaidDialog({ license, onClose, onSaved }: FeePaidDialogProps)
   const submit = form.handleSubmit(async (v) => {
     const amount = car ? (v.amount ?? null) : null;
     try {
-      const updated = await mutation.mutateAsync({ paidAt: v.paidAt, amount, note: v.note ?? null });
+      const updated = await mutation.mutateAsync({
+        paidAt: v.paidAt,
+        amount,
+        note: v.note ?? null,
+      });
       onSaved(updated, amount !== null);
     } catch (error) {
       handleError(error);

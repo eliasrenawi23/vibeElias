@@ -37,9 +37,15 @@ describe('parseBackupStatus', () => {
       remote: 's3:renawi-backups/renawi/',
     });
     expect(parse({ offsite: false })).toMatchObject({ ok: true, offsite: false, remote: null });
-    expect(parse({ offsite: false, remote: 's3:x/' })).toMatchObject({ offsite: false, remote: null });
+    expect(parse({ offsite: false, remote: 's3:x/' })).toMatchObject({
+      offsite: false,
+      remote: null,
+    });
     expect(parse({ offsite: true })).toMatchObject({ offsite: true, remote: null });
-    expect(parse({ offsite: 'yes', remote: 's3:x/' })).toMatchObject({ offsite: null, remote: null });
+    expect(parse({ offsite: 'yes', remote: 's3:x/' })).toMatchObject({
+      offsite: null,
+      remote: null,
+    });
   });
 
   it('older than the maximum age (36 h) or far in the future -> not ok', () => {

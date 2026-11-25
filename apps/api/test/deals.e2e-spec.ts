@@ -1113,7 +1113,9 @@ describe('Deals (e2e)', () => {
       });
       // GET returns the same; a later tick keeps the details.
       const ticked = ok<DealBody>(
-        await s.api.patch(`/api/deals/${d.id}/transfer`).send({ checklist: { liensChecked: true } }),
+        await s.api
+          .patch(`/api/deals/${d.id}/transfer`)
+          .send({ checklist: { liensChecked: true } }),
       );
       expect(ticked.transferChecklist).toMatchObject({ transferFee: 257, notes: 'הוגש בדואר' });
       const fetched = ok<DealBody>(await s.api.get(`/api/deals/${d.id}`), 200);

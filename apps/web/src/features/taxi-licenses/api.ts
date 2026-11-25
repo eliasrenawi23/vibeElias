@@ -52,7 +52,10 @@ export function registerVehicle(id: string, vehicleId: string | null): Promise<T
  * API records a LICENSE_FEE expense on that car. Returns the full licence (409
  * `errors.licenseNotActive` for a sold licence).
  */
-export function markAnnualFeePaid(id: string, body: TaxiLicenseFeePaid): Promise<TaxiLicenseDetail> {
+export function markAnnualFeePaid(
+  id: string,
+  body: TaxiLicenseFeePaid,
+): Promise<TaxiLicenseDetail> {
   return http.post<TaxiLicenseDetail>(`${licensePath(id)}/fee-paid`, body);
 }
 

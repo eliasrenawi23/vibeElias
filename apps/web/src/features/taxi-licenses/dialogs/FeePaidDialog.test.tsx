@@ -62,9 +62,7 @@ describe('FeePaidDialog', () => {
 
     // Due 31.12.2026 -> next 31.12.2027.
     expect(await screen.findByTestId('fee-paid-next')).toHaveAttribute('data-date', '2027-12-31');
-    expect(screen.getByText(/Recorded as a licence-fee expense on/)).toHaveTextContent(
-      '84-731-26',
-    );
+    expect(screen.getByText(/Recorded as a licence-fee expense on/)).toHaveTextContent('84-731-26');
     expect(screen.queryByTestId('fee-paid-no-vehicle')).toBeNull();
 
     fireEvent.change(screen.getByLabelText('Amount paid'), { target: { value: '1450' } });

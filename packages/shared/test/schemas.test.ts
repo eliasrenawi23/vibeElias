@@ -367,9 +367,9 @@ describe('checklists', () => {
     expect(
       DealTransferRequestSchema.parse({ checklist: { transferFee: null, notes: '' } }).checklist,
     ).toEqual({ transferFee: null, notes: null });
-    expect(
-      DealTransferRequestSchema.safeParse({ checklist: { transferFee: -1 } }).success,
-    ).toBe(false);
+    expect(DealTransferRequestSchema.safeParse({ checklist: { transferFee: -1 } }).success).toBe(
+      false,
+    );
     expect(
       DealTransferRequestSchema.safeParse({ checklist: { filedAt: '2026-13-01' } }).success,
     ).toBe(false);

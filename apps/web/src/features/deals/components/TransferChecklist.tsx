@@ -201,7 +201,11 @@ export const TransferDetailsSchema = TransferChecklistSchema.pick({
 
 function detailValues(deal: DealDetail) {
   const c = deal.transferChecklist;
-  return { transferFee: c?.transferFee ?? null, filedAt: c?.filedAt ?? null, notes: c?.notes ?? '' };
+  return {
+    transferFee: c?.transferFee ?? null,
+    filedAt: c?.filedAt ?? null,
+    notes: c?.notes ?? '',
+  };
 }
 
 /**

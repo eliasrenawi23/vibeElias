@@ -3,7 +3,11 @@ import { act, fireEvent, screen, waitFor } from '@testing-library/react';
 import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 import i18n from '../../../app/i18n';
 import { jsonResponse, renderWithProviders } from '../../../test/renderWithProviders';
-import { ChangePasswordForm, ChangePasswordFormSchema, changePasswordBody } from './ChangePasswordForm';
+import {
+  ChangePasswordForm,
+  ChangePasswordFormSchema,
+  changePasswordBody,
+} from './ChangePasswordForm';
 
 beforeAll(() => installValidationErrorMap());
 
@@ -42,17 +46,32 @@ describe('ChangePasswordFormSchema', () => {
       messages({ currentPassword: 'Old12345', newPassword: 'abc1', confirmPassword: 'abc1' }),
     ).toHaveProperty('newPassword');
     expect(
-      messages({ currentPassword: 'Old12345', newPassword: 'abcdefghij', confirmPassword: 'abcdefghij' })
-        .newPassword,
+      messages({
+        currentPassword: 'Old12345',
+        newPassword: 'abcdefghij',
+        confirmPassword: 'abcdefghij',
+      }).newPassword,
     ).toBe('validation.passwordTooWeak');
     expect(
-      messages({ currentPassword: 'Old12345', newPassword: 'New12345', confirmPassword: 'New12346' }),
+      messages({
+        currentPassword: 'Old12345',
+        newPassword: 'New12345',
+        confirmPassword: 'New12346',
+      }),
     ).toEqual({ confirmPassword: 'auth.passwordMismatch' });
     expect(
-      messages({ currentPassword: 'Same1234', newPassword: 'Same1234', confirmPassword: 'Same1234' }),
+      messages({
+        currentPassword: 'Same1234',
+        newPassword: 'Same1234',
+        confirmPassword: 'Same1234',
+      }),
     ).toEqual({ newPassword: 'auth.passwordUnchanged' });
     expect(
-      messages({ currentPassword: 'Old12345', newPassword: 'New12345', confirmPassword: 'New12345' }),
+      messages({
+        currentPassword: 'Old12345',
+        newPassword: 'New12345',
+        confirmPassword: 'New12345',
+      }),
     ).toEqual({});
   });
 

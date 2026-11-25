@@ -90,9 +90,7 @@ export function ChangePasswordForm({ onChanged }: ChangePasswordFormProps) {
   return (
     <FormLayout onSubmit={submit} aria-label={t('auth.changePassword')}>
       <Flex vertical gap={4} data-testid="change-password-form">
-        {formError && (
-          <Alert type="error" showIcon title={formError} className="rm-dialog-error" />
-        )}
+        {formError && <Alert type="error" showIcon title={formError} className="rm-dialog-error" />}
         <FormTextField
           control={form.control}
           name="currentPassword"

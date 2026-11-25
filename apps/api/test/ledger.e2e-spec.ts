@@ -276,8 +276,7 @@ describe('Ledger (e2e)', () => {
     expect(((await entry(pay.id)) as unknown as { documentCount: number }).documentCount).toBe(2);
     // The paperclip list of the row.
     const docs = (await s.api.get(`/api/documents?ledgerEntryId=${pay.id}`).expect(200)).body as
-      | { fileName: string }[]
-      | { items: { fileName: string }[] };
+      { fileName: string }[] | { items: { fileName: string }[] };
     const items = Array.isArray(docs) ? docs : docs.items;
     expect(items.map((d) => d.fileName).sort()).toEqual(['payment-1.pdf', 'payment-2.pdf']);
   });
@@ -352,15 +351,13 @@ describe('Ledger (e2e)', () => {
       [{ path: 'method', message: 'validation.invalidOption' }],
     );
     expectError(
-      await s.api
-        .post('/api/ledger/charges')
-        .send({
-          driverId: driver.id,
-          chargeKind: 'OTHER',
-          amount: 1,
-          date: today(),
-          contractId: lease.id,
-        }),
+      await s.api.post('/api/ledger/charges').send({
+        driverId: driver.id,
+        chargeKind: 'OTHER',
+        amount: 1,
+        date: today(),
+        contractId: lease.id,
+      }),
       400,
       'errors.validation',
       [{ path: 'contractId', message: 'validation.invalidValue' }],
@@ -374,15 +371,13 @@ describe('Ledger (e2e)', () => {
       [{ path: 'driverId', message: 'errors.notFound' }],
     );
     expectError(
-      await s.api
-        .post('/api/ledger/payments')
-        .send({
-          driverId: driver.id,
-          amount: 1,
-          date: today(),
-          method: 'CASH',
-          allocateTo: ['nope'],
-        }),
+      await s.api.post('/api/ledger/payments').send({
+        driverId: driver.id,
+        amount: 1,
+        date: today(),
+        method: 'CASH',
+        allocateTo: ['nope'],
+      }),
       400,
       'errors.validation',
       [{ path: 'allocateTo.0', message: 'validation.invalidValue' }],

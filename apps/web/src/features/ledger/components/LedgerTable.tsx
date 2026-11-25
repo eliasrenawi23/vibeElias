@@ -186,11 +186,7 @@ export function LedgerTable({
                 <Flex gap={2} justify="flex-end">
                   {docs > 0 && <LedgerRowDocuments entryId={e.id} count={docs} />}
                   {pdf && (
-                    <PdfRowButton
-                      choice={pdf}
-                      savedTo="row"
-                      onGenerated={onDocumentGenerated}
-                    />
+                    <PdfRowButton choice={pdf} savedTo="row" onGenerated={onDocumentGenerated} />
                   )}
                   {onVoid && !e.voidedAt && (
                     <Tooltip title={t('ledger.void.action')}>
