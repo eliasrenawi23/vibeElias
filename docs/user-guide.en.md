@@ -21,6 +21,7 @@ Hebrew version: [user-guide.he.md](user-guide.he.md)
 13. [Settings](#13-settings)
 14. [Backups](#14-backups)
 15. [Legal notes](#15-legal-notes)
+16. [Known limitations](#16-known-limitations)
 
 Button, tab and field names below are written exactly as they appear on screen in English. If you work in Hebrew or Arabic, the same buttons are in the same places, mirrored right to left.
 
@@ -64,7 +65,13 @@ The installed app is the same website: it still needs internet, and you sign in 
 
 ### Changing the password
 
-There is no password-change screen in the app yet. To change the password, ask whoever installed and runs the server.
+1. Click your name or avatar in the top bar (**User menu**), then **My account**. The same page is also under **Settings** > **My account**.
+2. The page shows **My profile** (name, email and role) and **Change password**. Enter the **Current password**, the **New password** (at least 8 characters, with letters and digits) and the same new password again in **Confirm new password**.
+3. Click **Change password**.
+
+You see "Password changed. Other devices were signed out.": this device stays signed in, and every other computer or phone signed in to the account must sign in again with the new password. If the current password is wrong, the form says "The current password is wrong" and nothing changes.
+
+There is no "forgot password" link on the sign-in page. If you forgot the password, ask whoever installed and runs the server to reset it.
 
 ### Signing out
 
@@ -183,7 +190,17 @@ Upload the signed form to the licence's **Documents** tab with the type "Licence
 
 ### Annual fee in December
 
-The annual operating fee is paid with the December slip. The licence shows "Annual fee due soon" or "Annual fee overdue", and the reminder appears according to **Settings** > **Reminder timing**. After paying, open the licence, click **Edit** and set **Annual fee due** to next year's date.
+The annual operating fee is paid with the December slip. The licence shows "Annual fee due soon" or "Annual fee overdue", and the reminder appears according to **Settings** > **Reminder timing**.
+
+After paying, record it on the licence:
+
+1. Open the licence and click **Mark annual fee as paid** (while the fee is due soon or overdue it is the main action).
+2. In the **Annual licence fee paid** window check **Paid on** (today by default).
+3. Optionally enter the **Amount paid**. When a car is registered on the licence, the amount is recorded on that car as a **Licence fee** expense paid by us (no VAT), and appears in the car's **Expenses** tab. Without a registered car there is nowhere to record the amount: only the due date moves.
+4. Add **Notes** if you like (they become the expense's description).
+5. The window shows the current **Annual fee due** and the **Next due date**: 31 December of the year after the fee you are paying (paying the fee due 31 December 2026 moves it to 31 December 2027). Click **Mark as paid**.
+
+The alert and the reminder disappear until the next fee comes close. A sold licence has no fee to pay, so the action is not offered on it. You can still correct the date by hand with **Edit** > **Annual fee due**.
 
 ### Licence P&L
 
@@ -249,7 +266,7 @@ Go to **Leases** > **New lease** (or **New lease** on a driver or a licence). Th
 1. **Driver:** choose the driver or create a **New driver**. You are warned if the driver already has an active contract.
 2. **Licence:** choose an **Available licence**. Only active licences that are not leased are offered.
 3. **Car:** choose the **Lease type**. For **Car + licence** choose the **Taxi**; for **Licence only** choose **The driver's own car** or **No car recorded**.
-4. **Terms:** **Start date**, **End date** (the last day, inclusive; one year by default), **Monthly rent**, **Payment day of the month** (1 to 28), **Early-exit penalty** (months of rent charged if the driver leaves early), **Rent includes VAT**, **Who pays** (insurance, annual test, repairs, fines: us or the driver; by default the driver pays everything except the car itself) and **Contract terms** for this contract.
+4. **Terms:** **Start date**, **End date** (the last day, inclusive; one year by default), **Monthly rent**, **Payment day of the month** (1 to 28), **Early-exit penalty** (months of rent charged if the driver leaves early), **Rent includes VAT**, **Who pays** (insurance, annual test, repairs, fines: us or the driver; by default the driver pays everything except the car itself) and **Contract terms** for this contract (extra terms, printed together with the standard clauses from **Settings** > **Contracts**, not instead of them).
 5. **Deposit & handover:** **Deposit** amount and **Deposit type** (**Cash**, **Cheque**, **Promissory note**). For **Car + licence**, fill in the **Handover checklist** (km, fuel level, spare wheel, jack, documents in the car, damages, meter sealed, photos taken).
 6. **Review:** check everything and click **Create draft**.
 
@@ -335,6 +352,10 @@ On a contract, the **Deposit** action offers:
 
 Deposit and payment rows have a PDF button to print a **Deposit confirmation** or a **Payment confirmation** (section 12).
 
+### Finding a confirmation again
+
+A confirmation generated from a ledger row is stored with that entry. The row then shows a paperclip (**Documents of this entry**, with the number of documents when there is more than one). Click the paperclip to see the stored documents with their type and date, and open or download any of them. Ledger entries have no Documents tab of their own, so the paperclip is the place to look.
+
 ---
 
 ## 7. Traffic fines
@@ -414,6 +435,14 @@ Completing a sale closes the car's inventory cycle, marks the car **Sold**, comp
 ### Ownership transfer
 
 After a completed sale, the **Transfer** tab holds the **Ownership transfer checklist**: ID copies collected, vehicle licence signed, liens checked, outstanding fines checked, transfer filed, new vehicle licence received, insurance cancelled or moved, and for a taxi, taxi licence detached. Each tick is saved immediately. When the buyer is registered, click **Mark transferred** and enter the **Transferred on** date.
+
+Under the checklist, **Transfer details** keeps the paperwork facts of the transfer:
+
+- **Transfer fee:** the fee paid when filing the transfer (at the post office or online).
+- **Filed on:** the date the transfer was filed.
+- **Notes:** anything worth remembering, for example where it was filed or what is still missing.
+
+Unlike the ticks, these are saved together: fill them in and click **Save details** (**Reset** discards the changes). The fee and the filing date are also shown at the top of the tab. They are for your records only: the transfer fee is not added to the car's expenses or the profit.
 
 The buyer must be registered within 6 working days of the sale. A late transfer shows "Transfer overdue" on the deal, in the reminders and on the dashboard (**Transfers overdue**).
 
@@ -516,9 +545,9 @@ The PDF opens in a new tab, and a copy is stored in the system:
 - Lease documents in the lease's **Documents** tab.
 - Deal documents, including payment confirmations of deal payments, in the deal's **Documents** tab.
 - The consignment agreement in the car's **Documents** tab.
-- Deposit and payment confirmations from the driver ledger are stored with the ledger entry and are not listed in a Documents tab: save or print them when they open, or generate them again later from the same row.
+- Deposit and payment confirmations from the driver ledger are stored with their ledger entry, not in a Documents tab: open them again with the paperclip on that row (section 6).
 
-Each click creates a new copy, so you can regenerate a document after correcting the data. If the browser blocks the new tab, allow pop-ups for the site, or open the document from the Documents tab.
+Each click creates a new copy, so you can regenerate a document after correcting the data. If the browser blocks the new tab, allow pop-ups for the site, or open the document from the Documents tab (for a ledger row, from its paperclip).
 
 ---
 
@@ -540,7 +569,7 @@ Click **Save**. **Reset** discards unsaved changes.
 Defaults for new lease contracts:
 
 - **Default responsibilities:** who pays insurance, the annual test, repairs and fines (**Us** or **Driver**). New contracts start with these; each contract can change them.
-- **Standard clauses:** **Clauses in Hebrew**, **Clauses in Arabic**, **Clauses in English**. They are printed on the lease contract in the contract's language; if the chosen language is empty, the Hebrew clauses are printed. The **Contract terms** of a specific contract are printed in addition.
+- **Standard clauses:** **Clauses in Hebrew**, **Clauses in Arabic**, **Clauses in English**. They are printed on every lease contract in the document's language; if that language is empty, the Hebrew clauses are printed. When a contract has **Contract terms** of its own, both are printed: the contract's terms and these standard clauses (the contract's terms do not replace them).
 
 ### Reminder timing
 
@@ -550,19 +579,27 @@ How many days before each kind of date it shows as "due soon" in the reminders a
 
 Shows the state of the nightly backup. See the next section.
 
+### My account
+
+The signed-in user and **Change password** (section 1). It also opens from the user menu.
+
 ---
 
 ## 14. Backups
 
-Every night at 02:30 Israel time the system backs up the whole database and all uploaded documents to cloud storage.
+Every night at 02:30 Israel time the system backs up the whole database and all uploaded documents. A copy stays on the server and another copy is sent to cloud storage outside the server, so the data survives even if the server is lost.
 
 **Settings** > **Backup** shows:
 
-- **Status:** **Up to date** (a backup succeeded in the last 36 hours), **Out of date** (in red: no successful backup for more than 36 hours) or **No backup has run yet**.
-- **Last successful backup** (date and time) and **Backup file**.
+- **Status:**
+  - **Up to date** (green): a backup succeeded in the last 36 hours.
+  - **Local backups only** (amber): the last backup succeeded, but it is kept on this server only. The page warns "Local backups only — not protected against server loss": the off-site cloud storage is not set up.
+  - **Out of date** (red): no successful backup for more than 36 hours.
+  - **No backup has run yet** (amber).
+- **Last successful backup** (date and time), **Off-site copy** and **Backup file**. **Off-site copy** is **Yes** (with the storage it was copied to), **No — on this server only**, or **Unknown** when the server's backup job is an older version that does not report it.
 - **Refresh** to check again.
 
-If the status is **Out of date**, or the page says "Backup monitoring is not set up on this server", contact whoever runs the server the same day. Do not wait for a second night. The technical restore steps for that person are in [ops/restore.md](ops/restore.md).
+If the status is **Out of date**, or the page says "Backup monitoring is not set up on this server", contact whoever runs the server the same day. Do not wait for a second night. If it says **Local backups only**, ask that person to set up the off-site backup storage soon: until then a server failure could lose all the data. The technical steps for that person are in [ops/deploy.md](ops/deploy.md#10-off-site-backups-backblaze-b2) (off-site backups) and [ops/restore.md](ops/restore.md) (restoring).
 
 ---
 
@@ -577,3 +614,14 @@ These notes are practical reminders, not legal advice. Check anything unclear wi
 - **Register the buyer within 6 working days.** Follow the **Transfer** tab and the overdue alerts.
 - **Reassign fines in time.** Fines must be reassigned to the driver within 90 days of receipt; after that the business carries them.
 - **Personal data is sensitive.** The system holds ID numbers, driving licences and scanned documents. Keep your password private, do not share the account, and always log out on shared computers.
+
+---
+
+## 16. Known limitations
+
+Things the system does not do yet. Ask whoever installed and runs the server when you need one of them.
+
+- **No logo upload.** The screens and the PDFs use the built-in Renawi Motors logo. There is no setting to upload a different logo.
+- **No user management screen.** Users cannot be added, removed or given other permissions in the app; the admin account is created on the server.
+- **No "forgot password" link.** A signed-in user changes the password under **My account** (section 1); a forgotten password is reset on the server.
+- **Internet only.** The data lives on the server, so the system and the installed phone app need an internet connection: nothing can be viewed or recorded offline.
