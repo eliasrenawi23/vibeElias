@@ -70,7 +70,7 @@ function vehicle(over: Json): Json {
 
 function license(over: Json): Json {
   return {
-    holderName: 'רינאוי מוטורס',
+    holderName: 'רכב רינאוי',
     status: 'ACTIVE',
     acquiredAt: '2024-01-15',
     acquisitionPrice: 240000,

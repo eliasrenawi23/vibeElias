@@ -37,7 +37,7 @@ async function mockApi(page: Page, options: { loggedIn?: boolean } = {}): Promis
     password: 'ChangeMe123!',
     backup: null,
     settings: {
-      businessName: { he: 'רינאוי מוטורס', ar: 'ريناوي موتورز', en: 'Renawi Motors' },
+      businessName: { he: 'רכב רינאוי', ar: 'ريناوي موتورز', en: 'Renawi Motors' },
       legalId: null,
       dealerLicenseNo: null,
       address: null,
@@ -183,7 +183,7 @@ test('login, switch language and theme', async ({ page }) => {
   // Dashboard in the authenticated shell.
   await expect(page).toHaveURL(/\/$/);
   await expect(page.getByRole('heading', { level: 1 })).toHaveText('לוח בקרה');
-  await expect(page).toHaveTitle('לוח בקרה · רינאוי מוטורס');
+  await expect(page).toHaveTitle('לוח בקרה · רכב רינאוי');
   await expect(page.locator('.ant-statistic').first()).toBeVisible();
   // Live KPIs, all six from `GET /dashboard/kpis`; the month profit is coloured as a profit.
   await expect(page.locator('.ant-statistic-content').first()).toHaveText('4');
@@ -291,7 +291,7 @@ test('business settings load, validate and save', async ({ page }) => {
   // PATCH carries the parsed schema output: trimmed, normalised, '' -> null.
   const patch = api.calls.find((c) => c.method === 'PATCH' && c.path === '/api/settings');
   expect(patch?.body).toMatchObject({
-    businessName: { he: 'רינאוי מוטורס', ar: 'ريناوي موتورز', en: 'Renawi Motors Ltd' },
+    businessName: { he: 'רכב רינאוי', ar: 'ريناوي موتورز', en: 'Renawi Motors Ltd' },
     email: 'office@renawi.co.il',
     phone: '0501234567',
     legalId: null,

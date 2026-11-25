@@ -5,7 +5,7 @@
 // -----------------------------------------------------------------------------------------------
 
 export const brand = {
-  name: { en: 'Renawi Motors', he: 'רינאוי מוטורס', ar: 'ريناوي موتورز' },
+  name: { en: 'Renawi Motors', he: 'רכב רינאוי', ar: 'ريناوي موتورز' },
   colors: {
     /** Taxi yellow: primary fills, the logo, the selected item. Never text on white. */
     yellow: '#F5C518',

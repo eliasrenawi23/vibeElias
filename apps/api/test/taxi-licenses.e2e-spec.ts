@@ -53,7 +53,7 @@ describe('Taxi licences (e2e)', () => {
   it('creates a licence with the December fee default and computed alerts', async () => {
     const lic = await create({
       licenseNo: '55501',
-      holderName: 'רינאוי מוטורס בע״מ',
+      holderName: 'רכב רינאוי בע״מ',
       acquisitionPrice: 240000,
     });
     expect(lic).toMatchObject({

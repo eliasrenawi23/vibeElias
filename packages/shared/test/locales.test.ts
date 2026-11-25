@@ -71,7 +71,7 @@ describe('locale files', () => {
 
   it('carry the brand name', () => {
     expect(en.app.name).toBe('Renawi Motors');
-    expect(he.app.name).toBe('רינאוי מוטורס');
+    expect(he.app.name).toBe('רכב רינאוי');
     expect(ar.app.name).toBe('ريناوي موتورز');
   });
 

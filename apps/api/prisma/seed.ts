@@ -12,7 +12,8 @@
  * Every demo row has a fixed `seed_*` id and is upserted with `update: {}`: re-running creates
  * what is missing and never overwrites data (or the admin password) changed in the app. The only
  * exceptions are `migrateLegacyDemo()`, which once rewrites the demo rows of older seed versions,
- * and `migrateLegacySpelling()`, which once fixes the old spelling of the business name.
+ * `migrateLegacySpelling()`, which once fixes the old spelling of the business name, and
+ * `migrateHebrewRename()`, which renames the Hebrew business name.
  * Demo documents write small placeholder files (PDF / PNG) into UPLOAD_DIR.
  * `npm run db:reset` drops everything and seeds again with fresh relative dates.
  */
@@ -243,11 +244,32 @@ async function migrateLegacySpelling(): Promise<void> {
     }
   }
   const licences = await prisma.taxiLicense.updateMany({
-    where: { id: { startsWith: 'seed_tl_' }, holderName: 'רנאוי מוטורס בע״מ' },
+    where: {
+      id: { startsWith: 'seed_tl_' },
+      holderName: { in: ['רנאוי מוטורס בע״מ', 'רינאוי מוטורס בע״מ'] },
+    },
     data: { holderName: LICENSE_HOLDER },
   });
   if (licences.count)
     console.log(`Fixed the holder name spelling on ${licences.count} demo licences.`);
+}
+
+/**
+ * The Hebrew business name changed from רינאוי מוטורס to רכב רינאוי (Arabic and English are
+ * unchanged). Sets the stored Hebrew name only when it is exactly the old default, so a name the
+ * owner edited is never touched. The holder name of the demo licences is fixed in
+ * `migrateLegacySpelling()`. No-op on fresh or already renamed data.
+ */
+async function migrateHebrewRename(): Promise<void> {
+  const settings = await prisma.settings.findUnique({ where: { id: 1 } });
+  const name = BusinessNameSchema.safeParse(settings?.businessName);
+  if (name.success && name.data.he === 'רינאוי מוטורס') {
+    await prisma.settings.update({
+      where: { id: 1 },
+      data: { businessName: { ...name.data, he: BUSINESS_NAME.he } },
+    });
+    console.log(`Renamed the Hebrew business name: רינאוי מוטורס -> ${BUSINESS_NAME.he}.`);
+  }
 }
 
 /**
@@ -2151,6 +2173,7 @@ async function main(): Promise<void> {
   const admin = await seedAdmin();
   await seedSettings(demo);
   await migrateLegacySpelling();
+  await migrateHebrewRename();
 
   if (demo) await seedDemo(admin.id, today);
 

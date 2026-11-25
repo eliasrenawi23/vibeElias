@@ -146,7 +146,7 @@ async function mockApi(page: Page) {
     theme: 'light',
   };
   let settings: Json = {
-    businessName: { he: 'רינאוי מוטורס', ar: 'ريناوي موتورز', en: 'Renawi Motors' },
+    businessName: { he: 'רכב רינאוי', ar: 'ريناوي موتورز', en: 'Renawi Motors' },
     legalId: null,
     dealerLicenseNo: null,
     address: null,

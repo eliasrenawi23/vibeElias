@@ -63,14 +63,18 @@ const WORDMARKS = {
   },
   he: {
     lang: 'he',
-    title: 'רינאוי מוטורס',
-    text: 'רינאוי מוטורס',
-    lines: ['רינאוי', 'מוטורס'],
+    title: 'רכב רינאוי',
+    text: 'רכב רינאוי',
+    // Reading order: "רכב" (car) first, then the name. Stacked, the name is still the big line
+    // (see `smallFirst`), so the small descriptor sits on top.
+    lines: ['רכב', 'רינאוי'],
+    smallFirst: true,
     band: 'ink',
     refHeight: 571,
     sizeRatio: 0.97,
     tracking: 0.02,
-    justifyLine2: true,
+    justifyLine2: false,
+    line2Ratio: 0.64, // short word, not letter-spaced
   },
   ar: {
     lang: 'ar',
@@ -308,24 +312,37 @@ function stacked({ fonts, mark, concept, spec, color }) {
   const markW = mark.aspect * st.markHeight;
   const scale1 = (st.capHeight * spec.sizeRatio) / spec.refHeight;
   const scale2 = scale1 * (spec.line2Ratio ?? st.line2Ratio);
+  // `smallFirst`: the first line in reading order is the small one (Hebrew "רכב" above the name).
+  const [bigText, smallText] = spec.smallFirst
+    ? [spec.lines[1], spec.lines[0]]
+    : [spec.lines[0], spec.lines[1]];
 
-  const line1 = shapeLine(fonts, spec.lines[0], spec.tracking);
-  const w1 = (line1.ink.maxX - line1.ink.minX) * scale1;
-  let line2 = shapeLine(fonts, spec.lines[1], 0);
-  if (spec.justifyLine2 && line2.glyphCount > 1) {
-    const w2 = (line2.ink.maxX - line2.ink.minX) * scale2;
-    const tracking = (w1 - w2) / scale2 / (line2.glyphCount - 1) / fonts.otFont.unitsPerEm;
-    line2 = shapeLine(fonts, spec.lines[1], Math.max(0, tracking));
+  const big = shapeLine(fonts, bigText, spec.tracking);
+  const wBig = (big.ink.maxX - big.ink.minX) * scale1;
+  let small = shapeLine(fonts, smallText, 0);
+  if (spec.justifyLine2 && small.glyphCount > 1) {
+    const w = (small.ink.maxX - small.ink.minX) * scale2;
+    const tracking = (wBig - w) / scale2 / (small.glyphCount - 1) / fonts.otFont.unitsPerEm;
+    small = shapeLine(fonts, smallText, Math.max(0, tracking));
   }
-  const w2 = (line2.ink.maxX - line2.ink.minX) * scale2;
-  const width = Math.max(markW, w1, w2);
+  const wSmall = (small.ink.maxX - small.ink.minX) * scale2;
+  const width = Math.max(markW, wBig, wSmall);
 
-  const band1 = bandOf(spec, line1);
-  const baseline1 = st.markHeight + st.gap + band1.top * scale1;
-  const l1 = linePath(line1, scale1, (width - w1) / 2, baseline1);
-  const baseline2 = l1.bottom + st.lineGap + line2.ink.maxY * scale2;
-  const l2 = linePath(line2, scale2, (width - w2) / 2, baseline2);
-
+  let l1;
+  let l2;
+  if (spec.smallFirst) {
+    const baselineS = st.markHeight + st.gap + small.ink.maxY * scale2;
+    l1 = linePath(small, scale2, (width - wSmall) / 2, baselineS);
+    const bandB = bandOf(spec, big);
+    const baselineB = l1.bottom + st.lineGap + bandB.top * scale1;
+    l2 = linePath(big, scale1, (width - wBig) / 2, baselineB);
+  } else {
+    const band1 = bandOf(spec, big);
+    const baseline1 = st.markHeight + st.gap + band1.top * scale1;
+    l1 = linePath(big, scale1, (width - wBig) / 2, baseline1);
+    const baseline2 = l1.bottom + st.lineGap + small.ink.maxY * scale2;
+    l2 = linePath(small, scale2, (width - wSmall) / 2, baseline2);
+  }
   const top = Math.min(0, l1.top);
   const bottom = l2.bottom;
   const body = [

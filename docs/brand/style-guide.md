@@ -28,16 +28,20 @@ look like they come from the same place.
 ### 2.1 Parts
 
 - **Icon mark**: script-neutral, never mirrored, works on its own (app icon, favicon, stamp).
-- **Wordmark**: Renawi Motors / רינאוי מוטורס / ريناوي موتورز, set in Rubik at weight 650 and
+- **Wordmark**: Renawi Motors / רכב רינאוי / ريناوي موتورز, set in Rubik at weight 650 and
   converted to vector outlines (no live text, no font needed). Latin is uppercase with +45/1000
   letter-spacing; Hebrew +20/1000; **Arabic is never letter-spaced** (it breaks the joins).
 - **Spelling**: the owner's spelling is **רינאוי** in Hebrew (yod after the resh) and
   **ريناوي** in Arabic (ya after the ra), in the logo, the app, documents and signage alike; not
-  the older רנאוי / رناوي. "Motors" is מוטורס / موتورز.
+  the older רנאוי / رناوي. The Hebrew name is **רכב רינאוי** ("Renawi Car"; it was רינאוי מוטורס
+  until November 2026); Arabic and English keep "Motors" (موتورز).
 - **Lockups**: icon + wordmark in English, Hebrew and Arabic. The icon always sits on the
   **leading side**: left of English, right of Hebrew and Arabic. The wordmark's cap height lines
   up with the icon: concept A centres the cap band on the tile; concept B aligns it with the R
   inside the roof sign. Hebrew and Arabic are sized to the same optical size as the Latin.
+  Stacked Hebrew reads top to bottom as the name does: small **רכב** on the first line, the
+  large name **רינאוי** below (the other languages put the large name on top, `smallFirst` in
+  `build-logos.mjs`).
 
 ### 2.2 Concepts
 

@@ -28,7 +28,7 @@ export const BusinessNameSchema = z.object({
 export type BusinessName = z.infer<typeof BusinessNameSchema>;
 
 export const BUSINESS_NAME: Readonly<BusinessName> = Object.freeze({
-  he: 'רינאוי מוטורס',
+  he: 'רכב רינאוי',
   ar: 'ريناوي موتورز',
   en: 'Renawi Motors',
 });

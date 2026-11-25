@@ -26,7 +26,7 @@ const ctx = (lang: PdfContext['lang'] = 'he'): PdfContext => ({
   today: '2026-11-12',
   vatRate: 18,
   business: {
-    name: { he: 'רינאוי מוטורס', ar: 'ريناوي موتورز', en: 'Renawi Motors' },
+    name: { he: 'רכב רינאוי', ar: 'ريناوي موتورز', en: 'Renawi Motors' },
     legalId: '516427184',
     dealerLicenseNo: '2026-0417',
     address: 'רח׳ פאולוס השישי 45, נצרת',
@@ -215,7 +215,7 @@ describe('lease contract', () => {
       documentTitle: 'חוזה שכירות רכב מונית ורישיון מונית LC-000012',
       owner: { key: 'contractId', id: 'lease1' },
       translated: false,
-      business: { name: 'רינאוי מוטורס', dealerLicenseNo: '2026-0417' },
+      business: { name: 'רכב רינאוי', dealerLicenseNo: '2026-0417' },
     });
     expect(m.data).toMatchObject({
       licenseNo: '24718',
@@ -509,7 +509,7 @@ describe('disclosure form', () => {
     expect(m).toMatchObject({ template: 'disclosure-form', number: 'DF-000004' });
     expect(m.data).toMatchObject({
       consignment: false,
-      registeredOwner: { name: 'רינאוי מוטורס', idNumber: '516427184', isDealer: true },
+      registeredOwner: { name: 'רכב רינאוי', idNumber: '516427184', isDealer: true },
       previousOwner: { name: 'יוסי כהן' },
       hands: 3,
       km: 87_500,
