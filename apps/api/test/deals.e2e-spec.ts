@@ -115,7 +115,13 @@ interface CyclePnlBody {
     rebilled: number;
     total: number;
   };
-  costs: { purchase: number; expenses: number; vatOnMargin: number; total: number };
+  costs: {
+    purchase: number;
+    expenses: number;
+    conversionTax: number;
+    vatOnMargin: number;
+    total: number;
+  };
   profit: number;
   unrealised: boolean;
 }
@@ -1394,7 +1400,13 @@ describe('Deals (e2e)', () => {
         listingPrice: 80_000,
         commission: null,
         revenue: { sale: 80_000, commission: 0, leaseIncome, rebilled: 1480, total: revenue },
-        costs: { purchase: 60_000, expenses: 1300, vatOnMargin: vat, total: costs },
+        costs: {
+          purchase: 60_000,
+          expenses: 1300,
+          conversionTax: 0,
+          vatOnMargin: vat,
+          total: costs,
+        },
         profit: sumMoney([revenue, -costs]),
         unrealised: true,
       });

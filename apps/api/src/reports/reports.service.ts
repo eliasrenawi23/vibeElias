@@ -29,6 +29,7 @@ import { NOT_CANCELLED, PnlService } from '../deals/pnl.service';
 import { LedgerService } from '../ledger/ledger.service';
 import { isDecimal } from '../prisma/prisma.decimal';
 import { PrismaService } from '../prisma/prisma.service';
+import { FORMER_TAXI_PLATE_ARGS, formerTaxiPlateOf } from '../vehicles/conversion-rules';
 import type { ParamKind } from './report-export';
 import {
   aggregateProfit,
@@ -61,6 +62,11 @@ const ReceivableBalanceRow = z.object({
 });
 
 const VEHICLE_SELECT = { id: true, plateNo: true, make: true, model: true, year: true } as const;
+/** `VEHICLE_SELECT` + the TAXI_TO_PRIVATE change (`formerTaxiPlateNo` columns). */
+const VEHICLE_FORMER_PLATE_SELECT = {
+  ...VEHICLE_SELECT,
+  plateChanges: FORMER_TAXI_PLATE_ARGS,
+} satisfies Prisma.VehicleSelect;
 
 /** `Mazda 3 2019` */
 function vehicleName(v: { make: string; model: string; year: number }): string {
@@ -119,7 +125,8 @@ export class ReportsService {
           sale: c.revenue.sale,
           commission: c.revenue.commission,
           purchase: c.costs.purchase,
-          expenses: c.costs.expenses,
+          // The taxi -> private customs count as an expense of the car here.
+          expenses: sumMoney([c.costs.expenses, c.costs.conversionTax]),
           rebilled: c.revenue.rebilled,
           vat: c.costs.vatOnMargin,
         })),
@@ -192,8 +199,9 @@ export class ReportsService {
         kind: true,
         startedAt: true,
         askingPrice: true,
-        vehicle: { select: { ...VEHICLE_SELECT, listingPrice: true, status: true } },
+        vehicle: { select: { ...VEHICLE_FORMER_PLATE_SELECT, listingPrice: true, status: true } },
         purchaseDeal: { select: { price: true, date: true, status: true } },
+        // Every category paid by us, the taxi -> private customs (CONVERSION_TAX) included.
         expenses: {
           where: { paidBy: 'US', date: { lte: day } },
           select: { amount: true },
@@ -202,6 +210,7 @@ export class ReportsService {
     });
     const columns = [
       col('plateNo', 'plate'),
+      col('formerTaxiPlateNo', 'plate'),
       col('vehicle', 'text'),
       col('ownership', 'enum', 'CycleKind'),
       col('status', 'enum', 'VehicleStatus'),
@@ -229,6 +238,7 @@ export class ReportsService {
       buckets[bucket] = (buckets[bucket] ?? 0) + 1;
       return {
         plateNo: c.vehicle.plateNo,
+        formerTaxiPlateNo: formerTaxiPlateOf(c.vehicle.plateChanges),
         vehicle: vehicleName(c.vehicle),
         ownership: c.kind,
         status: c.vehicle.status,
@@ -551,7 +561,8 @@ export class ReportsService {
 
   /**
    * Trade book (sefer sachar): one row per inventory cycle bought (started) or sold (ended)
-   * in the period - purchase, seller, our repairs, sale, buyer, VAT on the margin and profit.
+   * in the period - purchase, seller, our repairs, the taxi -> private customs (own column,
+   * not in repairsTotal) with the former taxi plate, sale, buyer, VAT on the margin and profit.
    */
   async tradeBook(q: TradeBookQuery): Promise<ReportResult> {
     const { from, to } = resolveRange(q.from, q.to, this.clock.today());
@@ -569,11 +580,11 @@ export class ReportsService {
           kind: true,
           startedAt: true,
           endedAt: true,
-          vehicle: { select: VEHICLE_SELECT },
+          vehicle: { select: VEHICLE_FORMER_PLATE_SELECT },
           consignor: party,
           purchaseDeal: { select: { date: true, price: true, status: true, counterparty: party } },
           saleDeal: { select: { date: true, price: true, status: true, counterparty: party } },
-          expenses: { where: { paidBy: 'US' }, select: { amount: true } },
+          expenses: { where: { paidBy: 'US' }, select: { amount: true, category: true } },
         },
       }),
       this.pnl.cyclesPnl(where, [{ startedAt: 'asc' }]),
@@ -581,6 +592,7 @@ export class ReportsService {
     const pnlById = new Map(pnl.map((p) => [p.id, p]));
     const columns = [
       col('plateNo', 'plate'),
+      col('formerTaxiPlateNo', 'plate'),
       col('vehicle', 'text'),
       col('consignment', 'bool'),
       col('purchaseDate', 'date'),
@@ -588,6 +600,7 @@ export class ReportsService {
       col('sellerIdNumber', 'text'),
       col('purchasePrice', 'money'),
       col('repairsTotal', 'money'),
+      col('conversionTax', 'money'),
       col('saleDate', 'date'),
       col('buyerName', 'text'),
       col('buyerIdNumber', 'text'),
@@ -606,15 +619,20 @@ export class ReportsService {
       const buyer = sale?.counterparty ?? null;
       const p = pnlById.get(c.id);
       const closed = c.endedAt !== null;
+      const customs = c.expenses.filter((e) => e.category === 'CONVERSION_TAX');
       return {
         plateNo: c.vehicle.plateNo,
+        formerTaxiPlateNo: formerTaxiPlateOf(c.vehicle.plateChanges),
         vehicle: vehicleName(c.vehicle),
         consignment: consigned,
         purchaseDate: isoOf(purchase?.date ?? c.startedAt),
         sellerName: seller ? contactDisplayName(seller) || null : null,
         sellerIdNumber: seller?.idNumber ?? null,
         purchasePrice: money(purchase?.price),
-        repairsTotal: sumMoney(c.expenses.map((e) => e.amount)),
+        repairsTotal: sumMoney(
+          c.expenses.filter((e) => e.category !== 'CONVERSION_TAX').map((e) => e.amount),
+        ),
+        conversionTax: sumMoney(customs.map((e) => e.amount)),
         saleDate: sale ? isoOf(sale.date) : null,
         buyerName: buyer ? contactDisplayName(buyer) || null : null,
         buyerIdNumber: buyer?.idNumber ?? null,

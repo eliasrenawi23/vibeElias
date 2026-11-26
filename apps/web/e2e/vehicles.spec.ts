@@ -196,8 +196,14 @@ async function mockApi(page: Page) {
     }
     if (path === '/api/vehicles' && method === 'GET') {
       const statuses = (url.searchParams.get('status') ?? '').split(',').filter(Boolean);
+      const q = (url.searchParams.get('q') ?? '').replace(/\D/g, '');
       const items = [...vehicles.values()]
         .filter((v) => statuses.length === 0 || statuses.includes(String(v.status)))
+        // Search by the current plate or the former taxi plate.
+        .filter(
+          (v) =>
+            !q || String(v.plateNo).includes(q) || String(v.formerTaxiPlateNo ?? '').includes(q),
+        )
         .map(listItem);
       const pageSize = Number(url.searchParams.get('pageSize') ?? 25);
       return json(route, 200, {
@@ -282,6 +288,34 @@ async function mockApi(page: Page) {
           ],
           totals: { revenue: 72000, costs: 63101.69, profit: 8898.31 },
         });
+      }
+      if (sub === '/convert-to-private' && method === 'POST') {
+        const input = body as Json;
+        const converted = {
+          ...vehicle,
+          plateNo: input.newPlateNo,
+          isTaxi: false,
+          convertedAt: input.convertedAt,
+          formerTaxi: true,
+          formerTaxiPlateNo: vehicle.plateNo,
+          expectedConversionTax: null,
+          privatePriceEstimate: null,
+          listingPrice: input.listingPrice,
+          canConvert: { allowed: false, blockers: ['errors.vehicleNotTaxi'] },
+          plateHistory: [
+            {
+              id: 'pc_1',
+              oldPlateNo: vehicle.plateNo,
+              newPlateNo: input.newPlateNo,
+              changedAt: input.convertedAt,
+              reason: 'TAXI_TO_PRIVATE',
+              conversionTax: input.conversionTax,
+              notes: input.notes ?? null,
+            },
+          ],
+        };
+        vehicles.set(String(vehicle.id), converted);
+        return json(route, 200, converted);
       }
       if (sub === '/odometer' && method === 'POST') {
         const entry = { id: 'odo_2', ...(body as Json) };
@@ -434,7 +468,7 @@ test('vehicle file: expense, odometer, documents, new vehicle, Arabic plate', as
   await page.keyboard.press('Escape');
   await page.getByLabel('Model', { exact: true }).fill('Ioniq');
   await page.getByLabel('Meter serial number').fill('MTR-7781');
-  await page.getByLabel('Listing price').fill('95000');
+  await page.getByLabel('Price as taxi').fill('95000');
   await page.getByTestId('vehicle-save').click();
   await expect(page).toHaveURL(/\/vehicles\/veh_new$/);
   await expect(page.getByText('Vehicle created')).toBeVisible();
@@ -605,5 +639,87 @@ test('phone layout: vehicle actions collapse into a menu', async ({ page }) => {
     await page.getByRole('option', { name: 'P&L' }).click({ timeout: 2000 });
     await expect(page.getByTestId('pnl-totals')).toBeVisible({ timeout: 1000 });
   }).toPass({ timeout: 15_000 });
+  expect(problems).toEqual([]);
+});
+
+test('convert a taxi to a private car: new plate in the header, old plate searchable', async ({
+  page,
+}) => {
+  const api = await mockApi(page);
+  const problems = watchConsole(page);
+  api.vehicles.set(
+    'veh_taxi',
+    baseVehicle({
+      id: 'veh_taxi',
+      plateNo: '8473126',
+      make: 'Skoda',
+      model: 'Octavia',
+      year: 2019,
+      isTaxi: true,
+      listingPrice: 35000,
+      expectedConversionTax: 15000,
+      privatePriceEstimate: 50000,
+      convertedAt: null,
+      formerTaxi: false,
+      formerTaxiPlateNo: null,
+      canConvert: { allowed: true, blockers: [] },
+      plateHistory: [],
+      openCycle: { id: 'cyc_t', kind: 'OWNED', startedAt: '2026-09-01' },
+    }),
+  );
+
+  await page.goto('/vehicles/veh_taxi');
+  await expect(page.getByRole('heading', { level: 2 })).toContainText('Skoda Octavia');
+  await expect(page.getByTestId('convert-blockers')).toHaveCount(0);
+  await expect(page.getByTestId('former-taxi-tag')).toHaveCount(0);
+
+  await page.getByTestId('vehicle-action-convert').click();
+  const dialog = page.getByRole('dialog', { name: 'Convert to a private car' });
+  await expect(dialog).toBeVisible();
+  await expect(dialog.getByLabel('Customs paid')).toHaveValue('15000');
+  await expect(dialog.getByLabel('New asking price')).toHaveValue('50000');
+  await dialog.getByLabel('New (private) plate number').pressSequentially('1234525');
+  await expect(dialog.getByTestId('convert-taxi-plate-warning')).toBeVisible();
+  await dialog.getByLabel('New (private) plate number').fill('');
+  await dialog.getByLabel('New (private) plate number').pressSequentially('1234567');
+  await expect(dialog.getByTestId('convert-taxi-plate-warning')).toHaveCount(0);
+  await dialog.getByRole('button', { name: 'Convert' }).click();
+
+  await expect(page.getByTestId('convert-done')).toContainText('customs receipt');
+  expect(
+    [...api.calls]
+      .reverse()
+      .find((c) => c.method === 'POST' && c.path === '/api/vehicles/veh_taxi/convert-to-private')
+      ?.body,
+  ).toMatchObject({
+    convertedAt: TODAY,
+    newPlateNo: '1234567',
+    conversionTax: 15000,
+    listingPrice: 50000,
+  });
+
+  // The header shows the new plate, the "Former taxi" tag and the old taxi plate as a fact.
+  await expect(dialog).toBeHidden();
+  await expect(page.locator('.rm-vehicle-title bdi.rm-plate')).toHaveText('12-345-67');
+  await expect(page.getByTestId('former-taxi-tag')).toHaveText('Former taxi');
+  await expect(page.locator('[data-fact="formerTaxiPlate"]')).toContainText('84-731-26');
+  await expect(page.getByTestId('vehicle-action-convert')).toHaveCount(0);
+  await expect(page.getByTestId('plate-change')).toContainText('84-731-26');
+  await expect(page.getByTestId('plate-change')).toContainText('12-345-67');
+
+  // The list finds the car by its old taxi plate.
+  await page.getByTestId('breadcrumbs').getByRole('link', { name: 'Vehicles' }).click();
+  await page.getByPlaceholder('Plate, VIN, make or model').fill('8473126');
+  await expect
+    .poll(() =>
+      api.calls.some(
+        (c) => c.path === '/api/vehicles' && new URLSearchParams(c.search).get('q') === '8473126',
+      ),
+    )
+    .toBe(true);
+  const row = page.getByTestId('vehicles-table');
+  await expect(row.getByTestId('former-plate')).toContainText('84-731-26');
+  await expect(row.locator('bdi.rm-plate')).toHaveText(['12-345-67']);
+
   expect(problems).toEqual([]);
 });

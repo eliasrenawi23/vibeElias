@@ -83,7 +83,7 @@ Click your name or avatar in the top bar (**User menu**), then **Log out**. Alwa
 
 The **Vehicles** page has two tabs: **Inventory** (all cars: stock, taxis, consignment cars and drivers' own cars) and **Business insurance** (trade and lot policies that cover the business rather than one car).
 
-Use the search box (plate, VIN, make or model) and the filters (status, ownership, **Taxis only**, **Year from** / **Year to**) to find a car.
+Use the search box (plate, VIN, make or model) and the filters (status, ownership, **Taxis only**, **Former taxis only**, **Year from** / **Year to**) to find a car.
 
 ### Adding a vehicle
 
@@ -103,7 +103,7 @@ Usually you do not need to add a bought car here: recording a **Purchase** deal 
 
 ### The vehicle file
 
-Click a car to open its file. The header shows the plate, status, ownership and alerts (for example "Licence expiring" or "Taxi 10+ years old"). The actions are **Edit**, **Change status**, **Take on consignment** / **Return to consignor** (when relevant), **Add expense**, **Add odometer reading**, **Consignment agreement** (for a consignment car) and **Add reminder**.
+Click a car to open its file. The header shows the plate, status, ownership and alerts (for example "Licence expiring" or "Taxi 10+ years old"). The actions are **Edit**, **Change status**, **Take on consignment** / **Return to consignor** (when relevant), **Convert to private** (taxis), **Add expense**, **Add odometer reading**, **Consignment agreement** (for a consignment car) and **Add reminder**.
 
 The tabs:
 
@@ -121,7 +121,7 @@ The tabs:
 ### Recording an expense
 
 1. In the car's file click **Add expense**.
-2. Choose the **Category** (Repair, Annual test, Insurance, Fuel, Towing, Parts, Cleaning, Fine, Licence fee, Taxi meter, Other), the **Date**, **Vendor / garage** and **Amount**.
+2. Choose the **Category** (Repair, Annual test, Insurance, Fuel, Towing, Parts, Cleaning, Fine, Licence fee, Taxi meter, Customs, Other), the **Date**, **Vendor / garage** and **Amount**.
 3. Choose **Paid by**: **Us**, **Driver** or **Consignor**. Only what we paid counts as our cost.
 4. Tick **Amount includes VAT** and **VAT can be reclaimed** when they apply, so the reports show the VAT to reclaim.
 5. Click **Save**.
@@ -159,6 +159,29 @@ A document with an expiry date shows a badge ("Valid", "Expiring soon", "Expired
 4. Click **Save**. The car is now in stock as a consignment car.
 
 Print the agreement with the **Consignment agreement** action. If the car does not sell, use **Return to consignor** to end the consignment and give the car back.
+
+### Converting a taxi to a private car
+
+A taxi can leave our stock in two ways:
+
+- **Sold as a taxi**, to a taxi driver, at the **Price as taxi** (for example ₪35,000). Nothing changes on the car: record a normal sale deal. When you pick a taxi in the sale form, an information box shows both prices and reminds you that it is sold as a taxi.
+- **Converted to a private car, then sold.** We pay the customs authority (for example ₪15,000), the car gets a new private plate number (taxi plates end in 25 or 26), and it is priced at the taxi price plus the customs (₪50,000 in the example).
+
+To convert a taxi:
+
+1. Open the car and click **Convert to private**. The button is grey while something blocks the conversion; the reasons are listed on the page (for example **A taxi licence is still registered on this car**, with a link to the licence). Detach the car from its licence first, and make sure it is in stock or reserved and not leased.
+2. Fill in the **Conversion date** (today by default), the **New (private) plate number** (a warning appears if it ends in 25 or 26), the **Customs paid** (offered from **Expected customs if converted** on the car) and the **New asking price** (taxi price plus customs; it follows the customs until you type a price of your own). Optionally choose the **Customs authority** and add notes. The line at the bottom shows the cost as private: taxi price + customs.
+3. Click **Convert**. The car now has the new plate and is no longer a taxi (the meter details are cleared). A message reminds you to upload the **customs receipt**: use **Open documents** and add it.
+
+What the system keeps:
+
+- **Both plate numbers.** The header shows the new plate, a **Former taxi** tag and the **Taxi plate**. The **Info** tab has a **Plate history** card with the date, old and new plate, customs and notes. The vehicle list shows "taxi: ..." under the plate, and the search finds the car by either number. An old plate can never be used again for another car.
+- **Customs as a cost of the car.** It is recorded as an expense in the category **Customs (taxi → private)** and shows as its own line, **Customs (conversion)**, in the car's **P&L** tab and in the reports (**Former taxi plate** and **Customs (conversion)** columns in the trade book).
+- **Prices.** While the car is still a taxi, the list and the car file show the price as a taxi and, under it, "as private: ..." (taxi price plus expected customs).
+
+If you typed something wrong, open the **Info** tab and click **Correct conversion details** in the **Plate history** card: you can fix the date, the new plate, the customs amount and the notes, and the car and its expense follow. A conversion cannot be undone.
+
+**VAT on the margin.** By default the customs does not change the VAT of a sale on margin. If your accountant decides that the customs may be deducted from the margin, switch on **Include customs in the VAT margin base** in **Settings** > **Business details**. Ask your accountant before turning it on.
 
 ---
 
@@ -561,6 +584,7 @@ Each click creates a new copy, so you can regenerate a document after correcting
 - **Company / licensed-dealer number** and **Car dealer licence number** (the dealer licence number must appear on sale agreements).
 - **Address**, **Phone**, **Email**.
 - **VAT rate** (%), used for new deals; existing deals keep their rate.
+- **Include customs in the VAT margin base**, off by default (see _Converting a taxi to a private car_; ask your accountant before turning it on).
 
 Click **Save**. **Reset** discards unsaved changes.
 

@@ -68,7 +68,8 @@
     "gearbox": "תיבת הילוכים",
     "engineCc": "נפח מנוע (סמ״ק)",
     "testExpiry": "תוקף רישיון הרכב (טסט)",
-    "taxi": "רכב מונית"
+    "taxi": "רכב מונית",
+    "formerTaxiPlate": "מספר רישוי קודם (מונית)"
   },
   "party": {
     "lessor": "המשכיר",
@@ -309,7 +310,8 @@
     "price": "מחיר הרכב: {{price}}.",
     "buyerTitle": "הצהרת הקונה",
     "buyerDeclaration": "אני הח״מ מאשר/ת כי קראתי טופס זה, כי הפרטים שבו נמסרו לי לפני חתימת הסכם המכירה, וכי קיבלתי עותק ממנו.",
-    "signedOn": "נחתם ביום {{date}}"
+    "signedOn": "נחתם ביום {{date}}",
+    "usedAsTaxi": "הרכב שימש כמונית"
   },
   "enums": {
     "DepositKind": { "CASH": "מזומן", "CHECK": "צ׳ק", "PROMISSORY_NOTE": "שטר חוב" },

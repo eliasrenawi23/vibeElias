@@ -68,7 +68,8 @@
     "gearbox": "Gearbox",
     "engineCc": "Engine (cc)",
     "testExpiry": "Vehicle licence (annual test) valid until",
-    "taxi": "Taxi"
+    "taxi": "Taxi",
+    "formerTaxiPlate": "Previous registration (plate) No. (taxi)"
   },
   "party": {
     "lessor": "the Lessor",
@@ -309,7 +310,8 @@
     "price": "Price of the vehicle: {{price}}.",
     "buyerTitle": "Buyer's declaration",
     "buyerDeclaration": "I, the undersigned, confirm that I have read this form, that its details were given to me before signing the sale agreement, and that I have received a copy of it.",
-    "signedOn": "Signed on {{date}}"
+    "signedOn": "Signed on {{date}}",
+    "usedAsTaxi": "The vehicle was used as a taxi"
   },
   "enums": {
     "DepositKind": { "CASH": "cash", "CHECK": "cheque", "PROMISSORY_NOTE": "promissory note" },

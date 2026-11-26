@@ -73,7 +73,10 @@ export const VehicleBaseSchema = z.object({
   meterSerial: optionalText(50),
   meterSealedAt: optionalIsoDate,
   location: optionalText(100),
+  /** Asking price in the car's current state (for a taxi: the price as a taxi). */
   listingPrice: nonNegativeMoney.nullish(),
+  /** Estimated customs if converted to a private car; only meaningful while `isTaxi`. */
+  expectedConversionTax: nonNegativeMoney.nullish(),
   notes: optionalText(5000),
 });
 
@@ -113,11 +116,40 @@ export const VehicleQuerySchema = pagination.extend({
   ownership: queryList(VehicleOwnership).optional(),
   make: z.string().trim().min(1).max(60).optional(),
   isTaxi: queryBool.optional(),
+  /** Former taxis only (`true`) / never converted (`false`). */
+  formerTaxi: queryBool.optional(),
   /** Manufacture year range, inclusive. */
   yearFrom: z.coerce.number().int().min(MIN_YEAR).max(2200).optional(),
   yearTo: z.coerce.number().int().min(MIN_YEAR).max(2200).optional(),
 });
 export type VehicleQuery = z.infer<typeof VehicleQuerySchema>;
+
+/** `POST /vehicles/:id/convert-to-private`: taxi -> private car (new plate, customs paid). */
+export const VehicleConvertSchema = z.object({
+  /** Date of the conversion (not in the future, not before the open cycle started). */
+  convertedAt: isoDate,
+  /** The new (private) plate; must not be a taxi plate (25 / 26) nor used / retired already. */
+  newPlateNo: plateNo,
+  /** Customs / conversion tax paid by us; 0 = none (no expense is created). */
+  conversionTax: nonNegativeMoney,
+  /** New asking price; default = current listing price + conversionTax. */
+  listingPrice: nonNegativeMoney.nullish(),
+  /** Customs authority contact (vendor of the CONVERSION_TAX expense). */
+  vendorId: idString.nullish(),
+  notes: optionalText(1000),
+});
+export type VehicleConvert = z.infer<typeof VehicleConvertSchema>;
+export type VehicleConvertInput = z.input<typeof VehicleConvertSchema>;
+
+/** `PATCH /vehicles/:id/conversion`: corrects the latest taxi -> private conversion. */
+export const VehicleConversionUpdateSchema = z.object({
+  convertedAt: isoDate.optional(),
+  newPlateNo: plateNo.optional(),
+  conversionTax: nonNegativeMoney.optional(),
+  notes: optionalText(1000),
+});
+export type VehicleConversionUpdate = z.infer<typeof VehicleConversionUpdateSchema>;
+export type VehicleConversionUpdateInput = z.input<typeof VehicleConversionUpdateSchema>;
 
 /** `POST /vehicles/:id/status` */
 export const VehicleStatusChangeSchema = z.object({
@@ -196,6 +228,7 @@ export const EXPENSE_TO_CHARGE_KIND: Readonly<Record<ExpenseCategory, ChargeKind
   LICENSE_FEE: 'OTHER',
   METER: 'REPAIR',
   OTHER: 'OTHER',
+  CONVERSION_TAX: 'OTHER',
 });
 
 /**

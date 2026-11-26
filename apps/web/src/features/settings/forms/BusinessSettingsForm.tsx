@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { useUnsavedChangesGuard } from '../../../shared/form/useUnsavedChangesGuard';
 import { applyApiErrors, useZodForm } from '../../../shared/form/useZodForm';
 import { ltrInputProps, numericInputProps, phoneInputProps } from '../../../shared/lib/bidi';
+import { FormCheckboxField } from '../../../shared/ui/FormCheckboxField';
 import { FormLayout } from '../../../shared/ui/FormLayout';
 import { FormMoneyField } from '../../../shared/ui/FormMoneyField';
 import { FormTextField } from '../../../shared/ui/FormTextField';
@@ -141,6 +142,14 @@ export function BusinessSettingsForm({ settings, onSave, saving }: BusinessSetti
                 min={0}
                 max={100}
                 help={t('settings.business.vatRateHelp')}
+              />
+            </Col>
+            <Col xs={24} md={16}>
+              <FormCheckboxField
+                control={control}
+                name="vatMarginIncludesConversionTax"
+                label={t('settings.business.vatMarginIncludesConversionTax')}
+                help={t('settings.business.vatMarginIncludesConversionTaxHelp')}
               />
             </Col>
           </Row>

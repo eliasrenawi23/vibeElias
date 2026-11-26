@@ -3,6 +3,11 @@
     <th>{{t "vehicle.plate"}}</th><td>{{plate v.plateNo}}{{#if v.isTaxi}} <span class="muted small">({{t "vehicle.taxi"}})</span>{{/if}}</td>
     <th>{{t "vehicle.makeModel"}}</th><td>{{auto (concat v.make " " v.model)}}{{#if v.trim}} <span class="muted">{{auto v.trim}}</span>{{/if}}</td>
   </tr>
+  {{#if v.formerTaxiPlateNo}}
+  <tr>
+    <th>{{t "vehicle.formerTaxiPlate"}}</th><td colspan="3">{{plate v.formerTaxiPlateNo}}</td>
+  </tr>
+  {{/if}}
   <tr>
     <th>{{t "vehicle.year"}}</th><td>{{ltr v.year}}</td>
     <th>{{t "vehicle.vin"}}</th><td>{{ltr v.vin}}</td>

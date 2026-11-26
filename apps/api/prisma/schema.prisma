@@ -95,6 +95,13 @@ enum ExpenseCategory {
   LICENSE_FEE
   METER
   OTHER
+  CONVERSION_TAX
+}
+
+/// Why a vehicle's plate number changed.
+enum PlateChangeReason {
+  TAXI_TO_PRIVATE
+  OTHER
 }
 
 enum InsuranceType {
@@ -317,46 +324,69 @@ model Driver {
 }
 
 model Vehicle {
-  id                 String            @id @default(cuid())
-  plateNo            String            @unique
-  vin                String?           @unique
-  make               String
-  model              String
-  trim               String?
-  year               Int // manufacture year (taxi 12-year rule)
-  color              String?
-  fuel               Fuel?
-  gearbox            Gearbox?
-  engineCc           Int?
-  hand               Int? // יד
-  isTaxi             Boolean           @default(false)
-  status             VehicleStatus     @default(IN_STOCK)
-  ownership          VehicleOwnership  @default(OWNED)
-  ownerDriverId      String?
-  ownerDriver        Driver?           @relation(fields: [ownerDriverId], references: [id])
-  currentKm          Int?
-  registrationExpiry DateTime?         @db.Date // תוקף רישיון רכב / טסט
-  dealerRegisteredAt DateTime?         @db.Date // "רכב בבעלות סוחר" start (12-month cap)
-  meterSerial        String?
-  meterSealedAt      DateTime?         @db.Date
-  location           String?
-  listingPrice       Decimal?          @db.Decimal(12, 2)
-  notes              String?
-  createdAt          DateTime          @default(now())
-  updatedAt          DateTime          @updatedAt
-  cycles             InventoryCycle[]
-  deals              Deal[]
-  expenses           VehicleExpense[]
-  insurance          InsurancePolicy[]
-  odometer           OdometerLog[]
-  segments           LeaseSegment[]
-  ledger             LedgerEntry[]
-  fines              TrafficFine[]
-  documents          Document[]
-  registeredLicense  TaxiLicense?      @relation("RegisteredVehicle")
+  id                    String               @id @default(cuid())
+  plateNo               String               @unique
+  vin                   String?              @unique
+  make                  String
+  model                 String
+  trim                  String?
+  year                  Int // manufacture year (taxi 12-year rule)
+  color                 String?
+  fuel                  Fuel?
+  gearbox               Gearbox?
+  engineCc              Int?
+  hand                  Int? // יד
+  isTaxi                Boolean              @default(false)
+  status                VehicleStatus        @default(IN_STOCK)
+  ownership             VehicleOwnership     @default(OWNED)
+  ownerDriverId         String?
+  ownerDriver           Driver?              @relation(fields: [ownerDriverId], references: [id])
+  currentKm             Int?
+  registrationExpiry    DateTime?            @db.Date // תוקף רישיון רכב / טסט
+  dealerRegisteredAt    DateTime?            @db.Date // "רכב בבעלות סוחר" start (12-month cap)
+  meterSerial           String?
+  meterSealedAt         DateTime?            @db.Date
+  location              String?
+  listingPrice          Decimal?             @db.Decimal(12, 2) // asking price in the car's current state (taxi: price as taxi)
+  expectedConversionTax Decimal?             @db.Decimal(12, 2) // estimated customs while still a taxi
+  convertedAt           DateTime?            @db.Date // set when converted taxi -> private
+  notes                 String?
+  createdAt             DateTime             @default(now())
+  updatedAt             DateTime             @updatedAt
+  plateChanges          VehiclePlateChange[]
+  cycles                InventoryCycle[]
+  deals                 Deal[]
+  expenses              VehicleExpense[]
+  insurance             InsurancePolicy[]
+  odometer              OdometerLog[]
+  segments              LeaseSegment[]
+  ledger                LedgerEntry[]
+  fines                 TrafficFine[]
+  documents             Document[]
+  registeredLicense     TaxiLicense?         @relation("RegisteredVehicle")
 
   @@index([status, ownership])
   @@index([make, model])
+}
+
+/// A change of a vehicle's plate number (taxi -> private conversion); old plates are retired.
+model VehiclePlateChange {
+  id            String            @id @default(cuid())
+  vehicleId     String
+  vehicle       Vehicle           @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
+  oldPlateNo    String
+  newPlateNo    String
+  changedAt     DateTime          @db.Date
+  reason        PlateChangeReason
+  conversionTax Decimal?          @db.Decimal(12, 2)
+  expenseId     String?           @unique // the CONVERSION_TAX VehicleExpense, when tax > 0
+  expense       VehicleExpense?   @relation(fields: [expenseId], references: [id], onDelete: SetNull)
+  notes         String?
+  createdById   String?
+  createdAt     DateTime          @default(now())
+
+  @@index([oldPlateNo])
+  @@index([vehicleId, changedAt])
 }
 
 /// One stock period of a vehicle (purchase -> sale, or consignment intake -> sale/return).
@@ -449,25 +479,26 @@ model DealPayment {
 }
 
 model VehicleExpense {
-  id              String          @id @default(cuid())
+  id              String              @id @default(cuid())
   vehicleId       String
-  vehicle         Vehicle         @relation(fields: [vehicleId], references: [id])
+  vehicle         Vehicle             @relation(fields: [vehicleId], references: [id])
   cycleId         String?
-  cycle           InventoryCycle? @relation(fields: [cycleId], references: [id])
+  cycle           InventoryCycle?     @relation(fields: [cycleId], references: [id])
   category        ExpenseCategory
-  date            DateTime        @db.Date
-  amount          Decimal         @db.Decimal(12, 2)
-  vatIncluded     Boolean         @default(true)
-  vatReclaimable  Boolean         @default(false)
-  paidBy          PaidBy          @default(US)
+  date            DateTime            @db.Date
+  amount          Decimal             @db.Decimal(12, 2)
+  vatIncluded     Boolean             @default(true)
+  vatReclaimable  Boolean             @default(false)
+  paidBy          PaidBy              @default(US)
   vendorId        String?
-  vendor          Contact?        @relation(fields: [vendorId], references: [id])
-  rebilledEntryId String?         @unique // CHARGE created when passed on to driver
-  rebilledEntry   LedgerEntry?    @relation(fields: [rebilledEntryId], references: [id])
+  vendor          Contact?            @relation(fields: [vendorId], references: [id])
+  rebilledEntryId String?             @unique // CHARGE created when passed on to driver
+  rebilledEntry   LedgerEntry?        @relation(fields: [rebilledEntryId], references: [id])
   description     String?
-  createdAt       DateTime        @default(now())
-  updatedAt       DateTime        @updatedAt
+  createdAt       DateTime            @default(now())
+  updatedAt       DateTime            @updatedAt
   documents       Document[]
+  plateChange     VehiclePlateChange?
 
   @@index([vehicleId, date])
   @@index([cycleId])
@@ -710,18 +741,19 @@ model Reminder {
 }
 
 model Settings {
-  id                Int      @id @default(1)
-  businessName      Json // {he, ar, en}
-  legalId           String? // ח"פ / עוסק מורשה
-  dealerLicenseNo   String?
-  address           String?
-  phone             String?
-  email             String?
-  logoDocumentId    String?
-  vatRate           Decimal  @default(18.00) @db.Decimal(5, 2)
-  reminderLeadDays  Json // {registration:30, insurance:30, driverLicense:60, taxiPermit:60, medical:60, taxiLicense:60, lease:30, document:30, dealerRegistration:30, transfer:2}
-  defaultLeaseTerms Json // responsibilities default all DRIVER + clauses per language
-  updatedAt         DateTime @updatedAt
+  id                             Int      @id @default(1)
+  businessName                   Json // {he, ar, en}
+  legalId                        String? // ח"פ / עוסק מורשה
+  dealerLicenseNo                String?
+  address                        String?
+  phone                          String?
+  email                          String?
+  logoDocumentId                 String?
+  vatRate                        Decimal  @default(18.00) @db.Decimal(5, 2)
+  vatMarginIncludesConversionTax Boolean  @default(false)
+  reminderLeadDays               Json // {registration:30, insurance:30, driverLicense:60, taxiPermit:60, medical:60, taxiLicense:60, lease:30, document:30, dealerRegistration:30, transfer:2}
+  defaultLeaseTerms              Json // responsibilities default all DRIVER + clauses per language
+  updatedAt                      DateTime @updatedAt
 }
 
 model AuditLog {

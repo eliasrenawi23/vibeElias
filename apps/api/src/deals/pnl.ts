@@ -5,6 +5,7 @@ import {
   vatFromGross,
   type CycleKind,
   type DecimalValue,
+  type ExpenseCategory,
   type PaidBy,
   type VatMode,
 } from '@renawi/shared';
@@ -16,12 +17,16 @@ import { consignmentAmounts, ConsignmentRule, dealVat } from './deal-rules';
  *
  * - revenue: sale price (OWNED) or our commission (CONSIGNED) + lease income attributed to the
  *   car within the cycle (charges minus credits) + expenses passed on to drivers (rebilled).
- * - costs: purchase price + expenses paid by us (net of reclaimable VAT) + VAT: the sale's VAT
- *   (margin or full) minus the input VAT of a FULL-VAT purchase.
+ * - costs: purchase price + expenses paid by us (net of reclaimable VAT; the taxi -> private
+ *   customs, category CONVERSION_TAX, are their own line `conversionTax`) + VAT: the sale's VAT
+ *   (margin or full) minus the input VAT of a FULL-VAT purchase. With
+ *   `vatMarginIncludesConversionTax` the margin base also deducts the customs.
  * - an open cycle uses the listing price as a proxy sale (`unrealised`).
  */
 
 export interface PnlExpense {
+  /** Omitted = an ordinary expense (not the conversion customs). */
+  category?: ExpenseCategory;
   amount: DecimalValue;
   paidBy: PaidBy;
   vatIncluded: boolean;
@@ -52,6 +57,8 @@ export interface CyclePnlInput {
   leaseIncome: DecimalValue;
   /** Charges created by passing the cycle's expenses on to drivers. */
   rebilled: DecimalValue;
+  /** `Settings.vatMarginIncludesConversionTax` (default false). */
+  vatMarginIncludesConversionTax?: boolean;
 }
 
 export interface CyclePnl {
@@ -67,7 +74,17 @@ export interface CyclePnl {
     rebilled: number;
     total: number;
   };
-  costs: { purchase: number; expenses: number; vatOnMargin: number; total: number };
+  /**
+   * `expenses`: paid by us, the conversion customs excluded; `conversionTax`: the cycle's
+   * CONVERSION_TAX expenses paid by us. `total` = purchase + expenses + conversionTax + VAT.
+   */
+  costs: {
+    purchase: number;
+    expenses: number;
+    conversionTax: number;
+    vatOnMargin: number;
+    total: number;
+  };
   profit: number;
   unrealised: boolean;
 }
@@ -81,11 +98,21 @@ export function expenseCost(expenses: readonly PnlExpense[], vatRate: DecimalVal
   );
 }
 
+/** Taxi -> private customs of the cycle paid by us (CONVERSION_TAX expenses). */
+export function conversionTaxCost(expenses: readonly PnlExpense[], vatRate: DecimalValue): number {
+  return expenseCost(
+    expenses.filter((e) => e.category === 'CONVERSION_TAX'),
+    vatRate,
+  );
+}
+
 export function cyclePnl(i: CyclePnlInput): CyclePnl {
   const unrealised = i.open && !i.sale;
   const listingPrice = i.listingPrice == null ? null : round2(i.listingPrice);
   const purchasePrice = i.purchase ? round2(i.purchase.price) : null;
   const salePrice = i.sale ? round2(i.sale.price) : null;
+  const conversionTax = conversionTaxCost(i.expenses, i.vatRate);
+  const marginDeductions = i.vatMarginIncludesConversionTax ? conversionTax : 0;
 
   let saleRevenue = 0;
   let commission: number | null = null;
@@ -101,11 +128,17 @@ export function cyclePnl(i: CyclePnlInput): CyclePnl {
     let saleVat = 0;
     if (i.sale) {
       saleRevenue = round2(i.sale.price);
-      saleVat = dealVat(i.sale.vatMode, i.sale.vatRate, i.sale.price, purchasePrice).amount;
+      saleVat = dealVat(
+        i.sale.vatMode,
+        i.sale.vatRate,
+        i.sale.price,
+        purchasePrice,
+        marginDeductions,
+      ).amount;
     } else if (unrealised && listingPrice) {
       saleRevenue = listingPrice;
       const mode: VatMode = i.purchase?.vatMode === 'FULL' ? 'FULL' : 'MARGIN';
-      saleVat = dealVat(mode, i.vatRate, listingPrice, purchasePrice).amount;
+      saleVat = dealVat(mode, i.vatRate, listingPrice, purchasePrice, marginDeductions).amount;
     }
     vat = sumMoney([saleVat, -inputVat]);
   } else {
@@ -128,9 +161,12 @@ export function cyclePnl(i: CyclePnlInput): CyclePnl {
 
   const leaseIncome = round2(i.leaseIncome);
   const rebilled = round2(i.rebilled);
-  const expenses = expenseCost(i.expenses, i.vatRate);
+  const expenses = expenseCost(
+    i.expenses.filter((e) => e.category !== 'CONVERSION_TAX'),
+    i.vatRate,
+  );
   const revenueTotal = sumMoney([saleRevenue, commission ?? 0, leaseIncome, rebilled]);
-  const costsTotal = sumMoney([purchaseCost, expenses, vat]);
+  const costsTotal = sumMoney([purchaseCost, expenses, conversionTax, vat]);
   return {
     purchasePrice,
     salePrice,
@@ -143,7 +179,13 @@ export function cyclePnl(i: CyclePnlInput): CyclePnl {
       rebilled,
       total: revenueTotal,
     },
-    costs: { purchase: purchaseCost, expenses, vatOnMargin: vat, total: costsTotal },
+    costs: {
+      purchase: purchaseCost,
+      expenses,
+      conversionTax,
+      vatOnMargin: vat,
+      total: costsTotal,
+    },
     profit: sumMoney([revenueTotal, -costsTotal]),
     unrealised,
   };

@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { CycleEndReason, CycleKind, Prisma } from '@prisma/client';
 import { round2, sumMoney } from '@renawi/shared';
-import { readVatRate } from '../common/business-settings';
+import { readVatMarginIncludesConversionTax, readVatRate } from '../common/business-settings';
 import { dbDate, isoOf } from '../common/dates';
 import { AppException } from '../common/errors/app-exception';
 import { PrismaService } from '../prisma/prisma.service';
@@ -44,6 +44,7 @@ const CYCLE_PNL_INCLUDE = {
   },
   expenses: {
     select: {
+      category: true,
       amount: true,
       paidBy: true,
       vatIncluded: true,
@@ -157,7 +158,10 @@ export class PnlService {
       include: CYCLE_PNL_INCLUDE,
     });
     if (cycles.length === 0) return [];
-    const vatRate = await readVatRate(this.prisma);
+    const [vatRate, marginIncludesConversionTax] = await Promise.all([
+      readVatRate(this.prisma),
+      readVatMarginIncludesConversionTax(this.prisma),
+    ]);
     const vehicleIds = [...new Set(cycles.map((c) => c.vehicleId))];
     // Lease income attributed to the cars; charges created by rebilling an expense are counted
     // as `rebilled` on the expense's cycle instead.
@@ -170,10 +174,15 @@ export class PnlService {
       },
       select: { vehicleId: true, type: true, amount: true, date: true },
     })) as IncomeEntry[];
-    return cycles.map((c) => this.toView(c, income, vatRate));
+    return cycles.map((c) => this.toView(c, income, vatRate, marginIncludesConversionTax));
   }
 
-  private toView(c: CycleRow, income: readonly IncomeEntry[], vatRate: Prisma.Decimal) {
+  private toView(
+    c: CycleRow,
+    income: readonly IncomeEntry[],
+    vatRate: Prisma.Decimal,
+    vatMarginIncludesConversionTax: boolean,
+  ) {
     const start = isoOf(c.startedAt);
     const end = c.endedAt ? isoOf(c.endedAt) : null;
     const inCycle = income.filter((e) => {
@@ -207,6 +216,7 @@ export class PnlService {
       vatRate,
       leaseIncome,
       rebilled,
+      vatMarginIncludesConversionTax,
     });
     return {
       id: c.id,

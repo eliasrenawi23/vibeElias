@@ -11,6 +11,7 @@ import {
   DealCreateSchema,
   DocumentCreateSchema,
   DriverCreateSchema,
+  EXPENSE_TO_CHARGE_KIND,
   InsuranceCreateSchema,
   LeaseActivateSchema,
   LeaseCreateSchema,
@@ -20,6 +21,8 @@ import {
   MeUpdateSchema,
   SettingsSchema,
   SettingsUpdateSchema,
+  VehicleConversionUpdateSchema,
+  VehicleConvertSchema,
   VehicleCreateSchema,
   VehicleQuerySchema,
   VehicleUpdateSchema,
@@ -83,6 +86,10 @@ describe('settings', () => {
 
   it('validates partial updates', () => {
     expect(SettingsUpdateSchema.parse({ vatRate: 17 })).toEqual({ vatRate: 17 });
+    expect(SettingsUpdateSchema.parse({ vatMarginIncludesConversionTax: true })).toEqual({
+      vatMarginIncludesConversionTax: true,
+    });
+    expect(DEFAULT_SETTINGS.vatMarginIncludesConversionTax).toBe(false);
     expect(SettingsUpdateSchema.safeParse({ vatRate: 101 }).success).toBe(false);
     expect(SettingsUpdateSchema.safeParse({ legalId: '123456789' }).success).toBe(false);
     expect(SettingsUpdateSchema.parse({ legalId: '520013954', phone: '' })).toEqual({
@@ -161,6 +168,48 @@ describe('vehicle', () => {
       'SOLD',
     ]);
     expect(VehicleQuerySchema.safeParse({ status: 'FLYING' }).success).toBe(false);
+    expect(VehicleQuerySchema.parse({ formerTaxi: 'false' }).formerTaxi).toBe(false);
+  });
+
+  it('accepts the expected conversion tax on create / update', () => {
+    expect(
+      VehicleCreateSchema.parse({ ...base, isTaxi: true, expectedConversionTax: 15000 })
+        .expectedConversionTax,
+    ).toBe(15000);
+    expect(VehicleUpdateSchema.parse({ expectedConversionTax: null })).toEqual({
+      expectedConversionTax: null,
+    });
+    expect(VehicleCreateSchema.safeParse({ ...base, expectedConversionTax: -1 }).success).toBe(
+      false,
+    );
+  });
+
+  it('validates the taxi -> private conversion body (plate as digits)', () => {
+    expect(
+      VehicleConvertSchema.parse({
+        convertedAt: '2026-11-20',
+        newPlateNo: '123-45-678',
+        conversionTax: 15000,
+      }),
+    ).toEqual({ convertedAt: '2026-11-20', newPlateNo: '12345678', conversionTax: 15000 });
+    expect(
+      VehicleConvertSchema.safeParse({ convertedAt: '2026-11-20', newPlateNo: '1234567' }).success,
+    ).toBe(false);
+    expect(
+      VehicleConvertSchema.safeParse({
+        convertedAt: '2026-11-20',
+        newPlateNo: '1234567',
+        conversionTax: -5,
+      }).success,
+    ).toBe(false);
+    expect(VehicleConversionUpdateSchema.parse({})).toEqual({});
+    expect(VehicleConversionUpdateSchema.parse({ newPlateNo: '12 345 67' })).toEqual({
+      newPlateNo: '1234567',
+    });
+  });
+
+  it('maps the customs expense to an OTHER charge when passed on', () => {
+    expect(EXPENSE_TO_CHARGE_KIND.CONVERSION_TAX).toBe('OTHER');
   });
 
   it('checks insurance scope rules', () => {

@@ -162,6 +162,7 @@ describe('Milestone 5 coverage: feed kinds, reminders, exports, backup (e2e)', (
       const vat = vatOnMargin(59_000, 50_000, 18);
       expect(row).toEqual({
         plateNo,
+        formerTaxiPlateNo: null,
         vehicle: 'מאזדה 3 2019',
         consignment: false,
         purchaseDate: daysFromToday(-30),
@@ -169,6 +170,7 @@ describe('Milestone 5 coverage: feed kinds, reminders, exports, backup (e2e)', (
         sellerIdNumber,
         purchasePrice: 50_000,
         repairsTotal: 1_000,
+        conversionTax: 0,
         saleDate: T,
         buyerName: 'רונית לוי',
         buyerIdNumber,

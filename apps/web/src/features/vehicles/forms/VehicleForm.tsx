@@ -19,6 +19,7 @@ import { FormPlateField } from '../../../shared/ui/FormPlateField';
 import { FormSelect } from '../../../shared/ui/FormSelect';
 import { FormTextAreaField } from '../../../shared/ui/FormTextAreaField';
 import { FormTextField } from '../../../shared/ui/FormTextField';
+import { Money } from '../../../shared/ui/Money';
 import { COMMON_MAKES } from '../lib/makes';
 import type { VehicleDetail } from '../types';
 import { OwnerDriverField } from './OwnerDriverField';
@@ -65,9 +66,9 @@ export function VehicleForm({
   const form = useZodForm(VehicleFormSchema, { defaultValues: toVehicleFormValues(vehicle) });
   const { control, setValue } = form;
   const { formError, handleError, clearFormError } = useFormErrors(form.setError);
-  const [plateNo, isTaxi, ownership] = useWatch({
+  const [plateNo, isTaxi, ownership, listingPrice, expectedTax] = useWatch({
     control,
-    name: ['plateNo', 'isTaxi', 'ownership'],
+    name: ['plateNo', 'isTaxi', 'ownership', 'listingPrice', 'expectedConversionTax'],
   });
 
   // A picked contact without a driver profile blocks saving (only while THIRD_PARTY).
@@ -332,11 +333,37 @@ export function VehicleForm({
               <FormMoneyField
                 control={control}
                 name="listingPrice"
-                label={t('vehicles.fields.listingPrice')}
+                label={isTaxi ? t('vehicles.priceAsTaxi') : t('vehicles.fields.listingPrice')}
                 min={0}
                 precision={0}
               />
             </Col>
+            {isTaxi && (
+              <>
+                <Col xs={24} sm={12} lg={8}>
+                  <FormMoneyField
+                    control={control}
+                    name="expectedConversionTax"
+                    label={t('vehicles.form.expectedConversionTax')}
+                    help={t('vehicles.form.expectedConversionTaxHelp')}
+                    min={0}
+                    precision={0}
+                  />
+                </Col>
+                <Col xs={24} sm={12} lg={8}>
+                  <Flex vertical gap={4} data-testid="price-as-private">
+                    <span className="ant-form-item-label">{t('vehicles.priceAsPrivate')}</span>
+                    <Typography.Text strong>
+                      {listingPrice != null && expectedTax != null ? (
+                        <Money amount={listingPrice + expectedTax} decimals={false} />
+                      ) : (
+                        <span className="rm-empty-value">—</span>
+                      )}
+                    </Typography.Text>
+                  </Flex>
+                </Col>
+              </>
+            )}
             <Col xs={24}>
               <FormTextAreaField
                 control={control}

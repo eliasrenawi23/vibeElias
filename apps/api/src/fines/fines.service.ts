@@ -24,12 +24,13 @@ import { LedgerService } from '../ledger/ledger.service';
 import { toDbMoney } from '../prisma/prisma.decimal';
 import { zeroCounts } from '../common/status-counts';
 import { PrismaService } from '../prisma/prisma.service';
+import { FORMER_TAXI_PLATE_ARGS, formerTaxiPlateOf } from '../vehicles/conversion-rules';
 
 /** Days before the reassignment deadline at which a NEW fine is flagged. */
 export const FINE_DUE_SOON_DAYS = 14;
 
 const FINE_INCLUDE = {
-  vehicle: { select: { id: true, plateNo: true } },
+  vehicle: { select: { id: true, plateNo: true, plateChanges: FORMER_TAXI_PLATE_ARGS } },
   driver: { select: { id: true, contact: { select: CONTACT_NAME_SELECT } } },
   contract: { select: { id: true, contractNo: true } },
 } satisfies Prisma.TrafficFineInclude;
@@ -37,7 +38,8 @@ type FineWithRefs = Prisma.TrafficFineGetPayload<{ include: typeof FINE_INCLUDE 
 
 /** `GET /fines` item / `GET /fines/:id` (also returned by every fine mutation). */
 export interface FineView extends TrafficFine {
-  vehicle: { id: string; plateNo: string };
+  /** `formerTaxiPlateNo`: old taxi plate of a car converted to private (null otherwise). */
+  vehicle: { id: string; plateNo: string; formerTaxiPlateNo: string | null };
   driver: NamedRef | null;
   contract: { id: string; contractNo: number } | null;
   alerts: FineAlert[];
@@ -275,9 +277,10 @@ export class FinesService {
 
   private toView(row: FineWithRefs, today: string): FineView {
     const { vehicle, driver, contract, ...fine } = row;
+    const { plateChanges, ...vehicleRef } = vehicle;
     return {
       ...fine,
-      vehicle,
+      vehicle: { ...vehicleRef, formerTaxiPlateNo: formerTaxiPlateOf(plateChanges) },
       driver: driver ? { id: driver.id, name: contactDisplayName(driver.contact) } : null,
       contract: contract ?? null,
       alerts: fineAlerts(fine.status, isoOrNull(fine.reassignDeadline), today),
@@ -360,7 +363,13 @@ export class FinesService {
         { driver: { contact: { lastName: text } } },
       ];
       const plate = normalizePlate(token);
-      if (/^\d{2,8}$/.test(plate)) or.push({ vehicle: { plateNo: { contains: plate } } });
+      if (/^\d{2,8}$/.test(plate)) {
+        or.push(
+          { vehicle: { plateNo: { contains: plate } } },
+          // Old plates too: a fine notice carries the plate of the offence date (taxi plate).
+          { vehicle: { plateChanges: { some: { oldPlateNo: { contains: plate } } } } },
+        );
+      }
       and.push({ OR: or });
     }
     return and.length ? { AND: and } : {};

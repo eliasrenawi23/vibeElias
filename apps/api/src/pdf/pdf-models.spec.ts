@@ -548,6 +548,52 @@ describe('disclosure form', () => {
       PdfNotApplicableError,
     );
   });
+
+  it('former taxi (converted to private): "was used as a taxi" and the former taxi plate', () => {
+    const converted: DealInput = {
+      ...sale,
+      vehicle: {
+        ...sale.vehicle,
+        plateNo: '24519803',
+        isTaxi: false,
+        formerTaxi: true,
+        formerTaxiPlateNo: '4185226',
+      },
+    };
+    const m = buildDisclosure(converted, ctx());
+    expect(m.data).toMatchObject({
+      history: { taxi: true },
+      usedAsTaxi: true,
+      formerTaxiPlateNo: '4185226',
+    });
+    const he = textOf(engine.render(m));
+    expect(he).toContain('הרכב שימש כמונית');
+    expect(he).toContain('מספר רישוי קודם (מונית)');
+    expect(he).toContain('41-852-26');
+    expect(he).toContain('245-19-803');
+    expect(textOf(engine.render(buildDisclosure(converted, ctx('en'))))).toContain(
+      'The vehicle was used as a taxi',
+    );
+    // A car that never was a taxi says nothing about it.
+    const plain = buildDisclosure(sale, ctx());
+    expect(plain.data).toMatchObject({ usedAsTaxi: false, formerTaxiPlateNo: null });
+    expect(textOf(engine.render(plain))).not.toContain('הרכב שימש כמונית');
+  });
+});
+
+describe('sale agreement of a former taxi', () => {
+  it('prints the previous (taxi) plate in the vehicle table only when there is one', () => {
+    const converted: DealInput = {
+      ...sale,
+      vehicle: { ...sale.vehicle, formerTaxi: true, formerTaxiPlateNo: '4185226' },
+    };
+    const text = textOf(engine.render(buildSaleAgreement(converted, ctx())));
+    expect(text).toContain('מספר רישוי קודם (מונית)');
+    expect(text).toContain('41-852-26');
+    const ar = textOf(engine.render(buildSaleAgreement(converted, ctx('ar'))));
+    expect(ar).toContain('رقم التسجيل السابق (تاكسي)');
+    expect(textOf(engine.render(buildSaleAgreement(sale, ctx())))).not.toContain('מספר רישוי קודם');
+  });
 });
 
 describe('consignment agreement', () => {

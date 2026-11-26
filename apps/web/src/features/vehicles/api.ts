@@ -8,6 +8,8 @@ import type {
   InsuranceUpdate,
   OdometerCreate,
   Paginated,
+  VehicleConversionUpdate,
+  VehicleConvert,
   VehicleCreate,
   VehicleStatusChange,
   VehicleSummary,
@@ -38,7 +40,11 @@ export function fetchVehicles(
   signal?: AbortSignal,
 ): Promise<Paginated<VehicleListItem>> {
   return http.get<Paginated<VehicleListItem>>('/vehicles', {
-    query: { ...query, isTaxi: query.isTaxi ? true : undefined },
+    query: {
+      ...query,
+      isTaxi: query.isTaxi ? true : undefined,
+      formerTaxi: query.formerTaxi ? true : undefined,
+    },
     signal,
   });
 }
@@ -55,7 +61,11 @@ export function fetchVehicleSummary(
   signal?: AbortSignal,
 ): Promise<VehicleSummary> {
   return http.get<VehicleSummary>('/vehicles/summary', {
-    query: { ...query, isTaxi: query.isTaxi ? true : undefined },
+    query: {
+      ...query,
+      isTaxi: query.isTaxi ? true : undefined,
+      formerTaxi: query.formerTaxi ? true : undefined,
+    },
     signal,
   });
 }
@@ -88,6 +98,24 @@ export function updateVehicle(id: string, body: VehicleUpdate): Promise<VehicleD
  */
 export function changeVehicleStatus(id: string, body: VehicleStatusChange): Promise<VehicleDetail> {
   return http.post<VehicleDetail>(`${vehiclePath(id)}/status`, body);
+}
+
+/**
+ * `POST /api/vehicles/:id/convert-to-private`: taxi -> private (new plate, customs expense).
+ * 409 `errors.licenseStillRegistered` / `errors.vehicleLeased` / ..., field errors on `newPlateNo`
+ * (`validation.duplicate` / `samePlate` / `privatePlateExpected`) and `convertedAt`; returns the
+ * full vehicle file.
+ */
+export function convertToPrivate(id: string, body: VehicleConvert): Promise<VehicleDetail> {
+  return http.post<VehicleDetail>(`${vehiclePath(id)}/convert-to-private`, body);
+}
+
+/** `PATCH /api/vehicles/:id/conversion`: correct the latest conversion; returns the vehicle file. */
+export function updateConversion(
+  id: string,
+  body: VehicleConversionUpdate,
+): Promise<VehicleDetail> {
+  return http.patch<VehicleDetail>(`${vehiclePath(id)}/conversion`, body);
 }
 
 /* ---- Expenses ------------------------------------------------------------------------------ */

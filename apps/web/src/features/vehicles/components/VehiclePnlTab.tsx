@@ -146,6 +146,7 @@ export function CyclePnlCard({ cycle }: { cycle: CyclePnl }) {
             items={[
               ...line('purchase', t('vehicles.pnl.purchase'), cycle.costs.purchase, consigned),
               ...line('expenses', t('vehicles.pnl.expenses'), cycle.costs.expenses, false),
+              ...line('conversionTax', t('vehicles.pnl.conversionTax'), cycle.costs.conversionTax),
               ...line('vatOnMargin', t('vehicles.pnl.vatOnMargin'), cycle.costs.vatOnMargin),
               {
                 key: 'total',

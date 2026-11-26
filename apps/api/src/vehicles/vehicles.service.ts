@@ -22,6 +22,7 @@ import { CONTACT_NAME_SELECT, searchTokens } from '../common/refs';
 import { toDbMoneyOrNull } from '../prisma/prisma.decimal';
 import { zeroCounts } from '../common/status-counts';
 import { PrismaService } from '../prisma/prisma.service';
+import { conversionBlockers } from './conversion-rules';
 import { checkStatusTransition, STOCK_STATUSES, vehicleAlerts } from './vehicle-rules';
 import {
   summarizeExpenses,
@@ -126,14 +127,38 @@ export class VehiclesService {
     if (!row) throw AppException.notFound();
     const { insurance, odometer, _count, ...withRefs } = row;
     const item = this.toListItem(withRefs, this.clock.today(), await this.registrationLeadDays());
-    const cycles = await this.cycleViews(id);
     const open = item.openCycle;
-    const openExpenses = open
-      ? await this.prisma.vehicleExpense.findMany({
-          where: { cycleId: open.id },
-          select: { category: true, amount: true, paidBy: true },
-        })
-      : [];
+    const [cycles, openExpenses, plateHistory, hasOpenSegment] = await Promise.all([
+      this.cycleViews(id),
+      open
+        ? this.prisma.vehicleExpense.findMany({
+            where: { cycleId: open.id },
+            select: { category: true, amount: true, paidBy: true },
+          })
+        : Promise.resolve([]),
+      this.prisma.vehiclePlateChange.findMany({
+        where: { vehicleId: id },
+        orderBy: [{ changedAt: 'desc' }, { createdAt: 'desc' }],
+        select: {
+          id: true,
+          oldPlateNo: true,
+          newPlateNo: true,
+          changedAt: true,
+          reason: true,
+          conversionTax: true,
+          expenseId: true,
+          notes: true,
+        },
+      }),
+      this.hasOpenSegment(id),
+    ]);
+    const blockers = conversionBlockers({
+      isTaxi: row.isTaxi,
+      ownership: row.ownership,
+      status: row.status,
+      hasOpenSegment,
+      hasRegisteredLicense: row.registeredLicense !== null,
+    });
     return {
       ...item,
       cycles,
@@ -141,6 +166,8 @@ export class VehiclesService {
       odometer,
       expenseSummary: { cycleId: open?.id ?? null, ...summarizeExpenses(openExpenses) },
       documentCount: _count.documents,
+      plateHistory,
+      canConvert: { allowed: blockers.length === 0, blockers },
     };
   }
 
@@ -220,6 +247,8 @@ export class VehiclesService {
             meterSealedAt: dto.meterSealedAt ? dbDate(dto.meterSealedAt) : null,
             location: dto.location ?? null,
             listingPrice: toDbMoneyOrNull(dto.listingPrice),
+            // Only meaningful while the car is a taxi.
+            expectedConversionTax: dto.isTaxi ? toDbMoneyOrNull(dto.expectedConversionTax) : null,
             notes: dto.notes ?? null,
           },
         });
@@ -241,10 +270,23 @@ export class VehiclesService {
    */
   async update(id: string, dto: VehicleUpdate): Promise<VehicleDetail> {
     const current = await this.getRow(id);
+    // A conversion to a private car is one-way.
+    if (dto.isTaxi === true && current.convertedAt) {
+      throw AppException.conflict(ErrorKey.invalidTransition);
+    }
     if (dto.plateNo !== undefined && dto.plateNo !== current.plateNo) {
       await this.assertUnique(dto.plateNo, null, id);
     }
     if (dto.vin && dto.vin !== current.vin) await this.assertUnique(null, dto.vin, id);
+    const isTaxi = dto.isTaxi ?? current.isTaxi;
+    // The expected customs only exist while the car is a taxi.
+    const expectedConversionTax = !isTaxi
+      ? current.expectedConversionTax === null && dto.expectedConversionTax === undefined
+        ? undefined
+        : null
+      : dto.expectedConversionTax === undefined
+        ? undefined
+        : toDbMoneyOrNull(dto.expectedConversionTax);
 
     const ownership = dto.ownership ?? current.ownership;
     const ownershipChanged = ownership !== current.ownership;
@@ -286,6 +328,7 @@ export class VehiclesService {
             location: dto.location,
             listingPrice:
               dto.listingPrice === undefined ? undefined : toDbMoneyOrNull(dto.listingPrice),
+            expectedConversionTax,
             notes: dto.notes,
           },
         });
@@ -405,14 +448,18 @@ export class VehiclesService {
     };
   }
 
+  /**
+   * 409 `validation.duplicate` on `plateNo` / `vin` when another vehicle uses it. A plate that is
+   * any vehicle's old plate (`VehiclePlateChange.oldPlateNo`) is retired and never reused.
+   */
   private async assertUnique(plateNo: string | null, vin: string | null, exceptId?: string) {
     const not = exceptId ? { id: { not: exceptId } } : {};
     if (plateNo) {
-      const other = await this.prisma.vehicle.findFirst({
-        where: { plateNo, ...not },
-        select: { id: true },
-      });
-      if (other) throw AppException.duplicate('plateNo');
+      const [other, retired] = await Promise.all([
+        this.prisma.vehicle.findFirst({ where: { plateNo, ...not }, select: { id: true } }),
+        this.isRetiredPlate(plateNo),
+      ]);
+      if (other || retired) throw AppException.duplicate('plateNo');
     }
     if (vin) {
       const other = await this.prisma.vehicle.findFirst({
@@ -421,6 +468,11 @@ export class VehiclesService {
       });
       if (other) throw AppException.duplicate('vin');
     }
+  }
+
+  /** The plate is some vehicle's old plate (retired by a plate change). */
+  async isRetiredPlate(plateNo: string, tx: Tx = this.prisma): Promise<boolean> {
+    return (await tx.vehiclePlateChange.count({ where: { oldPlateNo: plateNo } })) > 0;
   }
 
   private async assertDriver(driverId: string) {
@@ -438,6 +490,9 @@ export class VehiclesService {
     if (query.status?.length) and.push({ status: { in: query.status } });
     if (query.ownership?.length) and.push({ ownership: { in: query.ownership } });
     if (query.isTaxi !== undefined) and.push({ isTaxi: query.isTaxi });
+    if (query.formerTaxi !== undefined) {
+      and.push({ convertedAt: query.formerTaxi ? { not: null } : null });
+    }
     if (query.make) and.push({ make: { equals: query.make, mode: 'insensitive' } });
     if (query.yearFrom !== undefined || query.yearTo !== undefined) {
       let from = query.yearFrom;
@@ -454,7 +509,13 @@ export class VehiclesService {
         { vin: { contains: token.replace(/[\s-]/g, '').toUpperCase() } },
       ];
       const plate = normalizePlate(token);
-      if (/^\d{2,8}$/.test(plate)) or.push({ plateNo: { contains: plate } });
+      if (/^\d{2,8}$/.test(plate)) {
+        or.push(
+          { plateNo: { contains: plate } },
+          // Old (retired) plates, e.g. the taxi plate of a converted car.
+          { plateChanges: { some: { oldPlateNo: { contains: plate } } } },
+        );
+      }
       and.push({ OR: or });
     }
     return and.length ? { AND: and } : {};

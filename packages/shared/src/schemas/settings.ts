@@ -94,6 +94,11 @@ export const SettingsSchema = z.object({
   email: optionalEmail,
   /** VAT percent snapshot source, e.g. 18. */
   vatRate: percent.default(DEFAULT_VAT_RATE),
+  /**
+   * VAT on the margin: also deduct the cycle's taxi -> private conversion tax (customs) from the
+   * margin base. Off by default (accountant's call).
+   */
+  vatMarginIncludesConversionTax: z.boolean().default(false),
   reminderLeadDays: ReminderLeadDaysSchema,
   defaultLeaseTerms: DefaultLeaseTermsSchema,
 });
@@ -121,6 +126,7 @@ export const DEFAULT_SETTINGS: Readonly<Settings> = Object.freeze({
   phone: null,
   email: null,
   vatRate: DEFAULT_VAT_RATE,
+  vatMarginIncludesConversionTax: false,
   reminderLeadDays: { ...DEFAULT_REMINDER_LEAD_DAYS },
   defaultLeaseTerms: {
     responsibilities: { ...DEFAULT_RESPONSIBILITIES },

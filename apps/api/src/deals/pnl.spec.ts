@@ -48,7 +48,13 @@ describe('cyclePnl', () => {
       listingPrice: 61_000,
       commission: null,
       revenue: { sale: 59_000, commission: 0, leaseIncome: 2000, rebilled: 500, total: 61_500 },
-      costs: { purchase: 50_000, expenses: 1300, vatOnMargin: 1372.88, total: 52_672.88 },
+      costs: {
+        purchase: 50_000,
+        expenses: 1300,
+        conversionTax: 0,
+        vatOnMargin: 1372.88,
+        total: 52_672.88,
+      },
       profit: 8827.12,
       unrealised: false,
     });
@@ -137,5 +143,69 @@ describe('cyclePnl', () => {
     });
     const open = cyclePnl({ ...consigned, open: true, sale: null, listingPrice: 132_000 });
     expect(open).toMatchObject({ commission: 12_000, unrealised: true, profit: 11_650 });
+  });
+});
+
+describe('cyclePnl: taxi -> private conversion customs', () => {
+  // The owner's example: bought as a taxi for 30,000, customs 15,000, sold as private.
+  const converted: CyclePnlInput = {
+    ...owned,
+    purchase: { price: 30_000, vatMode: 'NONE', vatRate: 18 },
+    sale: { price: 50_000, vatMode: 'MARGIN', vatRate: 18, commissionAmount: null },
+    expenses: [
+      {
+        category: 'CONVERSION_TAX',
+        amount: 15_000,
+        paidBy: 'US',
+        vatIncluded: false,
+        vatReclaimable: false,
+      },
+      { category: 'REPAIR', amount: 1000, paidBy: 'US', vatIncluded: true, vatReclaimable: false },
+    ],
+  };
+
+  it('is its own cost line: cost as private = purchase + 15,000', () => {
+    const pnl = cyclePnl(converted);
+    const vat = 3050.85; // (50,000 - 30,000) x 18 / 118: margin base unchanged by default
+    expect(pnl.costs).toEqual({
+      purchase: 30_000,
+      expenses: 1000,
+      conversionTax: 15_000,
+      vatOnMargin: vat,
+      total: 49_050.85,
+    });
+    expect(pnl.profit).toBe(949.15);
+    // Costs paid by someone else never count.
+    const driverPaid = cyclePnl({
+      ...converted,
+      expenses: [{ ...converted.expenses[0]!, paidBy: 'DRIVER' }],
+    });
+    expect(driverPaid.costs.conversionTax).toBe(0);
+  });
+
+  it('VAT margin base deducts the customs only when the setting is on', () => {
+    expect(
+      cyclePnl({ ...converted, vatMarginIncludesConversionTax: false }).costs.vatOnMargin,
+    ).toBe(3050.85);
+    // max(0, 50,000 - 30,000 - 15,000) = 5,000 -> 5,000 x 18 / 118
+    expect(cyclePnl({ ...converted, vatMarginIncludesConversionTax: true }).costs.vatOnMargin).toBe(
+      762.71,
+    );
+    // A margin smaller than the customs owes nothing.
+    const thin = cyclePnl({
+      ...converted,
+      sale: { price: 40_000, vatMode: 'MARGIN', vatRate: 18, commissionAmount: null },
+      vatMarginIncludesConversionTax: true,
+    });
+    expect(thin.costs.vatOnMargin).toBe(0);
+    // An open cycle's proxy sale (listing price) follows the same rule.
+    const open = cyclePnl({
+      ...converted,
+      open: true,
+      sale: null,
+      listingPrice: 50_000,
+      vatMarginIncludesConversionTax: true,
+    });
+    expect(open.costs.vatOnMargin).toBe(762.71);
   });
 });

@@ -1,9 +1,10 @@
 import { Deal, DealPayment, Prisma } from '@prisma/client';
 import type { DealAlert } from '@renawi/shared';
 import { CONTACT_NAME_SELECT, NamedRef } from '../common/refs';
+import { FORMER_TAXI_PLATE_ARGS } from '../vehicles/conversion-rules';
 import { DealMoney, DealVat, TransferChecklistView } from './deal-rules';
 
-/** Vehicle reference on deals. */
+/** Vehicle reference on deals (as loaded; `plateChanges` becomes `formerTaxiPlateNo`). */
 export const DEAL_VEHICLE_SELECT = {
   id: true,
   plateNo: true,
@@ -12,8 +13,14 @@ export const DEAL_VEHICLE_SELECT = {
   year: true,
   isTaxi: true,
   status: true,
+  plateChanges: FORMER_TAXI_PLATE_ARGS,
 } satisfies Prisma.VehicleSelect;
-export type DealVehicleRef = Prisma.VehicleGetPayload<{ select: typeof DEAL_VEHICLE_SELECT }>;
+type DealVehicleRow = Prisma.VehicleGetPayload<{ select: typeof DEAL_VEHICLE_SELECT }>;
+/** Vehicle reference on deals: `{ id, plateNo, make, model, year, isTaxi, status, formerTaxiPlateNo }`. */
+export type DealVehicleRef = Omit<DealVehicleRow, 'plateChanges'> & {
+  /** Old taxi plate of a car converted to private; null otherwise. */
+  formerTaxiPlateNo: string | null;
+};
 
 /** Relations loaded for list items. */
 export const DEAL_LIST_INCLUDE = {
@@ -45,6 +52,11 @@ export const DEAL_DETAIL_INCLUDE = {
     include: {
       consignor: { select: CONTACT_NAME_SELECT },
       purchaseDeal: { select: PURCHASE_REF_SELECT },
+      // Taxi -> private customs (VAT margin base when the setting is on).
+      expenses: {
+        where: { category: 'CONVERSION_TAX', paidBy: 'US' },
+        select: { amount: true },
+      },
     },
   },
   tradeInDeal: {

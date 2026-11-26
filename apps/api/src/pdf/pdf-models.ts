@@ -88,6 +88,8 @@ export interface PdfVehicle {
   engineCc: number | null;
   testExpiry: string | null;
   isTaxi: boolean;
+  /** Old taxi plate of a car converted to private (printed as "previous plate (taxi)"). */
+  formerTaxiPlateNo?: string | null;
 }
 
 export interface PdfContext {
@@ -489,7 +491,8 @@ export interface DealInput {
   sellerIsVatBusiness: boolean;
   isTradeIn: boolean;
   counterparty: PdfPerson;
-  vehicle: PdfVehicle & { dealerRegisteredAt: string | null };
+  /** `formerTaxi`: converted taxi -> private (`Vehicle.convertedAt` set). */
+  vehicle: PdfVehicle & { dealerRegisteredAt: string | null; formerTaxi?: boolean };
   payments: DealPaymentRow[];
   /** SALE: the trade-in purchase (vehicle + agreed value). */
   tradeIn: { vehicle: PdfVehicle; value: number } | null;
@@ -640,6 +643,10 @@ export interface DisclosureData {
     rental: boolean | null;
     school: boolean | null;
   };
+  /** The car is or was a taxi: the form states it was used as a taxi. */
+  usedAsTaxi: boolean;
+  /** Former taxi plate of a car converted to private; null otherwise. */
+  formerTaxiPlateNo: string | null;
   km: number | null;
   price: number;
   signedOn: string | null;
@@ -661,6 +668,9 @@ export function buildDisclosure(input: DealInput, ctx: PdfContext): PdfModel<Dis
   else if (input.vehicle.dealerRegisteredAt || !input.previousOwner)
     registeredOwner = { ...dealer, isDealer: true };
   else registeredOwner = { ...input.previousOwner, isDealer: false };
+  const formerTaxiPlateNo = input.vehicle.formerTaxiPlateNo ?? null;
+  const usedAsTaxi =
+    input.vehicle.isTaxi || input.vehicle.formerTaxi === true || formerTaxiPlateNo !== null;
   const title = pdfT(ctx.lang, 'titles.disclosure-form');
   return {
     ...base('disclosure-form', ctx, title, pdfDocumentNumber('DF', { no: input.dealNo })),
@@ -675,11 +685,13 @@ export function buildDisclosure(input: DealInput, ctx: PdfContext): PdfModel<Dis
       vehicle: input.vehicle,
       hands: input.vehicle.hand,
       history: {
-        taxi: input.vehicle.isTaxi ? true : null,
+        taxi: usedAsTaxi ? true : null,
         leasing: null,
         rental: null,
         school: null,
       },
+      usedAsTaxi,
+      formerTaxiPlateNo,
       km: input.vehicle.km,
       price: round2(input.price),
       signedOn: input.disclosureSignedAt ? input.disclosureSignedAt.slice(0, 10) : null,

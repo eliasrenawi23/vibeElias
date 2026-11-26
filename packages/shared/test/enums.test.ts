@@ -17,6 +17,7 @@ const PLAN_ENUMS = [
   'CycleEndReason',
   'CommissionMode',
   'ExpenseCategory',
+  'PlateChangeReason',
   'InsuranceType',
   'InsuranceScope',
   'PaidBy',

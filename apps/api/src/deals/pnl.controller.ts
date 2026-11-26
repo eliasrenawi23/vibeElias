@@ -14,9 +14,12 @@ export class VehiclePnlController {
       'Profit & loss per inventory cycle (newest first, cancelled cycles left out). revenue: ' +
       'sale price (OWNED) or commission (CONSIGNED) + leaseIncome (non-void charges minus ' +
       'credits attributed to the car within the cycle) + rebilled (expenses passed on to ' +
-      'drivers). costs: purchase + expenses paid by us (net of reclaimable VAT) + vatOnMargin ' +
-      '(sale VAT minus input VAT of a FULL-VAT purchase; consignment VAT is on the commission ' +
-      'at business level). An open cycle uses the listing price as proxy sale (unrealised)',
+      'drivers). costs: purchase + expenses paid by us (net of reclaimable VAT, customs ' +
+      'excluded) + conversionTax (CONVERSION_TAX expenses paid by us: taxi -> private customs) + ' +
+      'vatOnMargin (sale VAT minus input VAT of a FULL-VAT purchase; with ' +
+      'Settings.vatMarginIncludesConversionTax the MARGIN base also deducts conversionTax; ' +
+      'consignment VAT is on the commission at business level); total = sum of the parts. An ' +
+      'open cycle uses the listing price as proxy sale (unrealised)',
   })
   vehicle(@Param('id') id: string): Promise<VehiclePnl> {
     return this.pnl.vehiclePnl(id);

@@ -41,6 +41,20 @@ describe('VAT', () => {
     expect(dealVat('MARGIN', 18, 11_800, null)).toMatchObject({ base: 11_800, amount: 1800 });
   });
 
+  it('dealVat MARGIN deducts the conversion customs when asked (setting on)', () => {
+    // 50,000 - 30,000 - 15,000 = 5,000
+    expect(dealVat('MARGIN', 18, 50_000, 30_000, 15_000)).toEqual({
+      mode: 'MARGIN',
+      rate: 18,
+      base: 5000,
+      amount: 762.71,
+    });
+    expect(dealVat('MARGIN', 18, 50_000, 30_000)).toMatchObject({ base: 20_000, amount: 3050.85 });
+    expect(dealVat('MARGIN', 18, 40_000, 30_000, 15_000)).toMatchObject({ base: 0, amount: 0 });
+    // FULL / NONE ignore it.
+    expect(dealVat('FULL', 18, 59_000, 50_000, 15_000).base).toBe(59_000);
+  });
+
   it('dealVat FULL is the VAT contained in the full price; NONE is zero', () => {
     expect(dealVat('FULL', 18, 59_000, 50_000)).toEqual({
       mode: 'FULL',

@@ -4,6 +4,7 @@ import {
   DollarOutlined,
   EditOutlined,
   FilePdfOutlined,
+  CarOutlined,
   PlusOutlined,
   RollbackOutlined,
   SafetyCertificateOutlined,
@@ -14,9 +15,9 @@ import {
 import type { VehicleCreate } from '@renawi/shared';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Alert, App, Button, Flex } from 'antd';
-import { useState } from 'react';
+import { useState, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Link, useParams } from 'react-router';
+import { Link, useNavigate, useParams } from 'react-router';
 import { AutoDir } from '../../../shared/lib/bidi';
 import { GeneratePdfDialog, usePdfTemplateName } from '../../documents/components/GeneratePdf';
 import { consignmentPdfChoice } from '../../documents/pdf';
@@ -39,18 +40,21 @@ import { fetchVehicle, updateVehicle } from '../api';
 import { VehicleDealsTab } from '../components/VehicleDealsTab';
 import { VehicleExpensesTab } from '../components/VehicleExpensesTab';
 import { VehicleFinesTab } from '../components/VehicleFinesTab';
+import { ConversionBlockers } from '../components/ConversionBlockers';
 import { VehicleInfoTab } from '../components/VehicleInfoTab';
 import { VehicleInsuranceTab } from '../components/VehicleInsuranceTab';
 import { VehicleLeasesTab } from '../components/VehicleLeasesTab';
 import { VehiclePnlTab } from '../components/VehiclePnlTab';
 import { ConsignDialog } from '../dialogs/ConsignDialog';
+import { ConversionCorrectionDialog } from '../dialogs/ConversionCorrectionDialog';
+import { ConvertToPrivateDialog } from '../dialogs/ConvertToPrivateDialog';
 import { ExpenseDialog } from '../dialogs/ExpenseDialog';
 import { OdometerDialog } from '../dialogs/OdometerDialog';
 import { ReturnCycleDialog } from '../dialogs/ReturnCycleDialog';
 import { StatusDialog } from '../dialogs/StatusDialog';
 import { VehicleForm } from '../forms/VehicleForm';
 import { toVehicleUpdateBody } from '../forms/vehicleFormSchema';
-import { canConsign, returnableCycle } from '../lib/vehicleRules';
+import { canConsign, latestConversion, returnableCycle } from '../lib/vehicleRules';
 import { vehicleKeys } from '../queryKeys';
 import type { VehicleDetail } from '../types';
 
@@ -62,7 +66,9 @@ export type VehicleActionKey =
   | 'expense'
   | 'odometer'
   | 'consignmentPdf'
-  | 'reminder';
+  | 'reminder'
+  | 'convert'
+  | 'correctConversion';
 
 /** `/vehicles/:id`: header with actions, and the vehicle file in tabs. */
 export function VehicleDetailPage() {
@@ -76,6 +82,7 @@ function VehicleView({ id }: { id: string }) {
   const { t } = useTranslation();
   const { message } = App.useApp();
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
   const templateName = usePdfTemplateName();
   const [editing, setEditing] = useState(false);
   const [dialog, setDialog] = useState<Dialog>(null);
@@ -115,10 +122,28 @@ function VehicleView({ id }: { id: string }) {
   });
 
   /** A dialog saved: close it, refresh, and confirm. */
-  const saved = (text: string, updated?: VehicleDetail) => {
+  const saved = (text: ReactNode, updated?: VehicleDetail) => {
     setDialog(null);
     void (updated ? applyVehicle(updated) : refresh());
     void message.success(text);
+  };
+
+  /** Converted to private: close, refresh, and remind the user to upload the customs receipt. */
+  const converted = (updated: VehicleDetail) => {
+    saved(
+      <span data-testid="convert-done">
+        {t('vehicles.convert.done')}. {t('vehicles.convert.receiptHint')}{' '}
+        <Button
+          type="link"
+          size="small"
+          className="rm-inline-link"
+          onClick={() => navigate('?tab=documents')}
+        >
+          {t('vehicles.convert.receiptAction')}
+        </Button>
+      </span>,
+      updated,
+    );
   };
 
   const section = { title: t('nav.vehicles'), to: '/vehicles' };
@@ -140,6 +165,7 @@ function VehicleView({ id }: { id: string }) {
   const v = vehicle;
   const returnCycle = returnableCycle(vehicle);
   const consignmentPdf = consignmentPdfChoice(vehicle.openCycle);
+  const conversion = latestConversion(vehicle);
 
   const actions: ActionDef<VehicleActionKey>[] = [
     { key: 'edit', label: t('actions.edit'), icon: <EditOutlined /> },
@@ -159,6 +185,16 @@ function VehicleView({ id }: { id: string }) {
             key: 'return' as const,
             label: t('vehicles.actions.returnToConsignor'),
             icon: <RollbackOutlined className="rm-flip-rtl" />,
+          },
+        ]
+      : []),
+    ...(vehicle.isTaxi
+      ? [
+          {
+            key: 'convert' as const,
+            label: t('vehicles.actions.convertToPrivate'),
+            icon: <CarOutlined />,
+            disabled: vehicle.canConvert ? !vehicle.canConvert.allowed : false,
           },
         ]
       : []),
@@ -199,6 +235,11 @@ function VehicleView({ id }: { id: string }) {
           <StatusTag enumName="VehicleStatus" value={v.status} />
           <StatusTag enumName="VehicleOwnership" value={v.ownership} />
           {v.isTaxi && <ToneTag tone="accent">{t('vehicles.taxi')}</ToneTag>}
+          {v.formerTaxi && (
+            <ToneTag tone="neutral" data-testid="former-taxi-tag">
+              {t('vehicles.formerTaxi')}
+            </ToneTag>
+          )}
           <AlertTags enumName="VehicleAlert" alerts={v.alerts} hideEmpty />
         </>
       }
@@ -222,10 +263,16 @@ function VehicleView({ id }: { id: string }) {
                 label: t('vehicles.fields.currentKm'),
                 value: <KmText value={v.currentKm} />,
               },
+              Boolean(v.formerTaxiPlateNo) && {
+                key: 'formerTaxiPlate',
+                icon: <CarOutlined />,
+                label: t('vehicles.taxiPlate'),
+                value: <PlateNo value={v.formerTaxiPlateNo} />,
+              },
               v.listingPrice !== null && {
                 key: 'listingPrice',
                 icon: <DollarOutlined />,
-                label: t('vehicles.fields.listingPrice'),
+                label: v.isTaxi ? t('vehicles.priceAsTaxi') : t('vehicles.fields.listingPrice'),
                 value: <Money amount={v.listingPrice} decimals={false} />,
               },
               v.registeredLicense && {
@@ -233,7 +280,10 @@ function VehicleView({ id }: { id: string }) {
                 icon: <SafetyCertificateOutlined />,
                 label: t('vehicles.fields.registeredLicense'),
                 value: (
-                  <LicenseTag licenseNo={v.registeredLicense.licenseNo} id={v.registeredLicense.id} />
+                  <LicenseTag
+                    licenseNo={v.registeredLicense.licenseNo}
+                    id={v.registeredLicense.id}
+                  />
                 ),
               },
               v.ownerDriver && {
@@ -258,7 +308,11 @@ function VehicleView({ id }: { id: string }) {
                 key: 'info',
                 label: t('vehicles.detailTabs.info'),
                 children: (
-                  <VehicleInfoTab vehicle={vehicle} onAddOdometer={() => setDialog('odometer')} />
+                  <VehicleInfoTab
+                    vehicle={vehicle}
+                    onAddOdometer={() => setDialog('odometer')}
+                    onCorrectConversion={() => setDialog('correctConversion')}
+                  />
                 ),
               },
               {
@@ -318,6 +372,8 @@ function VehicleView({ id }: { id: string }) {
             ]
       }
     >
+      {!editing && vehicle.isTaxi && <ConversionBlockers vehicle={vehicle} />}
+
       {!editing &&
         vehicle.ownership === 'CONSIGNED' &&
         vehicle.status === 'IN_STOCK' &&
@@ -349,6 +405,21 @@ function VehicleView({ id }: { id: string }) {
           status={vehicle.status}
           onClose={() => setDialog(null)}
           onSaved={(updated) => saved(t('vehicles.status.changed'), updated)}
+        />
+      )}
+      {dialog === 'convert' && vehicle.isTaxi && (
+        <ConvertToPrivateDialog
+          vehicle={vehicle}
+          onClose={() => setDialog(null)}
+          onSaved={converted}
+        />
+      )}
+      {dialog === 'correctConversion' && conversion && (
+        <ConversionCorrectionDialog
+          vehicleId={vehicle.id}
+          change={conversion}
+          onClose={() => setDialog(null)}
+          onSaved={(updated) => saved(t('vehicles.convert.corrected'), updated)}
         />
       )}
       {dialog === 'consign' && (

@@ -45,6 +45,8 @@ export const ErrorKey = {
   noDriverMatched: 'errors.noDriverMatched',
   // Milestone 6: generated PDFs.
   pdfNotApplicable: 'errors.pdfNotApplicable',
+  // Taxi -> private conversion: a taxi licence is still registered on the car (detach it first).
+  licenseStillRegistered: 'errors.licenseStillRegistered',
   invalidCredentials: 'auth.invalidCredentials',
   sessionExpired: 'auth.sessionExpired',
   tooManyAttempts: 'auth.tooManyAttempts',
@@ -63,6 +65,14 @@ export const FieldErrorKey = {
   segmentStartTooEarly: 'validation.segmentStartTooEarly',
   /** The date lies outside the contract period. */
   outsideContract: 'validation.outsideContract',
+  /** The new plate equals the current (old) plate (taxi -> private conversion). */
+  samePlate: 'validation.samePlate',
+  /** A taxi plate (ending in 25 / 26) was given where a private plate is expected. */
+  privatePlateExpected: 'validation.privatePlateExpected',
+  /** The date cannot be in the future. */
+  dateInFuture: 'validation.dateInFuture',
+  /** The date lies outside the vehicle's inventory cycle (before it entered stock). */
+  outsideCycle: 'validation.outsideCycle',
 } as const;
 
 /** One field-level problem; `path` is the dotted field path (`reminderLeadDays.insurance`). */

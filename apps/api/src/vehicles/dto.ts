@@ -11,6 +11,8 @@ import {
   InsuranceUpdateSchema,
   OdometerCreateSchema,
   OdometerQuerySchema,
+  VehicleConversionUpdateSchema,
+  VehicleConvertSchema,
   VehicleCreateSchema,
   VehicleQuerySchema,
   VehicleSummaryQuerySchema,
@@ -24,6 +26,8 @@ export class VehicleUpdateDto extends createZodDto(VehicleUpdateSchema) {}
 export class VehicleQueryDto extends createZodDto(VehicleQuerySchema) {}
 export class VehicleSummaryQueryDto extends createZodDto(VehicleSummaryQuerySchema) {}
 export class VehicleStatusChangeDto extends createZodDto(VehicleStatusChangeSchema) {}
+export class VehicleConvertDto extends createZodDto(VehicleConvertSchema) {}
+export class VehicleConversionUpdateDto extends createZodDto(VehicleConversionUpdateSchema) {}
 
 export class ExpenseCreateDto extends createZodDto(ExpenseCreateSchema) {}
 export class ExpenseUpdateDto extends createZodDto(ExpenseUpdateSchema) {}

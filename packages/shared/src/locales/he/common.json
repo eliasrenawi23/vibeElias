@@ -158,7 +158,11 @@
     "billingPeriodUnsupported": "נתמך רק חיוב חודשי",
     "dateInPast": "התאריך לא יכול להיות בעבר",
     "segmentStartTooEarly": "השינוי חייב להתחיל אחרי תאריך ההתחלה של המקטע הנוכחי",
-    "outsideContract": "התאריך מחוץ לתקופת החוזה"
+    "outsideContract": "התאריך מחוץ לתקופת החוזה",
+    "samePlate": "מספר הרישוי החדש חייב להיות שונה מהנוכחי",
+    "privatePlateExpected": "נדרש מספר רישוי של רכב פרטי (מספר רישוי של מונית מסתיים ב-25 או 26)",
+    "dateInFuture": "התאריך לא יכול להיות בעתיד",
+    "outsideCycle": "התאריך קודם לכניסת הרכב למלאי"
   },
   "errors": {
     "generic": "משהו השתבש. נסו שוב.",
@@ -201,7 +205,8 @@
     "dealHasPayments": "יש למחוק את תשלומי העסקה לפני ביטולה",
     "systemPayment": "תשלומי טרייד-אין נוצרים על ידי המערכת ולא ניתן למחוק אותם",
     "noDriverMatched": "אף נהג לא החזיק ברכב בתאריך זה; בחרו נהג",
-    "pdfNotApplicable": "לא ניתן להפיק מסמך זה עבור רשומה זו"
+    "pdfNotApplicable": "לא ניתן להפיק מסמך זה עבור רשומה זו",
+    "licenseStillRegistered": "רישיון מונית עדיין רשום על הרכב; יש לנתק אותו קודם"
   },
   "language": {
     "label": "שפה",
@@ -370,7 +375,8 @@
       "FINE": "קנס",
       "LICENSE_FEE": "אגרת רישוי",
       "METER": "מונה מונית",
-      "OTHER": "אחר"
+      "OTHER": "אחר",
+      "CONVERSION_TAX": "מכס / מס הסבה לפרטי"
     },
     "InsuranceType": {
       "COMPULSORY": "חובה",
@@ -546,6 +552,10 @@
       "IN": "קבלת פיקדון",
       "OUT": "החזרת פיקדון",
       "APPLY": "קיזוז פיקדון מהחוב"
+    },
+    "PlateChangeReason": {
+      "TAXI_TO_PRIVATE": "הסבה ממונית לפרטי",
+      "OTHER": "אחר"
     }
   },
   "dashboard": {
@@ -659,7 +669,9 @@
       "legalId": "ח״פ / מספר עוסק מורשה",
       "dealerLicenseNo": "מספר רישיון סוחר רכב",
       "vatRateHelp": "משמש לעסקאות חדשות; עסקאות קיימות שומרות על השיעור שלהן.",
-      "loadError": "לא ניתן לטעון את ההגדרות"
+      "loadError": "לא ניתן לטעון את ההגדרות",
+      "vatMarginIncludesConversionTax": "לכלול את המכס בבסיס המע״מ על המרווח",
+      "vatMarginIncludesConversionTaxHelp": "מומלץ להתייעץ עם רואה החשבון לפני ההפעלה."
     },
     "reminders": {
       "description": "כמה ימים לפני תוקף או מועד הוא יופיע כ״בקרוב״ ברשימת התזכורות ובפעמון.",
@@ -896,7 +908,9 @@
       "consignedHelp": "לאחר השמירה יש לרשום את תנאי הקונסיגנציה בפעולה „קבלה לקונסיגנציה”.",
       "dealerRegisteredHelp": "רישום על שם הסוחר מוגבל ל־12 חודשים.",
       "locationHelp": "מגרש, מוסך או כתובת",
-      "saveBlocked": "כדי לשמור יש לבחור בעלים שיש לו פרופיל נהג."
+      "saveBlocked": "כדי לשמור יש לבחור בעלים שיש לו פרופיל נהג.",
+      "expectedConversionTax": "מכס צפוי בהסבה",
+      "expectedConversionTaxHelp": "הערכה של המכס שישולם כשהרכב יוסב לפרטי."
     },
     "actions": {
       "changeStatus": "שינוי סטטוס",
@@ -904,7 +918,8 @@
       "returnToConsignor": "החזרה לבעלים",
       "addExpense": "הוספת הוצאה",
       "addOdometer": "הוספת קריאת קילומטראז׳",
-      "menu": "פעולות רכב"
+      "menu": "פעולות רכב",
+      "convertToPrivate": "הסבה לפרטי"
     },
     "detailTabs": {
       "info": "פרטים",
@@ -1050,7 +1065,44 @@
       "vatOnMargin": "מע״מ על המרווח",
       "total": "סה״כ",
       "empty": "אין עדיין מחזורי מלאי",
-      "atListingPrice": "לפי המחיר המבוקש"
+      "atListingPrice": "לפי המחיר המבוקש",
+      "conversionTax": "מכס (הסבה)"
+    },
+    "formerTaxi": "מונית לשעבר",
+    "formerTaxiOnly": "מוניות לשעבר בלבד",
+    "taxiPlate": "מספר רישוי כמונית",
+    "taxiPlateShort": "מונית:",
+    "asPrivateShort": "כפרטי:",
+    "priceAsTaxi": "מחיר כמונית",
+    "priceAsPrivate": "מחיר כפרטי",
+    "convert": {
+      "title": "הסבת הרכב לפרטי",
+      "intro": "מספר הרישוי של המונית נשמר בהיסטוריית המספרים; הרכב ממשיך עם המספר הפרטי החדש.",
+      "date": "תאריך ההסבה",
+      "newPlate": "מספר רישוי חדש (פרטי)",
+      "taxiPlateWarning": "מספר זה מסתיים ב-25 או 26, כלומר מספר של מונית.",
+      "customs": "מכס ששולם",
+      "customsHelp": "מתווסף לעלות הרכב. יש להזין 0 אם לא שולם דבר.",
+      "newPrice": "מחיר מבוקש חדש",
+      "newPriceHelp": "מחיר המונית בתוספת המכס, אלא אם תשנה.",
+      "vendor": "רשות המכס",
+      "notes": "הערות",
+      "summary": "עלות כפרטי = מחיר המונית {{taxi}} + מכס {{customs}} = {{total}}",
+      "submit": "הסבה",
+      "blocked": "עדיין אי אפשר להסב את הרכב",
+      "openLicense": "פתיחת רישיון המונית",
+      "done": "הרכב הוסב לפרטי",
+      "receiptHint": "כדאי להעלות את קבלת המכס.",
+      "receiptAction": "מעבר למסמכים",
+      "correctTitle": "תיקון פרטי ההסבה",
+      "corrected": "פרטי ההסבה עודכנו"
+    },
+    "plateHistory": {
+      "title": "היסטוריית מספרי רישוי",
+      "empty": "מספר הרישוי לא השתנה מעולם",
+      "customs": "מכס",
+      "correct": "תיקון פרטי ההסבה",
+      "arrow": "אל"
     }
   },
   "taxiLicenses": {
@@ -1580,7 +1632,10 @@
       "belowMinNet": "התשלום לבעל הרכב נמוך מהמינימום נטו שסוכם איתו.",
       "commissionEnterPrice": "הזינו מחיר כדי לחשב את העמלה ואת התשלום לבעל הרכב.",
       "warrantyHelp": "מודפס בהסכם המכירה בעברית.",
-      "submit": "יצירת עסקה"
+      "submit": "יצירת עסקה",
+      "soldAsTaxi": "הרכב עדיין מונית, ולכן נמכר כמונית במחיר {{taxi}}. לאחר הסבה לפרטי המחיר יהיה {{private}}.",
+      "soldAsTaxiNoEstimate": "הרכב עדיין מונית, ולכן נמכר כמונית במחיר {{taxi}}. כדי למכור אותו כרכב פרטי יש להסב אותו קודם.",
+      "convertFirst": "פתיחת הרכב להסבה"
     },
     "validation": {
       "tradeInOverPrice": "שווי הטרייד-אין אינו יכול לעלות על המחיר"
@@ -1953,7 +2008,9 @@
       "receivedAt": "תאריך קבלה",
       "authority": "גורם מנפיק",
       "reassignDeadline": "להסב עד",
-      "rebilled": "חויב לנהג"
+      "rebilled": "חויב לנהג",
+      "formerTaxiPlateNo": "מספר רישוי קודם (מונית)",
+      "conversionTax": "מכס (הסבה)"
     }
   },
   "pdf": {

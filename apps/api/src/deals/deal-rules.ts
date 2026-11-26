@@ -43,26 +43,29 @@ export interface DealVat {
 }
 
 /**
- * VAT of a deal. MARGIN (licensed dealer, VAT on the margin): `base = max(0, price - purchase)`,
- * a negative margin owes nothing. FULL (bought from a VAT-registered business that deducted
- * input VAT): `base = price`. NONE: 0. An unknown purchase price counts as 0.
+ * VAT of a deal. MARGIN (licensed dealer, VAT on the margin): `base = max(0, price - purchase -
+ * marginDeductions)`, a negative margin owes nothing; `marginDeductions` is the cycle's taxi ->
+ * private customs when `Settings.vatMarginIncludesConversionTax` is on, else 0. FULL (bought
+ * from a VAT-registered business that deducted input VAT): `base = price`. NONE: 0. An unknown
+ * purchase price counts as 0.
  */
 export function dealVat(
   mode: VatMode,
   rate: DecimalValue,
   price: DecimalValue,
   purchasePrice: DecimalValue | null | undefined,
+  marginDeductions: DecimalValue = 0,
 ): DealVat {
   const r = round2(rate);
   switch (mode) {
     case 'MARGIN': {
-      const purchase = purchasePrice ?? 0;
-      const margin = round2(sumMoney([price, -round2(purchase)]));
+      const cost = sumMoney([round2(purchasePrice ?? 0), round2(marginDeductions)]);
+      const margin = round2(sumMoney([price, -cost]));
       return {
         mode,
         rate: r,
         base: Math.max(0, margin),
-        amount: vatOnMargin(price, purchase, rate),
+        amount: vatOnMargin(price, cost, rate),
       };
     }
     case 'FULL':

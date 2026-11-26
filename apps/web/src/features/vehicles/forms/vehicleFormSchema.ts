@@ -66,13 +66,14 @@ export function toVehicleFormValues(v?: VehicleDetail | null): DefaultValues<Veh
     meterSealedAt: v?.meterSealedAt ?? null,
     location: v?.location ?? '',
     listingPrice: v?.listingPrice ?? null,
+    expectedConversionTax: v?.expectedConversionTax ?? null,
     notes: v?.notes ?? '',
   };
 }
 
 /**
  * Parsed form values to the `POST /vehicles` body: the owner driver only for THIRD_PARTY cars,
- * meter details only for taxis.
+ * meter details and expected customs only for taxis.
  */
 export function toVehicleCreateBody(values: VehicleFormOutput): VehicleCreate {
   return {
@@ -80,6 +81,8 @@ export function toVehicleCreateBody(values: VehicleFormOutput): VehicleCreate {
     ownerDriverId: values.ownership === 'THIRD_PARTY' ? (values.ownerDriverId ?? null) : null,
     meterSerial: values.isTaxi ? (values.meterSerial ?? null) : null,
     meterSealedAt: values.isTaxi ? (values.meterSealedAt ?? null) : null,
+    // Expected customs only mean something while the car is a taxi.
+    expectedConversionTax: values.isTaxi ? (values.expectedConversionTax ?? null) : null,
   };
 }
 

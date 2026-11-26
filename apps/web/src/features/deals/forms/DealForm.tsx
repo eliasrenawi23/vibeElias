@@ -4,10 +4,11 @@ import { Alert, Button, Card, Col, Descriptions, Flex, Row, Switch, Typography }
 import { useEffect, useMemo } from 'react';
 import { useController, useForm, useWatch, type Control } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
+import { Link } from 'react-router';
 import { useFormErrors } from '../../../shared/form/useFormErrors';
 import { useUnsavedChangesGuard } from '../../../shared/form/useUnsavedChangesGuard';
 import { isolateLtr } from '../../../shared/lib/bidi';
-import { formatCount } from '../../../shared/lib/money';
+import { formatAmount, formatCount } from '../../../shared/lib/money';
 import { DateText } from '../../../shared/ui/DateText';
 import { FormCheckboxField } from '../../../shared/ui/FormCheckboxField';
 import { FormDateField } from '../../../shared/ui/FormDateField';
@@ -139,6 +140,7 @@ export function DealForm({ type, initialVehicleId, onCreated, onCancel }: DealFo
                   purchase={purchase}
                 />
               )}
+              {file.vehicle?.isTaxi && <SoldAsTaxiAlert vehicle={file.vehicle} />}
             </>
           )}
           {type === 'CONSIGNMENT_SALE' && (
@@ -278,6 +280,35 @@ export function DealForm({ type, initialVehicleId, onCreated, onCancel }: DealFo
 function listGapHelp(price: number | null, listPrice: number | null) {
   if (!price || !listPrice) return null;
   return <ListGapText price={price} listPrice={listPrice} />;
+}
+
+/**
+ * A taxi picked for a sale is sold as a taxi at the taxi price; both prices are shown and the
+ * vehicle page offers the conversion to a private car first.
+ */
+function SoldAsTaxiAlert({ vehicle }: { vehicle: VehicleDetail }) {
+  const { t, i18n } = useTranslation();
+  const money = (amount: number) =>
+    isolateLtr(formatAmount(amount, i18n.resolvedLanguage, { decimals: false }));
+  const estimate = vehicle.privatePriceEstimate;
+  const taxi = vehicle.listingPrice !== null ? money(vehicle.listingPrice) : '—';
+  return (
+    <Alert
+      type="info"
+      showIcon
+      data-testid="sold-as-taxi"
+      title={
+        estimate !== null && estimate !== undefined
+          ? t('deals.form.soldAsTaxi', { taxi, private: money(estimate) })
+          : t('deals.form.soldAsTaxiNoEstimate', { taxi })
+      }
+      action={
+        <Link to={`/vehicles/${encodeURIComponent(vehicle.id)}`} data-testid="sold-as-taxi-link">
+          {t('deals.form.convertFirst')}
+        </Link>
+      }
+    />
+  );
 }
 
 /** Purchase price, days in stock and listing price of the car being sold. */

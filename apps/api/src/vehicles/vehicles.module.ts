@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { ContactsModule } from '../contacts/contacts.module';
 import { DocumentsModule } from '../documents/documents.module';
 import { LedgerModule } from '../ledger/ledger.module';
+import { ConversionService } from './conversion.service';
 import { CyclesController } from './cycles.controller';
 import { CyclesService } from './cycles.service';
 import { ExpensesController } from './expenses.controller';
@@ -23,7 +24,14 @@ import { VehiclesService } from './vehicles.service';
     OdometerController,
     CyclesController,
   ],
-  providers: [VehiclesService, ExpensesService, InsuranceService, OdometerService, CyclesService],
+  providers: [
+    VehiclesService,
+    ConversionService,
+    ExpensesService,
+    InsuranceService,
+    OdometerService,
+    CyclesService,
+  ],
   exports: [VehiclesService],
 })
 export class VehiclesModule {}

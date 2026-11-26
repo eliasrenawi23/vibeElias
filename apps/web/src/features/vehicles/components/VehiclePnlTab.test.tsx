@@ -103,6 +103,31 @@ describe('VehiclePnlView', () => {
     expect(within(totals).getByTestId('pnl-total-profit')).toHaveAttribute('data-profit', 'profit');
   });
 
+  it('lists the conversion customs as its own cost line', () => {
+    const pnl: VehiclePnl = {
+      cycles: [
+        cycle({
+          id: 'cyc_conv',
+          costs: {
+            purchase: 30000,
+            expenses: 1000,
+            conversionTax: 15000,
+            vatOnMargin: 0,
+            total: 46000,
+          },
+        }),
+      ],
+      totals: { revenue: 75000, costs: 46000, profit: 29000 },
+    };
+    renderWithProviders(<VehiclePnlView pnl={pnl} emptyText="none" />);
+    const costs = screen.getByTestId('pnl-costs');
+    expect(costs).toHaveTextContent('Customs (conversion)');
+    expect(costs).toHaveTextContent('₪15,000.00');
+    // Cycles without a conversion show no such line.
+    renderWithProviders(<VehiclePnlView pnl={PNL} emptyText="none" />);
+    expect(screen.getAllByTestId('pnl-costs').at(-1)).not.toHaveTextContent('Customs (conversion)');
+  });
+
   it('shows the empty text without cycles', () => {
     renderWithProviders(
       <VehiclePnlView

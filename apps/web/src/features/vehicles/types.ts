@@ -8,6 +8,7 @@ import type {
   InsuranceScope,
   InsuranceType,
   PaidBy,
+  PlateChangeReason,
   SortOrder,
   VehicleOwnership,
   VehicleStatus,
@@ -44,6 +45,10 @@ export interface Vehicle {
   meterSealedAt: string | null;
   location: string | null;
   listingPrice: number | null;
+  /** Estimated customs if converted to private (taxis). */
+  expectedConversionTax: number | null;
+  /** Date the car was converted from taxi to private (`YYYY-MM-DD`). */
+  convertedAt: string | null;
   notes: string | null;
   createdAt: string;
   updatedAt: string;
@@ -56,6 +61,11 @@ export interface VehicleListItem extends Vehicle {
   openCycle: { id: string; kind: CycleKind; startedAt: string } | null;
   /** Computed alert codes (`VehicleAlert` values; unknown codes are shown generically). */
   alerts: string[];
+  /** Converted from taxi to private (`convertedAt` set). */
+  formerTaxi: boolean;
+  formerTaxiPlateNo: string | null;
+  /** `listingPrice + expectedConversionTax` while a taxi and both are set. */
+  privatePriceEstimate: number | null;
 }
 
 export interface InventoryCycle {
@@ -127,8 +137,27 @@ export interface ExpenseSummary {
   byCategory: { category: ExpenseCategory; total: number }[];
 }
 
+/** One row of `VehicleDetail.plateHistory` (newest first). */
+export interface PlateChange {
+  id: string;
+  oldPlateNo: string;
+  newPlateNo: string;
+  changedAt: string;
+  reason: PlateChangeReason;
+  conversionTax: number | null;
+  notes: string | null;
+}
+
+/** Whether a taxi can be converted now; `blockers` are error i18n keys (e.g. `errors.vehicleLeased`). */
+export interface CanConvert {
+  allowed: boolean;
+  blockers: string[];
+}
+
 /** `GET /api/vehicles/:id` */
 export interface VehicleDetail extends VehicleListItem {
+  plateHistory: PlateChange[];
+  canConvert: CanConvert;
   cycles: InventoryCycle[];
   insurance: InsurancePolicy[];
   odometer: OdometerEntry[];
@@ -143,6 +172,8 @@ export interface VehicleListQuery {
   status?: string;
   ownership?: string;
   isTaxi?: boolean;
+  /** Former taxis only. */
+  formerTaxi?: boolean;
   make?: string;
   yearFrom?: number;
   yearTo?: number;
@@ -183,6 +214,8 @@ export interface CyclePnl {
   costs: {
     purchase: number;
     expenses: number;
+    /** Customs paid for the taxi -> private conversion (not part of `expenses`). */
+    conversionTax?: number;
     vatOnMargin: number;
     total: number;
   };

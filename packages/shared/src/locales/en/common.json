@@ -158,7 +158,11 @@
     "billingPeriodUnsupported": "Only monthly billing is supported",
     "dateInPast": "The date cannot be in the past",
     "segmentStartTooEarly": "The change must start after the current segment's start date",
-    "outsideContract": "The date is outside the contract period"
+    "outsideContract": "The date is outside the contract period",
+    "samePlate": "The new plate must differ from the current one",
+    "privatePlateExpected": "A private plate is expected here (taxi plates end in 25 or 26)",
+    "dateInFuture": "The date cannot be in the future",
+    "outsideCycle": "The date is before the car entered stock"
   },
   "errors": {
     "generic": "Something went wrong. Please try again.",
@@ -201,7 +205,8 @@
     "dealHasPayments": "Delete the deal's payments before cancelling it",
     "systemPayment": "Trade-in payments are created by the system and cannot be deleted",
     "noDriverMatched": "No driver had this car on that date; choose the driver",
-    "pdfNotApplicable": "This document cannot be generated for this record"
+    "pdfNotApplicable": "This document cannot be generated for this record",
+    "licenseStillRegistered": "A taxi licence is still registered on this car; detach it first"
   },
   "language": {
     "label": "Language",
@@ -370,7 +375,8 @@
       "FINE": "Fine",
       "LICENSE_FEE": "Licence fee",
       "METER": "Taxi meter",
-      "OTHER": "Other"
+      "OTHER": "Other",
+      "CONVERSION_TAX": "Customs (taxi → private)"
     },
     "InsuranceType": {
       "COMPULSORY": "Compulsory",
@@ -546,6 +552,10 @@
       "IN": "Receive deposit",
       "OUT": "Return deposit",
       "APPLY": "Apply deposit to debt"
+    },
+    "PlateChangeReason": {
+      "TAXI_TO_PRIVATE": "Converted from taxi to private",
+      "OTHER": "Other"
     }
   },
   "dashboard": {
@@ -659,7 +669,9 @@
       "legalId": "Company / licensed-dealer number",
       "dealerLicenseNo": "Car dealer licence number",
       "vatRateHelp": "Used for new deals; existing deals keep their rate.",
-      "loadError": "Could not load the settings"
+      "loadError": "Could not load the settings",
+      "vatMarginIncludesConversionTax": "Include customs in the VAT margin base",
+      "vatMarginIncludesConversionTaxHelp": "Ask your accountant before turning this on."
     },
     "reminders": {
       "description": "How many days before an expiry or deadline it shows as due in the reminders feed and the bell.",
@@ -896,7 +908,9 @@
       "consignedHelp": "After saving, record the consignment terms with “Take on consignment”.",
       "dealerRegisteredHelp": "Registration in the dealer’s name is limited to 12 months.",
       "locationHelp": "Lot, garage or address",
-      "saveBlocked": "Choose an owner who has a driver profile to save."
+      "saveBlocked": "Choose an owner who has a driver profile to save.",
+      "expectedConversionTax": "Expected customs if converted",
+      "expectedConversionTaxHelp": "Estimate of the customs paid when the car is converted to private."
     },
     "actions": {
       "changeStatus": "Change status",
@@ -904,7 +918,8 @@
       "returnToConsignor": "Return to consignor",
       "addExpense": "Add expense",
       "addOdometer": "Add odometer reading",
-      "menu": "Vehicle actions"
+      "menu": "Vehicle actions",
+      "convertToPrivate": "Convert to private"
     },
     "detailTabs": {
       "info": "Info",
@@ -1050,7 +1065,44 @@
       "vatOnMargin": "VAT on margin",
       "total": "Total",
       "empty": "No inventory cycles yet",
-      "atListingPrice": "At the listing price"
+      "atListingPrice": "At the listing price",
+      "conversionTax": "Customs (conversion)"
+    },
+    "formerTaxi": "Former taxi",
+    "formerTaxiOnly": "Former taxis only",
+    "taxiPlate": "Taxi plate",
+    "taxiPlateShort": "taxi:",
+    "asPrivateShort": "as private:",
+    "priceAsTaxi": "Price as taxi",
+    "priceAsPrivate": "Price as private",
+    "convert": {
+      "title": "Convert to a private car",
+      "intro": "The taxi plate is kept in the plate history; the car continues under the new private plate.",
+      "date": "Conversion date",
+      "newPlate": "New (private) plate number",
+      "taxiPlateWarning": "This plate ends in 25 or 26, which are taxi plates.",
+      "customs": "Customs paid",
+      "customsHelp": "Added to the cost of the car. Enter 0 if nothing was paid.",
+      "newPrice": "New asking price",
+      "newPriceHelp": "Taxi price plus customs, unless you change it.",
+      "vendor": "Customs authority",
+      "notes": "Notes",
+      "summary": "Cost as private = taxi price {{taxi}} + customs {{customs}} = {{total}}",
+      "submit": "Convert",
+      "blocked": "This car cannot be converted yet",
+      "openLicense": "Open the taxi licence",
+      "done": "The car is now a private car",
+      "receiptHint": "Remember to upload the customs receipt.",
+      "receiptAction": "Open documents",
+      "correctTitle": "Correct conversion details",
+      "corrected": "Conversion details updated"
+    },
+    "plateHistory": {
+      "title": "Plate history",
+      "empty": "The plate has never changed",
+      "customs": "Customs",
+      "correct": "Correct conversion details",
+      "arrow": "to"
     }
   },
   "taxiLicenses": {
@@ -1580,7 +1632,10 @@
       "belowMinNet": "The payout is below the minimum net agreed with the consignor.",
       "commissionEnterPrice": "Enter the price to compute the commission and the payout.",
       "warrantyHelp": "Printed on the sale agreement in Hebrew.",
-      "submit": "Create deal"
+      "submit": "Create deal",
+      "soldAsTaxi": "This car is still a taxi, so it is sold as a taxi at {{taxi}}. Converted to a private car it would be {{private}}.",
+      "soldAsTaxiNoEstimate": "This car is still a taxi, so it is sold as a taxi at {{taxi}}. To sell it as a private car, convert it first.",
+      "convertFirst": "Open the vehicle to convert it"
     },
     "validation": {
       "tradeInOverPrice": "The trade-in value cannot be more than the price"
@@ -1953,7 +2008,9 @@
       "receivedAt": "Received on",
       "authority": "Issued by",
       "reassignDeadline": "Reassign by",
-      "rebilled": "Charged to driver"
+      "rebilled": "Charged to driver",
+      "formerTaxiPlateNo": "Former taxi plate",
+      "conversionTax": "Customs (conversion)"
     }
   },
   "pdf": {

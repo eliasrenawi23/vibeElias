@@ -16,6 +16,7 @@ import { DocumentsService, type DocumentView } from '../documents/documents.serv
 import { newStorageKey, StorageService } from '../documents/storage/storage.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { SettingsService } from '../settings/settings.service';
+import { FORMER_TAXI_PLATE_ARGS, formerTaxiPlateOf } from '../vehicles/conversion-rules';
 import { dateInZone, pdfFileName, pickPdfLanguage } from './pdf-format';
 import {
   buildChecklist,
@@ -61,8 +62,9 @@ export function personOf(c: Contact): PdfPerson {
   };
 }
 
-export function vehicleOf(v: Vehicle): PdfVehicle {
+export function vehicleOf(v: Vehicle, formerTaxiPlateNo: string | null = null): PdfVehicle {
   return {
+    formerTaxiPlateNo,
     plateNo: v.plateNo,
     make: v.make,
     model: v.model,
@@ -385,7 +387,7 @@ export class PdfService {
     const d = await this.prisma.deal.findUnique({
       where: { id },
       include: {
-        vehicle: true,
+        vehicle: { include: { plateChanges: FORMER_TAXI_PLATE_ARGS } },
         counterparty: true,
         payments: { orderBy: [{ date: 'asc' }, { createdAt: 'asc' }] },
         tradeInDeal: { include: { vehicle: true } },
@@ -415,8 +417,9 @@ export class PdfService {
         isTradeIn: d.isTradeIn,
         counterparty: personOf(d.counterparty),
         vehicle: {
-          ...vehicleOf(d.vehicle),
+          ...vehicleOf(d.vehicle, formerTaxiPlateOf(d.vehicle.plateChanges)),
           dealerRegisteredAt: isoOrNull(d.vehicle.dealerRegisteredAt),
+          formerTaxi: d.vehicle.convertedAt !== null,
         },
         payments: d.payments.map((p) => ({
           date: isoOf(p.date),

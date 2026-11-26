@@ -16,11 +16,13 @@ import { StatusTag } from '../../../shared/ui/StatusTag';
 import { YearText } from '../../../shared/ui/YearText';
 import type { OdometerEntry, VehicleDetail } from '../types';
 import { CyclesTimeline } from './CyclesTimeline';
+import { PlateHistoryCard } from './PlateHistoryCard';
 import { DESCRIPTION_COLUMNS } from '../../../shared/ui/descriptionColumns';
 
 export interface VehicleInfoTabProps {
   vehicle: VehicleDetail;
   onAddOdometer: () => void;
+  onCorrectConversion?: () => void;
 }
 
 const empty = <span className="rm-empty-value">—</span>;
@@ -28,7 +30,11 @@ const text = (value: string | null | undefined): ReactNode =>
   value ? <AutoDir>{value}</AutoDir> : empty;
 
 /** Vehicle details, odometer log and inventory cycles. */
-export function VehicleInfoTab({ vehicle: v, onAddOdometer }: VehicleInfoTabProps) {
+export function VehicleInfoTab({
+  vehicle: v,
+  onAddOdometer,
+  onCorrectConversion,
+}: VehicleInfoTabProps) {
   const { t } = useTranslation();
   const enumLabel = useEnumLabel();
 
@@ -163,9 +169,23 @@ export function VehicleInfoTab({ vehicle: v, onAddOdometer }: VehicleInfoTabProp
     { key: 'location', label: t('vehicles.fields.location'), children: text(v.location) },
     {
       key: 'listingPrice',
-      label: t('vehicles.fields.listingPrice'),
+      label: v.isTaxi ? t('vehicles.priceAsTaxi') : t('vehicles.fields.listingPrice'),
       children: <Money amount={v.listingPrice} decimals={false} />,
     },
+    ...(v.isTaxi && v.expectedConversionTax !== null
+      ? [
+          {
+            key: 'expectedConversionTax',
+            label: t('vehicles.form.expectedConversionTax'),
+            children: <Money amount={v.expectedConversionTax} decimals={false} />,
+          },
+          {
+            key: 'privatePrice',
+            label: t('vehicles.priceAsPrivate'),
+            children: <Money amount={v.privatePriceEstimate} decimals={false} />,
+          },
+        ]
+      : []),
     {
       key: 'notes',
       label: t('vehicles.fields.notes'),
@@ -185,6 +205,10 @@ export function VehicleInfoTab({ vehicle: v, onAddOdometer }: VehicleInfoTabProp
       <Card variant="borderless" title={t('common.details')}>
         <Descriptions column={DESCRIPTION_COLUMNS} size="small" items={items} />
       </Card>
+
+      {(v.formerTaxi || (v.plateHistory?.length ?? 0) > 0) && (
+        <PlateHistoryCard history={v.plateHistory ?? []} onCorrect={onCorrectConversion} />
+      )}
 
       <Card
         variant="borderless"

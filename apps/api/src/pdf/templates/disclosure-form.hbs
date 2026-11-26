@@ -53,6 +53,7 @@
       <span class="choice">{{box history.school}}{{t "history.school"}}</span>
       <span class="choice">{{box false}}{{t "history.private"}}</span>
     </div>
+    {{#if usedAsTaxi}}<p><strong>{{t "disclosure.usedAsTaxi"}}</strong>{{#if formerTaxiPlateNo}} · {{t "vehicle.formerTaxiPlate"}}: {{plate formerTaxiPlateNo}}{{/if}}</p>{{/if}}
   </li>
 
   <li class="keep">

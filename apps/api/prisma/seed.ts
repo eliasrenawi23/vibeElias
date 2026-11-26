@@ -12,8 +12,9 @@
  * Every demo row has a fixed `seed_*` id and is upserted with `update: {}`: re-running creates
  * what is missing and never overwrites data (or the admin password) changed in the app. The only
  * exceptions are `migrateLegacyDemo()`, which once rewrites the demo rows of older seed versions,
- * `migrateLegacySpelling()`, which once fixes the old spelling of the business name, and
- * `migrateHebrewRename()` and `migrateEnArRename()`, which rename the business name.
+ * `migrateLegacySpelling()`, which once fixes the old spelling of the business name,
+ * `migrateHebrewRename()` and `migrateEnArRename()`, which rename the business name, and
+ * `fixOctaviaPrices()`, which fills the idle taxi's price / expected customs only while unset.
  * Demo documents write small placeholder files (PDF / PNG) into UPLOAD_DIR.
  * `npm run db:reset` drops everything and seeds again with fresh relative dates.
  */
@@ -65,6 +66,7 @@ import {
 } from '../src/leases/billing-plan';
 import { allocateFifo } from '../src/ledger/allocation';
 import { makeThumbnail } from '../src/documents/file-type';
+import { conversionExpenseDescription } from '../src/vehicles/conversion-rules';
 import { LocalDiskStorage } from '../src/documents/storage/local-disk.storage';
 import { thumbKeyOf } from '../src/documents/storage/storage.service';
 
@@ -104,6 +106,13 @@ const OCTAVIA_SERVICE_DESCRIPTION = 'טיפול גדול + מצמד — הכנה
 const OCTAVIA_ODO_SOURCES = ['הכנה להשכרה', 'בדיקה במגרש'] as const;
 const MIZRAHI_SWAP_REASON =
   'החלפת רכב: רכב הנהג במוסך אחרי תאונה — הרישיון הועבר לרכב החלופי של הנהג';
+/** The idle Octavia: asking price as a taxi and the customs a conversion to private would cost. */
+const OCTAVIA_TAXI_PRICE = 35_000;
+const OCTAVIA_EXPECTED_CUSTOMS = 15_000;
+/** Demo former taxi (Prius): taxi plate ending in 26, private plate after the conversion. */
+const PRIUS_TAXI_PLATE = '4185226';
+const PRIUS_PRIVATE_PLATE = '24519803';
+const PRIUS_CUSTOMS = 15_000;
 
 /** Create-only upsert by id (`update: {}`) that counts what happened. */
 async function ensure<T>(find: () => Promise<unknown>, upsert: () => Promise<T>): Promise<T> {
@@ -327,6 +336,26 @@ async function fixDemoDeals(consignment: { commission: number; payout: number })
       : { count: 0 };
   if (rav4.count || sportage.count) {
     console.log('Applied the deal rules to older demo deals (consignment VAT, reserved car).');
+  }
+}
+
+/**
+ * Databases seeded before the taxi -> private conversion feature: the idle Octavia gets its price
+ * as a taxi and the expected customs, each only while unset and only while the car is still an
+ * unconverted taxi (a price entered in the app, or a conversion done in the app, is kept).
+ */
+async function fixOctaviaPrices(): Promise<void> {
+  const stillTaxi = { id: 'seed_v_taxi_octavia', isTaxi: true, convertedAt: null };
+  const price = await prisma.vehicle.updateMany({
+    where: { ...stillTaxi, listingPrice: null },
+    data: { listingPrice: ils(OCTAVIA_TAXI_PRICE) },
+  });
+  const customs = await prisma.vehicle.updateMany({
+    where: { ...stillTaxi, expectedConversionTax: null },
+    data: { expectedConversionTax: ils(OCTAVIA_EXPECTED_CUSTOMS) },
+  });
+  if (price.count || customs.count) {
+    console.log('Set the Octavia taxi price / expected customs (taxi -> private demo).');
   }
 }
 
@@ -675,6 +704,15 @@ async function seedDemo(adminId: string, T: string): Promise<void> {
       preferredLang: 'he',
     },
     {
+      // Paid the customs when the demo Prius was converted from taxi to private.
+      id: 'seed_c_customs',
+      tags: ['SUPPLIER'],
+      companyName: 'רשות המסים — מכס חיפה',
+      phones: ['048669300'],
+      city: 'חיפה',
+      preferredLang: 'he',
+    },
+    {
       id: 'seed_c_insurer',
       tags: ['INSURER'],
       companyName: 'גליל סוכנות לביטוח',
@@ -884,6 +922,8 @@ async function seedDemo(adminId: string, T: string): Promise<void> {
   const purchase2Date = addDays(T, -75); // Kia bought from a leasing company (VAT business)
   const saleDate = addDays(T, -4); // Mazda sold with a trade-in (i20)
   const consignStart = addDays(T, -30);
+  const priusBought = addDays(T, -45); // Prius bought as a taxi from a private seller
+  const priusConverted = addDays(T, -12); // ... and converted to a private car
 
   const vehicles: Prisma.VehicleUncheckedCreateInput[] = [
     {
@@ -930,6 +970,9 @@ async function seedDemo(adminId: string, T: string): Promise<void> {
       meterSerial: 'MT-2016-11870',
       meterSealedAt: day(swapDate),
       location: OCTAVIA_LOCATION,
+      // Price as a taxi; as a private car it would cost this + the expected customs.
+      listingPrice: ils(OCTAVIA_TAXI_PRICE),
+      expectedConversionTax: ils(OCTAVIA_EXPECTED_CUSTOMS),
       notes: OCTAVIA_NOTES,
     },
     {
@@ -1059,6 +1102,32 @@ async function seedDemo(adminId: string, T: string): Promise<void> {
       meterSealedAt: day(swapDate),
       notes: 'רכב חלופי של הנהג אבי מזרחי — רישיון 31952 רשום עליו מאז החלפת הרכב',
     },
+    {
+      // Former taxi: bought as a taxi, converted to a private car (new plate, customs paid).
+      id: 'seed_v_prius_former_taxi',
+      plateNo: PRIUS_PRIVATE_PLATE,
+      vin: 'JTDKN3DU5K0123456',
+      make: 'Toyota',
+      model: 'Prius',
+      trim: 'Hybrid',
+      year: 2019,
+      color: 'כסוף',
+      fuel: 'HYBRID',
+      gearbox: 'AUTO',
+      engineCc: 1798,
+      hand: 2,
+      isTaxi: false,
+      status: 'IN_STOCK',
+      ownership: 'OWNED',
+      currentKm: 312_000,
+      registrationExpiry: day(addDays(T, 330)),
+      dealerRegisteredAt: day(priusBought),
+      location: 'מגרש',
+      // Price as a taxi 37,000 + customs 15,000.
+      listingPrice: ils(52_000),
+      convertedAt: day(priusConverted),
+      notes: 'מונית לשעבר — הוסבה לרכב פרטי, מספר רישוי חדש',
+    },
   ];
   for (const v of vehicles) {
     await ensure(
@@ -1066,6 +1135,7 @@ async function seedDemo(adminId: string, T: string): Promise<void> {
       () => prisma.vehicle.upsert({ where: { id: v.id as string }, update: {}, create: v }),
     );
   }
+  await fixOctaviaPrices();
 
   /* ---------------------------------- Taxi licences ---------------------------------- */
   const feeDue = day(annualFeeDueDate(Number(T.slice(0, 4))));
@@ -1162,6 +1232,13 @@ async function seedDemo(adminId: string, T: string): Promise<void> {
       commissionMode: 'PERCENT',
       commissionValue: ils(5),
       agreementEndsAt: day(addDays(consignStart, 90)),
+    },
+    {
+      id: 'seed_cyc_prius',
+      vehicleId: 'seed_v_prius_former_taxi',
+      kind: 'OWNED',
+      startedAt: day(priusBought),
+      askingPrice: ils(37_000),
     },
   ];
   for (const c of cycles) {
@@ -1298,6 +1375,22 @@ async function seedDemo(adminId: string, T: string): Promise<void> {
       createdById: adminId,
       notes: 'הצעת מחיר — ממתינה לאישור מימון',
     },
+    {
+      id: 'seed_deal_buy_prius',
+      type: 'PURCHASE',
+      status: 'COMPLETED',
+      vehicleId: 'seed_v_prius_former_taxi',
+      cycleId: 'seed_cyc_prius',
+      counterpartyId: 'seed_c_seller_private',
+      date: day(priusBought),
+      price: ils(30_000),
+      listPrice: ils(33_000),
+      vatMode: 'NONE',
+      vatRate,
+      completedAt: at(priusBought, '10:00'),
+      createdById: adminId,
+      notes: 'נקנתה כמונית (מספר מונית) — לפני הסבה לפרטי',
+    },
   ];
   for (const d of deals) {
     await ensure(
@@ -1316,6 +1409,7 @@ async function seedDemo(adminId: string, T: string): Promise<void> {
     ],
     ['seed_cyc_sportage', { purchaseDealId: 'seed_deal_buy_sportage' }],
     ['seed_cyc_i20', { purchaseDealId: 'seed_deal_buy_i20_tradein' }],
+    ['seed_cyc_prius', { purchaseDealId: 'seed_deal_buy_prius' }],
   ];
   for (const [id, data] of cycleLinks) await prisma.inventoryCycle.update({ where: { id }, data });
 
@@ -1391,6 +1485,16 @@ async function seedDemo(adminId: string, T: string): Promise<void> {
       method: 'CREDIT_CARD',
       reference: 'אישור 044812',
       notes: 'מקדמה',
+    },
+    {
+      id: 'seed_dp_buy_prius',
+      dealId: 'seed_deal_buy_prius',
+      direction: 'OUT',
+      contactId: 'seed_c_seller_private',
+      date: day(priusBought),
+      amount: ils(30_000),
+      method: 'BANK_TRANSFER',
+      reference: 'העברה 452260',
     },
   ];
   for (const p of dealPayments) {
@@ -1472,6 +1576,20 @@ async function seedDemo(adminId: string, T: string): Promise<void> {
       vendorId: 'seed_c_garage_north',
       description: OCTAVIA_SERVICE_DESCRIPTION,
     },
+    {
+      // Customs of the Prius conversion: a cost of the car, no VAT.
+      id: 'seed_exp_prius_customs',
+      vehicleId: 'seed_v_prius_former_taxi',
+      cycleId: 'seed_cyc_prius',
+      category: 'CONVERSION_TAX',
+      date: day(priusConverted),
+      amount: ils(PRIUS_CUSTOMS),
+      vatIncluded: false,
+      vatReclaimable: false,
+      paidBy: 'US',
+      vendorId: 'seed_c_customs',
+      description: conversionExpenseDescription(PRIUS_TAXI_PLATE, PRIUS_PRIVATE_PLATE),
+    },
   ];
   for (const e of expenses) {
     await ensure(
@@ -1479,6 +1597,28 @@ async function seedDemo(adminId: string, T: string): Promise<void> {
       () => prisma.vehicleExpense.upsert({ where: { id: e.id as string }, update: {}, create: e }),
     );
   }
+
+  // The Prius plate change: its taxi plate is kept (searchable, retired) next to the new one.
+  await ensure(
+    () => prisma.vehiclePlateChange.findUnique({ where: { id: 'seed_vpc_prius' } }),
+    () =>
+      prisma.vehiclePlateChange.upsert({
+        where: { id: 'seed_vpc_prius' },
+        update: {},
+        create: {
+          id: 'seed_vpc_prius',
+          vehicleId: 'seed_v_prius_former_taxi',
+          oldPlateNo: PRIUS_TAXI_PLATE,
+          newPlateNo: PRIUS_PRIVATE_PLATE,
+          changedAt: day(priusConverted),
+          reason: 'TAXI_TO_PRIVATE',
+          conversionTax: ils(PRIUS_CUSTOMS),
+          expenseId: 'seed_exp_prius_customs',
+          notes: 'הוסבה ממונית לפרטי — מכס שולם, לוחית חדשה',
+          createdById: adminId,
+        },
+      }),
+  );
 
   /* ---------------------------------- Insurance ---------------------------------- */
   const yearStart = `${T.slice(0, 4)}-01-01`;

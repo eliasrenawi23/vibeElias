@@ -14,6 +14,7 @@ import {
   normalizePhone,
   normalizePlate,
   round2,
+  sumMoney,
   type DealCancelRequest,
   type DealCompleteRequest,
   type DealConsignmentSaleCreate,
@@ -34,7 +35,11 @@ import {
   type Paginated,
 } from '@renawi/shared';
 import { AuditRecord, AuditService } from '../common/audit/audit.service';
-import { readLeadDays, readVatRate } from '../common/business-settings';
+import {
+  readLeadDays,
+  readVatMarginIncludesConversionTax,
+  readVatRate,
+} from '../common/business-settings';
 import { Clock } from '../common/clock';
 import { dbDate, dbDateOpt, isoOf, isoOrNull } from '../common/dates';
 import { AppException, ErrorKey } from '../common/errors/app-exception';
@@ -43,6 +48,7 @@ import { ContactsService } from '../contacts/contacts.service';
 import { isDecimal, toDbMoney, toDbMoneyOrNull } from '../prisma/prisma.decimal';
 import { zeroCounts } from '../common/status-counts';
 import { PrismaService } from '../prisma/prisma.service';
+import { formerTaxiPlateOf } from '../vehicles/conversion-rules';
 import {
   consignmentAmounts,
   dealAlerts,
@@ -138,6 +144,13 @@ function vehicleFields(c: DealVehicleCreate) {
     meterSealedAt: dbDateOpt(c.meterSealedAt),
     location: c.location,
     listingPrice: c.listingPrice === undefined ? undefined : toDbMoneyOrNull(c.listingPrice),
+    // Only meaningful while the car is a taxi.
+    expectedConversionTax:
+      c.isTaxi === false
+        ? null
+        : c.expectedConversionTax === undefined
+          ? undefined
+          : toDbMoneyOrNull(c.expectedConversionTax),
     notes: c.notes,
   } satisfies Prisma.VehicleUncheckedUpdateInput;
 }
@@ -228,8 +241,11 @@ export class DealsService {
   async get(id: string): Promise<DealDetail> {
     const row = await this.prisma.deal.findUnique({ where: { id }, include: DEAL_DETAIL_INCLUDE });
     if (!row) throw AppException.notFound();
-    const lead = (await readLeadDays(this.prisma)).transfer;
-    return this.toDetail(row, this.clock.today(), lead);
+    const [leadDays, marginIncludesConversionTax] = await Promise.all([
+      readLeadDays(this.prisma),
+      readVatMarginIncludesConversionTax(this.prisma),
+    ]);
+    return this.toDetail(row, this.clock.today(), leadDays.transfer, marginIncludesConversionTax);
   }
 
   /* ------------------------------------------------------------------------------------ */
@@ -917,6 +933,13 @@ export class DealsService {
     } else {
       const create = input.create as DealVehicleCreate;
       existing = await this.prisma.vehicle.findUnique({ where: { plateNo: create.plateNo } });
+      // Old plates (e.g. the taxi plate of a converted car) are retired, never reused.
+      if (
+        !existing &&
+        (await this.prisma.vehiclePlateChange.count({ where: { oldPlateNo: create.plateNo } }))
+      ) {
+        throw AppException.duplicate(`${path}.create.plateNo`);
+      }
       if (create.vin) {
         const other = await this.prisma.vehicle.findFirst({
           where: { vin: create.vin, ...(existing ? { id: { not: existing.id } } : {}) },
@@ -926,6 +949,10 @@ export class DealsService {
       }
     }
     let attach: InventoryCycle | null = null;
+    // A conversion to a private car is one-way.
+    if (existing?.convertedAt && input.create?.isTaxi === true) {
+      throw AppException.conflict(ErrorKey.invalidTransition);
+    }
     if (existing) {
       const open = await this.openCycle(existing.id);
       if (open) {
@@ -950,6 +977,7 @@ export class DealsService {
         data: {
           plateNo: c.plateNo,
           ...vehicleFields(c),
+          ...(c.isTaxi ? {} : { expectedConversionTax: null }),
           isTaxi: c.isTaxi ?? false,
           status: 'IN_STOCK',
           ownership: 'OWNED',
@@ -1089,7 +1117,9 @@ export class DealsService {
   /* ------------------------------------------------------------------------------------ */
 
   private toListItem(row: DealListRow, today: string, transferLead: number): DealListItem {
-    const { vehicle, counterparty, payments, transferChecklist, ...deal } = row;
+    const { vehicle: vehicleRow, counterparty, payments, transferChecklist, ...deal } = row;
+    const { plateChanges, ...vehicleRef } = vehicleRow;
+    const vehicle = { ...vehicleRef, formerTaxiPlateNo: formerTaxiPlateOf(plateChanges) };
     const money = dealMoney(deal, payments);
     return {
       ...deal,
@@ -1113,7 +1143,12 @@ export class DealsService {
     };
   }
 
-  private toDetail(row: DealDetailRow, today: string, transferLead: number): DealDetail {
+  private toDetail(
+    row: DealDetailRow,
+    today: string,
+    transferLead: number,
+    vatMarginIncludesConversionTax: boolean,
+  ): DealDetail {
     const { cycle, tradeInDeal, tradeInFor, _count, payments, ...rest } = row;
     const sums = payments.map((p) => ({
       direction: p.direction,
@@ -1150,6 +1185,9 @@ export class DealsService {
         row.vatRate,
         row.price,
         row.type === 'SALE' ? (purchase?.price ?? null) : null,
+        row.type === 'SALE' && vatMarginIncludesConversionTax
+          ? sumMoney((cycle?.expenses ?? []).map((e) => e.amount))
+          : 0,
       ),
       documentCount: _count.documents,
     };
@@ -1191,7 +1229,13 @@ export class DealsService {
       const digits = token.replace(/^#/, '');
       if (/^\d{1,9}$/.test(digits)) or.push({ dealNo: Number(digits) });
       const plate = normalizePlate(token);
-      if (/^\d{2,8}$/.test(plate)) or.push({ vehicle: { plateNo: { contains: plate } } });
+      if (/^\d{2,8}$/.test(plate)) {
+        or.push(
+          { vehicle: { plateNo: { contains: plate } } },
+          // Old plates too (the taxi plate of a car converted to private).
+          { vehicle: { plateChanges: { some: { oldPlateNo: { contains: plate } } } } },
+        );
+      }
       const phone = normalizePhone(token);
       if (/^\d{9,10}$/.test(phone)) or.push({ counterparty: { phones: { has: phone } } });
       and.push({ OR: or });

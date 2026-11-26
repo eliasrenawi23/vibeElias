@@ -60,6 +60,7 @@ export class SettingsService {
       phone: dto.phone,
       email: dto.email,
       vatRate: dto.vatRate === undefined ? undefined : new Prisma.Decimal(dto.vatRate.toFixed(2)),
+      vatMarginIncludesConversionTax: dto.vatMarginIncludesConversionTax,
       reminderLeadDays: dto.reminderLeadDays,
       defaultLeaseTerms: dto.defaultLeaseTerms,
     };
@@ -91,6 +92,7 @@ export class SettingsService {
       phone: row.phone,
       email: row.email,
       vatRate: row.vatRate,
+      vatMarginIncludesConversionTax: row.vatMarginIncludesConversionTax,
       reminderLeadDays: leadDays.success ? leadDays.data : { ...DEFAULT_SETTINGS.reminderLeadDays },
       defaultLeaseTerms: leaseTerms.success ? leaseTerms.data : DefaultLeaseTermsSchema.parse({}),
       logoDocumentId: row.logoDocumentId,

@@ -3,7 +3,13 @@ import {
   MANUAL_VEHICLE_STATUS_TRANSITIONS,
   type VehicleStatus,
 } from '@renawi/shared';
-import type { ExpenseSummary, InventoryCycle, VehicleDetail, VehicleExpense } from '../types';
+import type {
+  ExpenseSummary,
+  InventoryCycle,
+  PlateChange,
+  VehicleDetail,
+  VehicleExpense,
+} from '../types';
 
 /** Statuses `POST /vehicles/:id/status` accepts from `status` (sales and leases have their own flows). */
 export function allowedStatusTargets(status: VehicleStatus): readonly VehicleStatus[] {
@@ -66,4 +72,9 @@ export function summarizeExpenses(items: readonly VehicleExpense[]): ExpenseSumm
       .filter((c) => perCategory.has(c))
       .map((category) => ({ category, total: round(perCategory.get(category) ?? 0) })),
   };
+}
+
+/** The latest taxi -> private plate change (the one `PATCH /vehicles/:id/conversion` corrects). */
+export function latestConversion(vehicle: Pick<VehicleDetail, 'plateHistory'>): PlateChange | null {
+  return (vehicle.plateHistory ?? []).find((c) => c.reason === 'TAXI_TO_PRIVATE') ?? null;
 }

@@ -40,7 +40,12 @@ export class SettingsController {
   @Patch()
   @Roles('ADMIN')
   @Audited('Settings', { entityId: SETTINGS_ID })
-  @ApiOperation({ summary: 'Partial update; nested objects are replaced whole' })
+  @ApiOperation({
+    summary:
+      'Partial update; nested objects are replaced whole. vatMarginIncludesConversionTax: ' +
+      "the VAT margin base of a MARGIN sale also deducts the cycle's taxi -> private customs " +
+      '(default false)',
+  })
   update(@Body() dto: SettingsUpdateDto): Promise<SettingsView> {
     return this.settings.update(dto);
   }

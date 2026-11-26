@@ -40,6 +40,29 @@ export function registrationClass(alerts: readonly string[]): string | undefined
   return undefined;
 }
 
+/**
+ * Listing price; for a taxi it is the price as a taxi, with the estimated price as a private
+ * car (taxi price + expected customs) in a second muted line when there is one.
+ */
+export function PriceCell({
+  vehicle: v,
+}: {
+  vehicle: Pick<VehicleListItem, 'isTaxi' | 'listingPrice' | 'privatePriceEstimate'>;
+}) {
+  const { t } = useTranslation();
+  if (!v.isTaxi || v.privatePriceEstimate === null || v.privatePriceEstimate === undefined) {
+    return <Money amount={v.listingPrice} decimals={false} />;
+  }
+  return (
+    <Flex vertical align="flex-end" gap={2}>
+      <Money amount={v.listingPrice} decimals={false} />
+      <Typography.Text type="secondary" className="rm-small-text" data-testid="private-estimate">
+        {t('vehicles.asPrivateShort')} <Money amount={v.privatePriceEstimate} decimals={false} />
+      </Typography.Text>
+    </Flex>
+  );
+}
+
 /** Inventory list: filters in the URL, server paging and sorting. */
 export function VehicleInventoryTab() {
   const { t } = useTranslation();
@@ -55,6 +78,7 @@ export function VehicleInventoryTab() {
       status: searchParams.get('status') || undefined,
       ownership: searchParams.get('ownership') || undefined,
       isTaxi: searchParams.get('taxi') === '1' || undefined,
+      formerTaxi: searchParams.get('formerTaxi') === '1' || undefined,
       make: searchParams.get('make') || undefined,
       yearFrom: yearParam(searchParams.get('yearFrom')),
       yearTo: yearParam(searchParams.get('yearTo')),
@@ -66,7 +90,14 @@ export function VehicleInventoryTab() {
     [searchParams, page, pageSize, sort, order],
   );
   const filtered = Boolean(
-    query.q || query.status || query.ownership || query.isTaxi || query.make || query.yearFrom || query.yearTo,
+    query.q ||
+    query.status ||
+    query.ownership ||
+    query.isTaxi ||
+    query.formerTaxi ||
+    query.make ||
+    query.yearFrom ||
+    query.yearTo,
   );
   // The summary cards count under every filter except the status itself.
   const summaryQuery = useMemo<VehicleSummaryQuery>(
@@ -74,11 +105,20 @@ export function VehicleInventoryTab() {
       q: query.q,
       ownership: query.ownership,
       isTaxi: query.isTaxi,
+      formerTaxi: query.formerTaxi,
       make: query.make,
       yearFrom: query.yearFrom,
       yearTo: query.yearTo,
     }),
-    [query.q, query.ownership, query.isTaxi, query.make, query.yearFrom, query.yearTo],
+    [
+      query.q,
+      query.ownership,
+      query.isTaxi,
+      query.formerTaxi,
+      query.make,
+      query.yearFrom,
+      query.yearTo,
+    ],
   );
 
   const list = useQuery({
@@ -94,9 +134,16 @@ export function VehicleInventoryTab() {
       sortKey: 'plateNo',
       mobile: 'title',
       render: (v) => (
-        <Link to={`/vehicles/${encodeURIComponent(v.id)}`} aria-label={v.plateNo}>
-          <PlateNo value={v.plateNo} />
-        </Link>
+        <Flex vertical gap={2} align="flex-start">
+          <Link to={`/vehicles/${encodeURIComponent(v.id)}`} aria-label={v.plateNo}>
+            <PlateNo value={v.plateNo} />
+          </Link>
+          {v.formerTaxiPlateNo && (
+            <Typography.Text type="secondary" className="rm-small-text" data-testid="former-plate">
+              {t('vehicles.taxiPlateShort')} <PlateNo value={v.formerTaxiPlateNo} variant="text" />
+            </Typography.Text>
+          )}
+        </Flex>
       ),
     },
     {
@@ -115,7 +162,12 @@ export function VehicleInventoryTab() {
         </Flex>
       ),
     },
-    { key: 'year', title: t('vehicles.fields.year'), sortKey: 'year', render: (v) => <YearText value={v.year} /> },
+    {
+      key: 'year',
+      title: t('vehicles.fields.year'),
+      sortKey: 'year',
+      render: (v) => <YearText value={v.year} />,
+    },
     {
       key: 'km',
       title: t('vehicles.fields.currentKm'),
@@ -171,7 +223,7 @@ export function VehicleInventoryTab() {
       title: t('vehicles.fields.listingPrice'),
       sortKey: 'listingPrice',
       align: 'end',
-      render: (v) => <Money amount={v.listingPrice} decimals={false} />,
+      render: (v) => <PriceCell vehicle={v} />,
     },
     {
       key: 'alerts',
@@ -211,7 +263,12 @@ export function VehicleInventoryTab() {
             label: t('vehicles.fields.ownership'),
             options: ownershipOptions,
           },
-          { type: 'autocomplete', key: 'make', label: t('vehicles.fields.make'), options: [...COMMON_MAKES] },
+          {
+            type: 'autocomplete',
+            key: 'make',
+            label: t('vehicles.fields.make'),
+            options: [...COMMON_MAKES],
+          },
           {
             type: 'numberRange',
             keys: ['yearFrom', 'yearTo'],
@@ -220,6 +277,7 @@ export function VehicleInventoryTab() {
             max: new Date().getFullYear() + 1,
           },
           { type: 'toggle', key: 'taxi', label: t('vehicles.taxiOnly') },
+          { type: 'toggle', key: 'formerTaxi', label: t('vehicles.formerTaxiOnly') },
         ]}
         extra={newButton}
       />

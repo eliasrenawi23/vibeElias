@@ -27,6 +27,18 @@ export async function readVatRate(prisma: Reader): Promise<Prisma.Decimal> {
   return row?.vatRate ?? new Prisma.Decimal(DEFAULT_VAT_RATE);
 }
 
+/**
+ * `Settings.vatMarginIncludesConversionTax`: the margin base of a MARGIN sale also deducts the
+ * cycle's taxi -> private customs (false when the row does not exist yet). Read-only.
+ */
+export async function readVatMarginIncludesConversionTax(prisma: Reader): Promise<boolean> {
+  const row = await prisma.settings.findUnique({
+    where: { id: 1 },
+    select: { vatMarginIncludesConversionTax: true },
+  });
+  return row?.vatMarginIncludesConversionTax ?? false;
+}
+
 /** `Settings.defaultLeaseTerms.responsibilities` (default: the driver pays everything). */
 export async function readDefaultResponsibilities(prisma: Reader): Promise<Responsibilities> {
   const row = await prisma.settings.findUnique({

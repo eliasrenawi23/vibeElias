@@ -163,6 +163,7 @@ export const TONE_REGISTRY: ToneRegistry = {
     LICENSE_FEE: 'license',
     METER: 'accent',
     OTHER: 'neutral',
+    CONVERSION_TAX: 'license',
   },
   ResponsibleParty: { US: 'accent', DRIVER: 'neutral' },
 
@@ -221,7 +222,10 @@ export function hasTone<N extends ToneEnumName>(
 }
 
 /** Tone of an enum value; unknown values (newer API, typo) fall back to neutral. */
-export function toneOf<N extends ToneEnumName>(enumName: N, value: string | null | undefined): Tone {
+export function toneOf<N extends ToneEnumName>(
+  enumName: N,
+  value: string | null | undefined,
+): Tone {
   if (!hasTone(enumName, value)) return 'neutral';
   return (TONE_REGISTRY[enumName] as Readonly<Record<string, Tone>>)[value] ?? 'neutral';
 }

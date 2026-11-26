@@ -12,6 +12,7 @@ export const BusinessSettingsFormSchema = SettingsSchema.pick({
   address: true,
   phone: true,
   email: true,
+  vatMarginIncludesConversionTax: true,
 }).extend({ vatRate: percent });
 
 export type BusinessSettingsFormInput = z.input<typeof BusinessSettingsFormSchema>;
@@ -27,5 +28,6 @@ export function toBusinessFormValues(settings: SettingsResponse): BusinessSettin
     phone: settings.phone ?? '',
     email: settings.email ?? '',
     vatRate: settings.vatRate,
+    vatMarginIncludesConversionTax: settings.vatMarginIncludesConversionTax ?? false,
   };
 }

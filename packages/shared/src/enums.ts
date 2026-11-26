@@ -65,8 +65,13 @@ export const ExpenseCategory = z.enum([
   'LICENSE_FEE',
   'METER',
   'OTHER',
+  'CONVERSION_TAX',
 ]);
 export type ExpenseCategory = z.infer<typeof ExpenseCategory>;
+
+/** Why a vehicle's plate number changed (`VehiclePlateChange.reason`). */
+export const PlateChangeReason = z.enum(['TAXI_TO_PRIVATE', 'OTHER']);
+export type PlateChangeReason = z.infer<typeof PlateChangeReason>;
 
 export const InsuranceType = z.enum(['COMPULSORY', 'THIRD_PARTY', 'COMPREHENSIVE', 'TRADE', 'LOT']);
 export type InsuranceType = z.infer<typeof InsuranceType>;
@@ -195,6 +200,7 @@ export const prismaEnums = {
   CycleEndReason,
   CommissionMode,
   ExpenseCategory,
+  PlateChangeReason,
   InsuranceType,
   InsuranceScope,
   PaidBy,
