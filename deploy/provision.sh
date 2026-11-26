@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Prepares a fresh Ubuntu 24.04 server (Hetzner Cloud CX22 or similar) for Renawi Motors.
+# Prepares a fresh Ubuntu 24.04 server (Hetzner Cloud CX22 or similar) for Renawi Auto.
 # Run once as root; running it again is safe (every step checks what is already in place).
 #
 #   scp deploy/provision.sh root@SERVER_IP:/root/
@@ -58,7 +58,7 @@ else
   info "created /swapfile"
 fi
 cat > /etc/sysctl.d/99-renawi.conf << 'EOF'
-# Renawi Motors: use swap only under memory pressure.
+# Renawi Auto: use swap only under memory pressure.
 vm.swappiness = 10
 EOF
 sysctl -q --system
@@ -127,7 +127,7 @@ visudo -cqf "/etc/sudoers.d/90-${DEPLOY_USER}" || die "invalid sudoers file"
 step "SSH: keys only, no root login"
 # 00- so these values win over 50-cloud-init.conf (sshd keeps the first value it reads).
 cat > /etc/ssh/sshd_config.d/00-renawi.conf << EOF
-# Renawi Motors hardening (deploy/provision.sh)
+# Renawi Auto hardening (deploy/provision.sh)
 PermitRootLogin no
 PasswordAuthentication no
 KbdInteractiveAuthentication no
@@ -176,7 +176,7 @@ APT::Periodic::Unattended-Upgrade "1";
 APT::Periodic::AutocleanInterval "7";
 EOF
 cat > /etc/apt/apt.conf.d/52renawi-unattended-upgrades << EOF
-// Renawi Motors (deploy/provision.sh). Containers restart by themselves after a reboot.
+// Renawi Auto (deploy/provision.sh). Containers restart by themselves after a reboot.
 Unattended-Upgrade::Automatic-Reboot "true";
 Unattended-Upgrade::Automatic-Reboot-Time "${REBOOT_TIME}";
 Unattended-Upgrade::Remove-Unused-Kernel-Packages "true";

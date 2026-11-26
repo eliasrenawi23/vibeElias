@@ -1,4 +1,4 @@
-# Deploying Renawi Motors
+# Deploying Renawi Auto
 
 How to put the system on the internet with HTTPS, nightly off-site backups and one-click updates
 from GitHub. Written for the owner; every command is meant to be copied as is. Related:

@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1.7
 #
-# Renawi Motors API image. Build from the REPO ROOT (npm workspaces need the root lockfile):
+# Renawi Auto API image. Build from the REPO ROOT (npm workspaces need the root lockfile):
 #
 #   docker build -f apps/api/Dockerfile -t renawi-api .
 #   docker run --rm -p 3000:3000 --env-file .env -e DATABASE_URL=... renawi-api

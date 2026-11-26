@@ -1,4 +1,4 @@
-# Renawi Motors brand style guide
+# Renawi Auto brand style guide
 
 Version 0.1 (November 2026). Source files live in `packages/brand`; open
 `packages/brand/brand-preview.html` in a browser to see everything in this guide rendered,
@@ -10,7 +10,7 @@ in light and dark, left-to-right and right-to-left.
 
 ## 1. Brand story
 
-Renawi Motors runs two businesses from one yard: a taxi station that owns taxi licences, the
+Renawi Auto runs two businesses from one yard: a taxi station that owns taxi licences, the
 "green numbers", and leases them to drivers, alone or with a car, and a used-car dealership
 that buys, sells, trades in and consigns cars. Drivers and buyers deal with the same family and
 the same office, in Hebrew, Arabic or English. The brand has to feel like one dependable local
@@ -28,13 +28,13 @@ look like they come from the same place.
 ### 2.1 Parts
 
 - **Icon mark**: script-neutral, never mirrored, works on its own (app icon, favicon, stamp).
-- **Wordmark**: Renawi Motors / רכב רינאוי / ريناوي موتورز, set in Rubik at weight 650 and
+- **Wordmark**: Renawi Auto / רכב רינאוי / ريخف ريناوي, set in Rubik at weight 650 and
   converted to vector outlines (no live text, no font needed). Latin is uppercase with +45/1000
   letter-spacing; Hebrew +20/1000; **Arabic is never letter-spaced** (it breaks the joins).
 - **Spelling**: the owner's spelling is **רינאוי** in Hebrew (yod after the resh) and
   **ريناوي** in Arabic (ya after the ra), in the logo, the app, documents and signage alike; not
   the older רנאוי / رناوي. The Hebrew name is **רכב רינאוי** ("Renawi Car"; it was רינאוי מוטורס
-  until November 2026); Arabic and English keep "Motors" (موتورز).
+  until November 2026); Arabic is **ريخف ريناوي** (a transliteration of the Hebrew name; it was ريناوي موتورز) and English is **Renawi Auto** (it was Renawi Motors), both changed in November 2026.
 - **Lockups**: icon + wordmark in English, Hebrew and Arabic. The icon always sits on the
   **leading side**: left of English, right of Hebrew and Arabic. The wordmark's cap height lines
   up with the icon: concept A centres the cap band on the tile; concept B aligns it with the R
@@ -50,7 +50,7 @@ look like they come from the same place.
 | Mark        | The yellow taxi roof sign on its roof line, with the R where the sign's lettering would be.                                                      | Rounded black tile, yellow geometric R. A dashed centre line runs up the stem and round the bowl: the R is a road. |
 | On dark     | Yellow sign, R cut out, white roof (the white taxi body).                                                                                        | Inverse: yellow tile, black R.                                                                                     |
 | Small sizes | The R is small inside the full sign, so app icons put the sign on a black tile and `favicon.svg` is a simplified sign with a larger R (see 2.3). | Strong; at favicon size keep the R and drop the road line.                                                         |
-| Says        | "Taxi": strongest for the taxi side.                                                                                                             | "Motors": covers both businesses.                                                                                  |
+| Says        | "Taxi": strongest for the taxi side.                                                                                                             | "Auto": covers both businesses.                                                                                    |
 
 ### 2.3 Files
 

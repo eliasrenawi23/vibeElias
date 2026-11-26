@@ -105,7 +105,7 @@ export interface PdfAssets {
 let cached: PdfAssets | null = null;
 
 const FALLBACK_LOGO =
-  '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 36" role="img" aria-label="Renawi Motors">' +
+  '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 36" role="img" aria-label="Renawi Auto">' +
   '<path fill="#F5C518" d="M6 28L9.93 6Q11 0 17 0H47Q53 0 54.07 6L58 28Z"/>' +
   '<path fill="#0F0F10" d="M5.5 31h53a2.5 2.5 0 0 1 0 5h-53a2.5 2.5 0 0 1 0-5z"/></svg>';
 

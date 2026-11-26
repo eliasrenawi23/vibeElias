@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1.7
 #
-# Renawi Motors web image: the Vite build of apps/web served by nginx, which also proxies /api/
+# Renawi Auto web image: the Vite build of apps/web served by nginx, which also proxies /api/
 # to the API container (deploy/nginx.conf). Build from the REPO ROOT (npm workspaces need the
 # root lockfile):
 #

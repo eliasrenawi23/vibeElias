@@ -2,7 +2,7 @@
   "name": "renawi-motors",
   "version": "0.1.0",
   "private": true,
-  "description": "Renawi Motors - used-car dealership and taxi-licence leasing management system",
+  "description": "Renawi Auto - used-car dealership and taxi-licence leasing management system",
   "type": "module",
   "workspaces": [
     "apps/*",

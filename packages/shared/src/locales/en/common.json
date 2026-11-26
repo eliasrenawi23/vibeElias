@@ -1,6 +1,6 @@
 {
   "app": {
-    "name": "Renawi Motors",
+    "name": "Renawi Auto",
     "shortName": "Renawi",
     "tagline": "Car dealership & taxi licences"
   },
@@ -19,7 +19,7 @@
   },
   "auth": {
     "login": "Log in",
-    "loginTitle": "Sign in to Renawi Motors",
+    "loginTitle": "Sign in to Renawi Auto",
     "loginSubtitle": "Enter your email and password",
     "email": "Email",
     "password": "Password",

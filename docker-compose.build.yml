@@ -1,4 +1,4 @@
-# Build the Renawi Motors images on the server (from a git checkout of this repo) instead of
+# Build the Renawi Auto images on the server (from a git checkout of this repo) instead of
 # pulling them from GHCR. Use it together with docker-compose.prod.yml, e.g. in .env:
 #
 #   COMPOSE_FILE=docker-compose.prod.yml:docker-compose.build.yml

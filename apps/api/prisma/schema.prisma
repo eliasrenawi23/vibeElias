@@ -1,4 +1,4 @@
-// Renawi Motors - Prisma schema (contract: approved plan, "Domain model (Prisma)").
+// Renawi Auto - Prisma schema (contract: approved plan, "Domain model (Prisma)").
 // Calendar dates use @db.Date and travel as YYYY-MM-DD strings; money is Decimal(12,2).
 // Migration `partial_indexes_and_views` adds raw-SQL partial unique indexes on LeaseSegment and
 // the driver_balance_v / driver_ageing_v views (not expressible in this file).

@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1.7
 #
-# Renawi Motors backup sidecar: nightly pg_dump + uploads archive, copied to an S3-compatible
+# Renawi Auto backup sidecar: nightly pg_dump + uploads archive, copied to an S3-compatible
 # bucket (Backblaze B2) with rclone; also the restore tool. Build context = deploy/backup:
 #
 #   docker build -t renawi-backup deploy/backup

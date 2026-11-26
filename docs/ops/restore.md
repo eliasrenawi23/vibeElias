@@ -1,4 +1,4 @@
-# Restoring Renawi Motors from a backup
+# Restoring Renawi Auto from a backup
 
 What the backups contain, how to get data back after a mistake or after losing the server, and a
 quarterly rehearsal so you know it works before you need it. Setup of the backups:

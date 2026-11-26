@@ -2,7 +2,7 @@
   "name": "@renawi/api",
   "version": "0.1.0",
   "private": true,
-  "description": "Renawi Motors REST API (NestJS 11 + Prisma 6 + PostgreSQL)",
+  "description": "Renawi Auto REST API (NestJS 11 + Prisma 6 + PostgreSQL)",
   "license": "UNLICENSED",
   "scripts": {
     "start:dev": "dotenv -e ../../.env -- nest start --watch",

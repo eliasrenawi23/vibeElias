@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Deploys (or rolls back) Renawi Motors on the server: pulls the images, recreates the
+# Deploys (or rolls back) Renawi Auto on the server: pulls the images, recreates the
 # containers that changed, waits until everything is healthy, then removes dangling images.
 # Run on the server as the deploy user (GitHub Actions runs it over SSH after every release):
 #

@@ -1,4 +1,4 @@
-# Security of the Renawi Motors server
+# Security of the Renawi Auto server
 
 What is already protected, what you as the owner must do, how to change secrets, and a note on
 the personal data the system holds. Setup: [deploy.md](deploy.md); backups: [restore.md](restore.md).

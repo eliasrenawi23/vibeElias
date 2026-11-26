@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Builds the Renawi Motors logo lockups.
+ * Builds the Renawi Auto logo lockups.
  *
  * Inputs (hand-written, the source of truth):
  *   logo/{a,b}-icon.svg          mark for light backgrounds
@@ -52,9 +52,9 @@ const WEIGHT = 650;
 const WORDMARKS = {
   en: {
     lang: 'en',
-    title: 'Renawi Motors',
-    text: 'RENAWI MOTORS',
-    lines: ['RENAWI', 'MOTORS'],
+    title: 'Renawi Auto',
+    text: 'RENAWI AUTO',
+    lines: ['RENAWI', 'AUTO'],
     band: 'cap',
     refHeight: 700,
     sizeRatio: 1,
@@ -78,9 +78,10 @@ const WORDMARKS = {
   },
   ar: {
     lang: 'ar',
-    title: 'ريناوي موتورز',
-    text: 'ريناوي موتورز',
-    lines: ['ريناوي', 'موتورز'],
+    title: 'ريخف ريناوي',
+    text: 'ريخف ريناوي',
+    lines: ['ريخف', 'ريناوي'],
+    smallFirst: true,
     band: 'ink',
     refHeight: 750,
     sizeRatio: 1.22,

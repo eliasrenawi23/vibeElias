@@ -1,4 +1,4 @@
-# Renawi Motors - production stack for one small VPS (Hetzner CX22: 2 vCPU, 4 GB RAM + 2 GB swap).
+# Renawi Auto - production stack for one small VPS (Hetzner CX22: 2 vCPU, 4 GB RAM + 2 GB swap).
 #
 #   caddy (80/443, HTTPS) -> web (nginx: app + /api/ proxy) -> api (NestJS, Chromium for PDFs)
 #                                                               -> postgres (no host port)

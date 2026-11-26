@@ -1,7 +1,7 @@
 {
   "Servers": {
     "1": {
-      "Name": "Renawi Motors (dev)",
+      "Name": "Renawi Auto (dev)",
       "Group": "Servers",
       "Host": "postgres",
       "Port": 5432,

@@ -55,7 +55,11 @@ const CRLF = '\r\n';
 /* ------------------------------------------------------------------------------------------ */
 
 /** `renawi-<report>-YYYY-MM-DD.<ext>` (date = the business date of the export). */
-export function exportFileName(report: ReportName, format: Exclude<ReportFormat, 'json'>, day: string) {
+export function exportFileName(
+  report: ReportName,
+  format: Exclude<ReportFormat, 'json'>,
+  day: string,
+) {
   return `renawi-${report}-${day}.${format}`;
 }
 
@@ -181,7 +185,9 @@ export function cellText(
 export function reportToCsv(result: ReportResult, o: ExportOptions): Buffer {
   const lines = [csvLine(result.columns.map((c) => o.t(c.label)))];
   for (const row of result.rows) {
-    lines.push(csvLine(result.columns.map((c) => cellText(c, row[c.key] ?? null, o.t, o.timeZone))));
+    lines.push(
+      csvLine(result.columns.map((c) => cellText(c, row[c.key] ?? null, o.t, o.timeZone))),
+    );
   }
   return Buffer.from(UTF8_BOM + lines.join(CRLF) + CRLF, 'utf8');
 }
@@ -285,10 +291,7 @@ function addContextSheet(wb: Workbook, result: ReportResult, o: ExportOptions, u
   const at = wallClock(o.exportedAt, o.timeZone);
   const rows: [string, string][] = [
     [t('reports.context.report'), t(REPORT_TITLE_KEYS[o.report])],
-    [
-      t('reports.context.exportedAt'),
-      `${formatDate(at.date, o.lang)} ${at.time} (${o.timeZone})`,
-    ],
+    [t('reports.context.exportedAt'), `${formatDate(at.date, o.lang)} ${at.time} (${o.timeZone})`],
   ];
   const params = result.params;
   const from = typeof params.from === 'string' ? params.from : null;
@@ -369,7 +372,7 @@ function addDataSheet(wb: Workbook, result: ReportResult, o: ExportOptions, used
 /** XLSX workbook: "Report context" sheet first, then the data sheet. */
 export async function reportToXlsx(result: ReportResult, o: ExportOptions): Promise<Buffer> {
   const wb = new Workbook();
-  wb.creator = 'Renawi Motors';
+  wb.creator = 'Renawi Auto';
   wb.created = o.exportedAt;
   wb.title = o.t(REPORT_TITLE_KEYS[o.report]);
   const used = new Set<string>();

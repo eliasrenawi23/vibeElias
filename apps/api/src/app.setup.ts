@@ -130,7 +130,7 @@ export function configureApp(app: NestExpressApplication): void {
 /** The OpenAPI document of the app (tags from `SWAGGER_TAGS`, zod DTOs cleaned up). */
 export function buildOpenApiDocument(app: NestExpressApplication): OpenAPIObject {
   const builder = new DocumentBuilder()
-    .setTitle('Renawi Motors API')
+    .setTitle('Renawi Auto API')
     .setDescription(
       'Dealership + taxi-licence leasing API. Log in with POST /api/auth/login (sets httpOnly ' +
         'cookies); every mutating request needs the header X-Requested-With: XMLHttpRequest ' +
@@ -145,7 +145,7 @@ export function buildOpenApiDocument(app: NestExpressApplication): OpenAPIObject
 /** Swagger UI at `/api/docs` (JSON at `/api/docs-json`), authenticated by the access cookie. */
 export function setupSwagger(app: NestExpressApplication): void {
   SwaggerModule.setup(SWAGGER_PATH, app, buildOpenApiDocument(app), {
-    customSiteTitle: 'Renawi Motors API',
+    customSiteTitle: 'Renawi Auto API',
     swaggerOptions: {
       persistAuthorization: true,
       withCredentials: true,

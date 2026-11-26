@@ -13,7 +13,7 @@
  * what is missing and never overwrites data (or the admin password) changed in the app. The only
  * exceptions are `migrateLegacyDemo()`, which once rewrites the demo rows of older seed versions,
  * `migrateLegacySpelling()`, which once fixes the old spelling of the business name, and
- * `migrateHebrewRename()`, which renames the Hebrew business name.
+ * `migrateHebrewRename()` and `migrateEnArRename()`, which rename the business name.
  * Demo documents write small placeholder files (PDF / PNG) into UPLOAD_DIR.
  * `npm run db:reset` drops everything and seeds again with fresh relative dates.
  */
@@ -255,8 +255,8 @@ async function migrateLegacySpelling(): Promise<void> {
 }
 
 /**
- * The Hebrew business name changed from רינאוי מוטורס to רכב רינאוי (Arabic and English are
- * unchanged). Sets the stored Hebrew name only when it is exactly the old default, so a name the
+ * The Hebrew business name changed from רינאוי מוטורס to רכב רינאוי (English and Arabic are
+ * renamed in `migrateEnArRename()`). Sets the stored Hebrew name only when it is exactly the old default, so a name the
  * owner edited is never touched. The holder name of the demo licences is fixed in
  * `migrateLegacySpelling()`. No-op on fresh or already renamed data.
  */
@@ -269,6 +269,30 @@ async function migrateHebrewRename(): Promise<void> {
       data: { businessName: { ...name.data, he: BUSINESS_NAME.he } },
     });
     console.log(`Renamed the Hebrew business name: רינאוי מוטורס -> ${BUSINESS_NAME.he}.`);
+  }
+}
+
+/**
+ * The English business name changed from Renawi Motors to Renawi Auto and the Arabic name from
+ * ريناوي موتورز to ريخف ريناوي. Each is set only when the stored value is exactly the old
+ * default, so a name the owner edited is never touched. No-op on fresh or already renamed data.
+ */
+async function migrateEnArRename(): Promise<void> {
+  const settings = await prisma.settings.findUnique({ where: { id: 1 } });
+  const name = BusinessNameSchema.safeParse(settings?.businessName);
+  if (!name.success) return;
+  const next = { ...name.data };
+  if (next.en === 'Renawi Motors') {
+    next.en = BUSINESS_NAME.en;
+    console.log(`Renamed the English business name: Renawi Motors -> ${BUSINESS_NAME.en}.`);
+  }
+  if (next.ar === 'ريناوي موتورز' || next.ar === 'ريخيف ريناوي') {
+    // The second value is an earlier spelling (extra ya) that was briefly applied.
+    console.log(`Renamed the Arabic business name: ${next.ar} -> ${BUSINESS_NAME.ar}.`);
+    next.ar = BUSINESS_NAME.ar;
+  }
+  if (next.en !== name.data.en || next.ar !== name.data.ar) {
+    await prisma.settings.update({ where: { id: 1 }, data: { businessName: next } });
   }
 }
 
@@ -420,9 +444,9 @@ async function placeholderPdf(title: string, lines: string[]): Promise<Buffer> {
   const pdf = await PDFDocument.create();
   const fixedDate = new Date('2026-01-01T00:00:00.000Z');
   pdf.setTitle(title);
-  pdf.setAuthor('Renawi Motors');
-  pdf.setProducer('Renawi Motors demo seed');
-  pdf.setCreator('Renawi Motors demo seed');
+  pdf.setAuthor('Renawi Auto');
+  pdf.setProducer('Renawi Auto demo seed');
+  pdf.setCreator('Renawi Auto demo seed');
   pdf.setCreationDate(fixedDate);
   pdf.setModificationDate(fixedDate);
   const page = pdf.addPage([595.28, 841.89]);
@@ -430,7 +454,7 @@ async function placeholderPdf(title: string, lines: string[]): Promise<Buffer> {
   const regular = await pdf.embedFont(StandardFonts.Helvetica);
   const bold = await pdf.embedFont(StandardFonts.HelveticaBold);
   page.drawRectangle({ x: 0, y: height - 96, width, height: 96, color: YELLOW });
-  page.drawText('RENAWI MOTORS', { x: 48, y: height - 60, size: 26, font: bold, color: INK });
+  page.drawText('RENAWI AUTO', { x: 48, y: height - 60, size: 26, font: bold, color: INK });
   page.drawText(title, { x: 48, y: height - 160, size: 20, font: bold, color: INK });
   lines.forEach((line, i) => {
     page.drawText(line, { x: 48, y: height - 205 - i * 24, size: 13, font: regular, color: INK });
@@ -2174,6 +2198,7 @@ async function main(): Promise<void> {
   await seedSettings(demo);
   await migrateLegacySpelling();
   await migrateHebrewRename();
+  await migrateEnArRename();
 
   if (demo) await seedDemo(admin.id, today);
 

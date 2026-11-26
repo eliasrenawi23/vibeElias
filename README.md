@@ -1,6 +1,6 @@
-# Renawi Motors
+# Renawi Auto
 
-**Renawi Motors** (רכב רינאוי / ريناوي موتورز) is the management system for a small Israeli
+**Renawi Auto** (רכב רינאוי / ريخف ريناوي) is the management system for a small Israeli
 business that trades used cars and leases taxi licences ("green numbers") and taxi cars to
 drivers. It is the single place for vehicles and per-car costs, taxi licences, drivers, lease
 contracts with prorated monthly rent and deposits, driver ledgers and balances, buy/sell deals

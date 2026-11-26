@@ -2,7 +2,7 @@
   "name": "@renawi/brand",
   "version": "0.1.0",
   "private": true,
-  "description": "Renawi Motors brand assets: logos, app icons, design tokens (CSS + TypeScript) and the brand preview page",
+  "description": "Renawi Auto brand assets: logos, app icons, design tokens (CSS + TypeScript) and the brand preview page",
   "license": "UNLICENSED",
   "type": "module",
   "sideEffects": [

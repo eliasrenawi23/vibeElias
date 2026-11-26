@@ -1,4 +1,4 @@
-# Caddy in front of the Renawi Motors stack: automatic HTTPS certificates (Let's Encrypt) for
+# Caddy in front of the Renawi Auto stack: automatic HTTPS certificates (Let's Encrypt) for
 # DOMAIN, HTTP -> HTTPS redirect, compression, HSTS, and a reverse proxy to the web container
 # (nginx serves the app and forwards /api/ to the API).
 #

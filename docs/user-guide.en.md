@@ -1,6 +1,6 @@
-# Renawi Motors: User Guide
+# Renawi Auto: User Guide
 
-How to run the taxi-licence leasing and the used-car trading with the Renawi Motors system, day to day.
+How to run the taxi-licence leasing and the used-car trading with the Renawi Auto system, day to day.
 
 Hebrew version: [user-guide.he.md](user-guide.he.md)
 
@@ -621,7 +621,7 @@ These notes are practical reminders, not legal advice. Check anything unclear wi
 
 Things the system does not do yet. Ask whoever installed and runs the server when you need one of them.
 
-- **No logo upload.** The screens and the PDFs use the built-in Renawi Motors logo. There is no setting to upload a different logo.
+- **No logo upload.** The screens and the PDFs use the built-in Renawi Auto logo. There is no setting to upload a different logo.
 - **No user management screen.** Users cannot be added, removed or given other permissions in the app; the admin account is created on the server.
 - **No "forgot password" link.** A signed-in user changes the password under **My account** (section 1); a forgotten password is reset on the server.
 - **Internet only.** The data lives on the server, so the system and the installed phone app need an internet connection: nothing can be viewed or recorded offline.

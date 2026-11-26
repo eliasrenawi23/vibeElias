@@ -29,8 +29,8 @@ export type BusinessName = z.infer<typeof BusinessNameSchema>;
 
 export const BUSINESS_NAME: Readonly<BusinessName> = Object.freeze({
   he: 'רכב רינאוי',
-  ar: 'ريناوي موتورز',
-  en: 'Renawi Motors',
+  ar: 'ريخف ريناوي',
+  en: 'Renawi Auto',
 });
 
 const leadDays = z.number().int().min(0).max(365);

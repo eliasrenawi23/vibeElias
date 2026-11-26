@@ -37,7 +37,7 @@ async function mockApi(page: Page, options: { loggedIn?: boolean } = {}): Promis
     password: 'ChangeMe123!',
     backup: null,
     settings: {
-      businessName: { he: 'רכב רינאוי', ar: 'ريناوي موتورز', en: 'Renawi Motors' },
+      businessName: { he: 'רכב רינאוי', ar: 'ريخف ريناوي', en: 'Renawi Auto' },
       legalId: null,
       dealerLicenseNo: null,
       address: null,
@@ -258,8 +258,8 @@ test('login, switch language and theme', async ({ page }) => {
   await page.getByRole('menuitem', { name: 'الإعدادات' }).click();
   await page.getByRole('menuitem', { name: 'بيانات العمل' }).click();
   await expect(page).toHaveURL(/\/settings\/business$/);
-  await expect(page).toHaveTitle('بيانات العمل · ريناوي موتورز');
-  await expect(page.locator('input[name="businessName.ar"]')).toHaveValue('ريناوي موتورز');
+  await expect(page).toHaveTitle('بيانات العمل · ريخف ريناوي');
+  await expect(page.locator('input[name="businessName.ar"]')).toHaveValue('ريخف ريناوي');
 
   expect(problems).toEqual([]);
 });
@@ -272,7 +272,7 @@ test('business settings load, validate and save', async ({ page }) => {
   // Session restored from GET /api/auth/me; the form is filled from GET /api/settings.
   await expect(page.getByRole('heading', { level: 1 })).toHaveText('פרטי העסק');
   const nameEn = page.locator('input[name="businessName.en"]');
-  await expect(nameEn).toHaveValue('Renawi Motors');
+  await expect(nameEn).toHaveValue('Renawi Auto');
   await expect(page.locator('input[name="businessName.he"]')).toHaveAttribute('dir', 'rtl');
   await expect(nameEn).toHaveAttribute('dir', 'ltr');
   await expect(page.locator('input[name="phone"]')).toHaveAttribute('inputmode', 'tel');
@@ -283,7 +283,7 @@ test('business settings load, validate and save', async ({ page }) => {
   await expect(page.getByText('כתובת דוא״ל לא תקינה')).toBeVisible();
 
   await page.locator('input[name="email"]').fill('Office@Renawi.co.il');
-  await nameEn.fill('Renawi Motors Ltd');
+  await nameEn.fill('Renawi Auto Ltd');
   await page.locator('input[name="phone"]').fill('050-123-4567');
   await page.getByRole('button', { name: 'שמירה' }).click();
   await expect(page.getByText('נשמר בהצלחה')).toBeVisible();
@@ -291,7 +291,7 @@ test('business settings load, validate and save', async ({ page }) => {
   // PATCH carries the parsed schema output: trimmed, normalised, '' -> null.
   const patch = api.calls.find((c) => c.method === 'PATCH' && c.path === '/api/settings');
   expect(patch?.body).toMatchObject({
-    businessName: { he: 'רכב רינאוי', ar: 'ريناوي موتورز', en: 'Renawi Motors Ltd' },
+    businessName: { he: 'רכב רינאוי', ar: 'ريخف ريناوي', en: 'Renawi Auto Ltd' },
     email: 'office@renawi.co.il',
     phone: '0501234567',
     legalId: null,

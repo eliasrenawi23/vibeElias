@@ -1,6 +1,6 @@
 {
   "extends": "../../tsconfig.base.json",
-  "display": "Renawi Motors web tooling (Vite, Vitest, Playwright)",
+  "display": "Renawi Auto web tooling (Vite, Vitest, Playwright)",
   "compilerOptions": {
     "lib": ["ES2023", "DOM"],
     "noEmit": true,

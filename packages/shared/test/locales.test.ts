@@ -70,9 +70,9 @@ describe('locale files', () => {
   });
 
   it('carry the brand name', () => {
-    expect(en.app.name).toBe('Renawi Motors');
+    expect(en.app.name).toBe('Renawi Auto');
     expect(he.app.name).toBe('רכב רינאוי');
-    expect(ar.app.name).toBe('ريناوي موتورز');
+    expect(ar.app.name).toBe('ريخف ريناوي');
   });
 
   it('label every value of every labelled enum (and nothing else)', () => {

@@ -2,7 +2,7 @@
   "name": "@renawi/web",
   "version": "0.1.0",
   "private": true,
-  "description": "Renawi Motors web app / PWA (React 19 + Vite + Ant Design v6; he/ar/en with RTL; light/dark)",
+  "description": "Renawi Auto web app / PWA (React 19 + Vite + Ant Design v6; he/ar/en with RTL; light/dark)",
   "type": "module",
   "scripts": {
     "dev": "vite",

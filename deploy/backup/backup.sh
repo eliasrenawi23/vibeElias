@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Renawi Motors backup: PostgreSQL dump + uploads archive -> local folder (newest N kept) ->
+# Renawi Auto backup: PostgreSQL dump + uploads archive -> local folder (newest N kept) ->
 # S3-compatible bucket (older than BACKUP_RETENTION_DAYS deleted) -> status file read by
 # GET /api/settings/backup-status.
 #

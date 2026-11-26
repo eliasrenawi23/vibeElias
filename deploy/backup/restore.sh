@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Renawi Motors restore: loads a database dump made by backup.sh (replacing the target database)
+# Renawi Auto restore: loads a database dump made by backup.sh (replacing the target database)
 # and, optionally, the matching uploads archive (replacing the uploads folder).
 #
 #   restore.sh [options] <db-YYYYMMDD-HHMM.dump> [uploads-YYYYMMDD-HHMM.tgz]

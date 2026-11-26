@@ -83,7 +83,7 @@ const indent = (lines, n) => lines.map((l) => (l ? ' '.repeat(n) + l : l));
 
 const css = [
   '/*',
-  ' * Renawi Motors design tokens.',
+  ' * Renawi Auto design tokens.',
   ' * Generated from tokens.ts by scripts/build-tokens.mjs. Do not edit by hand.',
   ' *',
   ' * Light theme on :root. Dark theme when <html data-theme="dark">, or when the system prefers',

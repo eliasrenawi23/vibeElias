@@ -1,5 +1,5 @@
 /**
- * Renawi Motors design tokens: the single source of truth for colours, type, spacing, radius,
+ * Renawi Auto design tokens: the single source of truth for colours, type, spacing, radius,
  * shadows and the Ant Design v6 theme.
  *
  * - `tokens.css` is generated from this file (`npm run build:tokens`); do not edit it by hand.
@@ -30,7 +30,7 @@ export type ThemeMode = 'light' | 'dark';
 // -----------------------------------------------------------------------------------------------
 
 export const brand = {
-  name: { en: 'Renawi Motors', he: 'רכב רינאוי', ar: 'ريناوي موتورز' },
+  name: { en: 'Renawi Auto', he: 'רכב רינאוי', ar: 'ريخف ريناوي' },
   colors: {
     /** Taxi yellow: primary fills, the logo, the selected item. Never text on white. */
     yellow: '#F5C518',

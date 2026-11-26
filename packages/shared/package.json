@@ -2,7 +2,7 @@
   "name": "@renawi/shared",
   "version": "0.1.0",
   "private": true,
-  "description": "Renawi Motors shared code: zod schemas, enums, money/date/bidi/plate helpers and he/ar/en locales",
+  "description": "Renawi Auto shared code: zod schemas, enums, money/date/bidi/plate helpers and he/ar/en locales",
   "type": "module",
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",

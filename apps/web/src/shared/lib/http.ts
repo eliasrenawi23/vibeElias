@@ -1,5 +1,5 @@
 /**
- * Thin `fetch` wrapper for the Renawi Motors API.
+ * Thin `fetch` wrapper for the Renawi Auto API.
  *
  * - Same-origin `/api` (Vite proxies it in dev, nginx in production); auth lives in httpOnly
  *   cookies, so every request sends `credentials: 'include'` and never touches a token.

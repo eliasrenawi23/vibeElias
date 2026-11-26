@@ -70,7 +70,7 @@ export default defineConfig({
       manifest: {
         name: brand.name.en,
         short_name: 'Renawi',
-        description: 'Renawi Motors - car dealership and taxi licences',
+        description: 'Renawi Auto - car dealership and taxi licences',
         lang: 'he',
         dir: 'rtl',
         start_url: '/',

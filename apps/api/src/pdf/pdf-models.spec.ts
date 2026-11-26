@@ -26,7 +26,7 @@ const ctx = (lang: PdfContext['lang'] = 'he'): PdfContext => ({
   today: '2026-11-12',
   vatRate: 18,
   business: {
-    name: { he: 'רכב רינאוי', ar: 'ريناوي موتورز', en: 'Renawi Motors' },
+    name: { he: 'רכב רינאוי', ar: 'ريخف ريناوي', en: 'Renawi Auto' },
     legalId: '516427184',
     dealerLicenseNo: '2026-0417',
     address: 'רח׳ פאולוס השישי 45, נצרת',
@@ -243,7 +243,7 @@ describe('lease contract', () => {
       dir: 'rtl',
     });
     const en = buildLeaseContract(lease, ctx('en'));
-    expect(en).toMatchObject({ dir: 'ltr', translated: true, business: { name: 'Renawi Motors' } });
+    expect(en).toMatchObject({ dir: 'ltr', translated: true, business: { name: 'Renawi Auto' } });
     expect(en.data.clauses).toEqual({ text: '1. General clause.', dir: 'ltr' });
   });
 
@@ -385,7 +385,7 @@ describe('deposit receipt / payment confirmation', () => {
     });
     const ar = textOf(engine.render(dp));
     expect(ar).toContain('אינו מהווה חשבונית מס/קבלה');
-    expect(ar).toContain('ريناوي موتورز');
+    expect(ar).toContain('ريخف ريناوي');
     expect(() => buildDealPayment({ ...input, method: 'TRADE_IN' }, ctx())).toThrow(
       PdfNotApplicableError,
     );
